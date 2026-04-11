@@ -60,7 +60,7 @@ export const Pointer: React.FC<PointerProps> = ({
         flexDirection: "column",
         alignItems: "center",
         pointerEvents: "none",
-        zIndex: 10 + stackIndex,
+        zIndex: 15 - stackIndex,
       }}
     >
       {/* Solid colored label */}

@@ -1,6 +1,6 @@
 import type { ThemedToken } from "shiki";
 
-export type NodeHighlight = "active" | "found" | "removing" | "new" | "error" | "none";
+export type NodeHighlight = "active" | "found" | "removing" | "new" | "error" | "visited" | "none";
 
 export interface ListNodeData {
   id: string;
@@ -30,6 +30,7 @@ export interface ListSnapshot {
   arrows: ArrowData[];
   newNode?: ListNodeData;
   caption?: string;
+  searchTarget?: number | string;
 }
 
 export interface HighlightStep {
@@ -41,6 +42,7 @@ export interface SceneStep {
   snapshot: ListSnapshot;
   highlightLines: HighlightStep;
   startFrame: number;
+  visibleLines?: number;
 }
 
 export interface CodeSnippet {

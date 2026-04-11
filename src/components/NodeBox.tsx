@@ -24,9 +24,10 @@ interface NodeBoxProps {
 const highlightColorMap: Record<string, { bg: string; dark: string }> = {
   active: { bg: "#2E7D32", dark: "#1B5E20" },
   found: { bg: "#2196F3", dark: "#1565C0" },
-  removing: { bg: "#f38ba8", dark: "#d6768f" },
-  error: { bg: "#f38ba8", dark: "#d6768f" },
+  removing: { bg: "#c0392b", dark: "#962d22" },
+  error: { bg: "#c0392b", dark: "#962d22" },
   new: { bg: "#9C6ADE", dark: "#8455C0" },
+  visited: { bg: "#37474F", dark: "#263238" },
   none: { bg: colors.nodeDefault, dark: colors.nodeDefaultDark },
 };
 
@@ -79,13 +80,13 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
           width: nullW,
           height: nullH,
           transform: `scale(${enterScale})`,
-          opacity: enterOpacity * 0.5,
+          opacity: enterOpacity * 0.85,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 6,
-          border: `1.5px dashed ${colors.nullNode}88`,
-          boxShadow: `0 0 8px ${colors.nullNode}33`,
+          border: `1.5px dashed ${colors.nullNode}cc`,
+          boxShadow: `0 0 8px ${colors.nullNode}55`,
           fontFamily: fonts.mono,
           fontSize: Math.max(13, h * 0.26),
           fontWeight: 600,
@@ -114,7 +115,8 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
     : 1;
 
   const isError = highlight === "error";
-  const contextOpacity = isError ? 0.4 : 1;
+  const isVisited = highlight === "visited";
+  const contextOpacity = isError ? 0.4 : isVisited ? 0.55 : 1;
   const finalScale = enterScale * emphasisScale * exitScale;
 
   const dividerW = 1;

@@ -61,10 +61,32 @@ const deleteNodeLines = [
   { stepIndex: 16, text: "If this clicked for you, hit subscribe. Next up — searching a linked list." },
 ];
 
+const searchNodeLines = [
+  { stepIndex: 0,  text: "Alright, here's our linked list. Three, seven, nine, five. Four nodes, all connected." },
+  { stepIndex: 1,  text: "Now, we want to search for the value nine. Can we jump straight to it? Nope. We have to check each node, one at a time.", rate: "+5%" },
+  { stepIndex: 2,  text: "We create a pointer called curr and set it to head. This is where we start our search." },
+  { stepIndex: 3,  text: "First check. Curr dot val is three. That's not nine. Not our target." },
+  { stepIndex: 4,  text: "So we move curr to the next node." },
+  { stepIndex: 5,  text: "Curr dot val is seven. Still not nine." },
+  { stepIndex: 6,  text: "Move curr forward again." },
+  { stepIndex: 7,  text: "Curr dot val is nine. That's it! We found what we're looking for." },
+  { stepIndex: 8,  text: "We return true. Value nine exists in the list." },
+  { stepIndex: 9,  text: "But what if the value isn't there? Let's search for four this time.", rate: "+5%" },
+  { stepIndex: 10, text: "Same process. Curr starts at head. Three is not four." },
+  { stepIndex: 11, text: "Move forward. Seven is not four." },
+  { stepIndex: 12, text: "Next. Nine is not four." },
+  { stepIndex: 13, text: "And five is not four either. That was the last node." },
+  { stepIndex: 14, text: "Curr moves to null. We've gone through the entire list." },
+  { stepIndex: 15, text: "The loop condition fails. Curr is null. So we return false. Value four does not exist.", rate: "+5%" },
+  { stepIndex: 16, text: "So the time complexity is O of n. Best case, we find it right away at the head. Worst case, we walk through every single node.", rate: "+5%" },
+  { stepIndex: 17, text: "If this helped you understand searching in a linked list, hit subscribe and drop a like. Traversal is coming next." },
+];
+
 const allNarrations = [
   { sceneId: "insert-head", lines: insertHeadLines },
   { sceneId: "insert-tail", lines: insertTailLines },
   { sceneId: "delete-node", lines: deleteNodeLines },
+  { sceneId: "search-node", lines: searchNodeLines },
 ];
 
 function getAudioDuration(filePath) {
@@ -79,32 +101,6 @@ function getAudioDuration(filePath) {
   }
 }
 
-function buildSsml(text, voice, rate, pitch) {
-  const escaped = text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-
-  return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-IN">
-  <voice name="${voice}">
-    <prosody rate="${rate}" pitch="${pitch}">
-      ${escaped}
-    </prosody>
-  </voice>
-</speak>`;
-}
-
-function generateWithSsml(ssml, outputPath) {
-  const tmpSsml = outputPath + ".ssml";
-  fs.writeFileSync(tmpSsml, ssml, "utf-8");
-  execSync(
-    `edge-tts --voice "${VOICE}" -f "${tmpSsml}" --write-media "${outputPath}"`,
-    { encoding: "utf-8", stdio: "pipe" },
-  );
-  fs.unlinkSync(tmpSsml);
-}
-
 function generateWithEdgeTts(text, outputPath, voice, rate) {
   const escaped = text.replace(/"/g, '\\"');
   execSync(
@@ -113,10 +109,22 @@ function generateWithEdgeTts(text, outputPath, voice, rate) {
   );
 }
 
-async function main() {
+function main() {
+  const filterScene = process.argv[2];
+
+  const scenes = filterScene
+    ? allNarrations.filter((n) => n.sceneId === filterScene)
+    : allNarrations;
+
+  if (scenes.length === 0) {
+    console.error(`Unknown scene: ${filterScene}`);
+    console.error(`Available: ${allNarrations.map((n) => n.sceneId).join(", ")}`);
+    process.exit(1);
+  }
+
   console.log("Generating narration audio files...\n");
 
-  for (const narration of allNarrations) {
+  for (const narration of scenes) {
     const outDir = path.join("public", "narration", narration.sceneId);
     fs.mkdirSync(outDir, { recursive: true });
 
@@ -153,9 +161,18 @@ async function main() {
     const durationsPath = path.join(outDir, "durations.json");
     fs.writeFileSync(durationsPath, JSON.stringify(durations, null, 2));
     console.log(`  Saved durations to ${durationsPath}\n`);
+
+    // Print startFrame suggestions (each step = prev startFrame + prev frames + 10 buffer)
+    console.log("Suggested startFrame values:");
+    let sf = 0;
+    for (let i = 0; i < durations.length; i++) {
+      console.log(`  Step ${durations[i].step}: startFrame: ${sf}`);
+      sf += durations[i].frames + 10;
+    }
+    console.log(`  Total scene frames: ${sf}\n`);
   }
 
   console.log("Done!");
 }
 
-main().catch(console.error);
+main();

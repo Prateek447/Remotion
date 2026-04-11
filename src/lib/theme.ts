@@ -29,7 +29,7 @@ export const colors = {
   arrowDefault: "rgba(255,255,255,0.85)",
   arrowActive: "#89b4fa",
   highlightBar: "rgba(137, 180, 250, 0.18)",
-  nullNode: "#555555",
+  nullNode: "#8899aa",
 
   codeBg: "#0c0c0c",
   dimmed: 0.3,

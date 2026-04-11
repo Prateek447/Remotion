@@ -1,0 +1,60 @@
+Scene: Search Node in Linked List
+Scene ID: search-node
+Voice: en-US-GuyNeural
+Rate: +5%
+
+---
+
+Step 0 | Phase: Context
+Alright, here's our linked list. Three, seven, nine, five. Four nodes, all connected.
+
+Step 1 | Phase: Problem Statement
+Now, we want to search for the value nine. Can we jump straight to it? Nope. We have to check each node, one at a time.
+
+Step 2 | Phase: Initialize
+We create a pointer called curr and set it to head. This is where we start our search.
+
+Step 3 | Phase: Found Case — Check node 3
+First check. Curr dot val is three. That's not nine. Not our target.
+
+Step 4 | Phase: Found Case — Advance
+So we move curr to the next node.
+
+Step 5 | Phase: Found Case — Check node 7
+Curr dot val is seven. Still not nine.
+
+Step 6 | Phase: Found Case — Advance
+Move curr forward again.
+
+Step 7 | Phase: Found Case — Match!
+Curr dot val is nine. That's it! We found what we're looking for.
+
+Step 8 | Phase: Found Case — Return
+We return true. Value nine exists in the list.
+
+Step 9 | Phase: Not Found Case — Setup
+But what if the value isn't there? Let's search for four this time.
+
+Step 10 | Phase: Not Found Case — Check node 3
+Same process. Curr starts at head. Three is not four.
+
+Step 11 | Phase: Not Found Case — Check node 7
+Move forward. Seven is not four.
+
+Step 12 | Phase: Not Found Case — Check node 9
+Next. Nine is not four.
+
+Step 13 | Phase: Not Found Case — Check node 5
+And five is not four either. That was the last node.
+
+Step 14 | Phase: Not Found Case — Null
+Curr moves to null. We've gone through the entire list.
+
+Step 15 | Phase: Not Found Case — Return false
+The loop condition fails. Curr is null. So we return false. Value four does not exist.
+
+Step 16 | Phase: Complexity
+So the time complexity is O of n. Best case, we find it right away at the head. Worst case, we walk through every single node.
+
+Step 17 | Phase: CTA
+If this helped you understand searching in a linked list, hit subscribe and drop a like. Traversal is coming next.

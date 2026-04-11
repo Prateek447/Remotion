@@ -91,7 +91,31 @@ export const deleteNodeNarration: SceneNarration = {
   ],
 };
 
-export const allNarrations: SceneNarration[] = [insertHeadNarration, insertTailNarration, deleteNodeNarration];
+export const searchNodeNarration: SceneNarration = {
+  sceneId: "search-node",
+  lines: [
+    { stepIndex: 0, text: "Alright, here's our linked list. Three, seven, nine, five. Four nodes, all connected." },
+    { stepIndex: 1, text: "Now, we want to search for the value nine. Can we jump straight to it? Nope. We have to check each node, one at a time." },
+    { stepIndex: 2, text: "We create a pointer called curr and set it to head. This is where we start our search." },
+    { stepIndex: 3, text: "First check. Curr dot val is three. That's not nine. Not our target." },
+    { stepIndex: 4, text: "So we move curr to the next node." },
+    { stepIndex: 5, text: "Curr dot val is seven. Still not nine." },
+    { stepIndex: 6, text: "Move curr forward again." },
+    { stepIndex: 7, text: "Curr dot val is nine. That's it! We found what we're looking for." },
+    { stepIndex: 8, text: "We return true. Value nine exists in the list." },
+    { stepIndex: 9, text: "But what if the value isn't there? Let's search for four this time." },
+    { stepIndex: 10, text: "Same process. Curr starts at head. Three is not four." },
+    { stepIndex: 11, text: "Move forward. Seven is not four." },
+    { stepIndex: 12, text: "Next. Nine is not four." },
+    { stepIndex: 13, text: "And five is not four either. That was the last node." },
+    { stepIndex: 14, text: "Curr moves to null. We've gone through the entire list." },
+    { stepIndex: 15, text: "The loop condition fails. Curr is null. So we return false. Value four does not exist." },
+    { stepIndex: 16, text: "So the time complexity is O of n. Best case, we find it right away at the head. Worst case, we walk through every single node." },
+    { stepIndex: 17, text: "If this helped you understand searching in a linked list, hit subscribe and drop a like. Traversal is coming next." },
+  ],
+};
+
+export const allNarrations: SceneNarration[] = [insertHeadNarration, insertTailNarration, deleteNodeNarration, searchNodeNarration];
 
 export interface NarrationDuration {
   step: number;
@@ -180,6 +204,27 @@ export const deleteTailDurations: NarrationDuration[] = [
   { step: 5, duration: 5.52, frames: 166 },
 ];
 
+export const searchNodeDurations: NarrationDuration[] = [
+  { step: 0,  duration: 6.00,  frames: 180 },
+  { step: 1,  duration: 7.42,  frames: 223 },
+  { step: 2,  duration: 4.90,  frames: 147 },
+  { step: 3,  duration: 5.21,  frames: 157 },
+  { step: 4,  duration: 2.18,  frames: 66 },
+  { step: 5,  duration: 2.98,  frames: 90 },
+  { step: 6,  duration: 1.66,  frames: 50 },
+  { step: 7,  duration: 4.27,  frames: 129 },
+  { step: 8,  duration: 3.65,  frames: 110 },
+  { step: 9,  duration: 4.18,  frames: 126 },
+  { step: 10, duration: 4.22,  frames: 127 },
+  { step: 11, duration: 2.69,  frames: 81 },
+  { step: 12, duration: 2.23,  frames: 67 },
+  { step: 13, duration: 3.46,  frames: 104 },
+  { step: 14, duration: 3.48,  frames: 105 },
+  { step: 15, duration: 6.82,  frames: 205 },
+  { step: 16, duration: 8.23,  frames: 247 },
+  { step: 17, duration: 6.38,  frames: 192 },
+];
+
 export const narrationDurationsByScene: Record<string, NarrationDuration[]> = {
   "insert-head": insertHeadDurations,
   "insert-tail": insertTailDurations,
@@ -187,4 +232,5 @@ export const narrationDurationsByScene: Record<string, NarrationDuration[]> = {
   "delete-head": deleteHeadDurations,
   "delete-middle": deleteMiddleDurations,
   "delete-tail": deleteTailDurations,
+  "search-node": searchNodeDurations,
 };
