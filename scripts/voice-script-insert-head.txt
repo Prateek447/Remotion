@@ -1,0 +1,97 @@
+=====================================
+ INSERT AT HEAD — Voice Script
+ Topic: Linked List - Insert at Head
+ Duration: ~90 seconds
+ Steps: 14
+=====================================
+
+INSTRUCTIONS FOR RECORDING:
+- Read each line naturally, as if explaining to a friend
+- Pause briefly (1 second) between each numbered step
+- Save each step as a separate file: step-0.mp3, step-1.mp3, etc.
+- Place files in: public/narration/insert-head/
+- After recording, run: node scripts/update-durations.mjs
+
+=====================================
+
+[0] CONTEXT — What is a linked list?
+
+So, a linked list. It's basically a chain of nodes. Each node has two parts. A value, and a next pointer that points to the following node.
+
+---
+
+[1] CONTEXT — Show the list
+
+Here's our linked list. Three, seven, nine. And this head pointer right here? That marks the start.
+
+---
+
+[2] PROBLEM — What we want to do
+
+Now, what we want to do, is insert the value one, at the very beginning of this list.
+
+---
+
+[3] WRONG WAY — Move head first
+
+But here's the thing. What if we move the head pointer to the new node first?
+
+---
+
+[4] WRONG WAY — Show the consequence
+
+See the problem? We lost the connection to three, seven, and nine. Those nodes are completely unreachable now.
+
+---
+
+[5] WRONG WAY — Recovery
+
+So, the order matters. We have to link the new node first, before touching head.
+
+---
+
+[6] CORRECT — Step 1: Create node
+
+Alright, step one. We create a brand new node, with value one.
+
+---
+
+[7] CORRECT — Step 2: Link to head
+
+Step two. We point new node's next, to the current head. This links it into the existing chain.
+
+---
+
+[8] CORRECT — Step 3: Move head
+
+Step three. Now it's safe to move head to the new node. Nothing is lost.
+
+---
+
+[9] CORRECT — Done
+
+And we're done! We increment the size. The list is now one, three, seven, nine.
+
+---
+
+[10] COMPLEXITY — Why O(1)?
+
+Now here's the beautiful part. We never had to walk through the list. No matter how long it is, this is always O of one. Constant time.
+
+---
+
+[11] EDGE CASE — Empty list
+
+What about an empty list though? Well, the same code just works. New node's next is null, and head moves to the new node.
+
+---
+
+[12] RECAP — Three steps
+
+So remember. Three simple steps. Create the node. Link it to head. Then move head. That's it.
+
+---
+
+[13] SUBSCRIBE CTA
+
+If this helped you understand linked lists better, hit that subscribe button and drop a like. More data structures coming soon!

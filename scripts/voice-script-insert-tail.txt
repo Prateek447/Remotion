@@ -1,0 +1,103 @@
+=====================================
+ INSERT AT TAIL — Voice Script
+ Topic: Linked List - Insert at Tail
+ Duration: ~90 seconds
+ Steps: 15
+=====================================
+
+INSTRUCTIONS FOR RECORDING:
+- Read each line naturally, as if explaining to a friend
+- Pause briefly (1 second) between each numbered step
+- Save each step as a separate file: step-0.mp3, step-1.mp3, etc.
+- Place files in: public/narration/insert-tail/
+- After recording, run: node scripts/update-durations.mjs
+
+=====================================
+
+[0] CONTEXT — Show the list
+
+Alright, here's our linked list again. Three, seven, nine, with head pointing to the start.
+
+---
+
+[1] PROBLEM — What we want to do
+
+This time, we want to insert the value five, at the very end of this list. At the tail.
+
+---
+
+[2] THE CHALLENGE — Why it's different from insert at head
+
+But unlike insert at head, we don't have a direct pointer to the last node. So we need to walk through the entire list to find it.
+
+---
+
+[3] EDGE CASE — Empty list
+
+But first, what if the list is empty? If head is null, the new node just becomes the head. Simple.
+
+---
+
+[4] CORRECT — Step 1: Create node
+
+Back to our list. Step one. Create a brand new node, with value five.
+
+---
+
+[5] CORRECT — Step 2: Start curr at head
+
+Step two. We create a pointer called curr, and set it to head.
+
+---
+
+[6] TRAVERSE — curr moves forward
+
+Now we check. Node three's next points to seven. Not null. So curr moves forward to seven.
+
+---
+
+[7] TRAVERSE — keep going
+
+Node seven's next points to nine. Still not null. So curr advances to nine.
+
+---
+
+[8] TRAVERSE — found the tail
+
+Now we check node nine's next. It's null! We've found the last node. We exit the loop.
+
+---
+
+[9] CORRECT — Step 3: Link new node
+
+Step three. We set curr dot next to the new node. This links five to the end of our chain.
+
+---
+
+[10] CORRECT — Done
+
+And we're done! We increment the size. The list is now three, seven, nine, five.
+
+---
+
+[11] COMPLEXITY — Why O(n)?
+
+Now why is this O of n? Because we had to walk through every single node to reach the tail. The longer the list, the more steps it takes.
+
+---
+
+[12] COMPARE — vs Insert at Head
+
+Compare that to insert at head, which was O of one. With a tail pointer, we could make this O of one too. But that's a topic for another video.
+
+---
+
+[13] RECAP — Three steps
+
+So remember. Create the node. Walk to the end. Link it up. That's insert at tail.
+
+---
+
+[14] SUBSCRIBE CTA
+
+If this helped you understand linked lists better, hit that subscribe button and drop a like. More data structures coming soon!

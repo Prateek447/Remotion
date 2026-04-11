@@ -1,0 +1,33 @@
+{
+  "name": "linked-list-remotion",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "studio": "npx remotion studio src/index.ts",
+    "render": "npx remotion render src/index.ts FullVideo out/video.mp4",
+    "build": "npx remotion render src/index.ts"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@bestcodes/edge-tts": "^3.0.1",
+    "@remotion/cli": "^4.0.438",
+    "@remotion/player": "^4.0.438",
+    "remotion": "^4.0.438",
+    "shiki": "^4.0.2"
+  },
+  "devDependencies": {
+    "@remotion/tailwind-v4": "^4.0.438",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "tailwindcss": "^4.2.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
