@@ -48,6 +48,7 @@ export interface SceneStep {
   snapshot: ListSnapshot;
   highlightLines: HighlightStep;
   startFrame: number;
+  visibleLines?: number;
 }
 
 export interface CodeSnippet {

@@ -47,20 +47,20 @@ export const OutroCard: React.FC<OutroCardProps> = ({ title, nextTopic }) => {
           width: 72,
           height: 72,
           borderRadius: "50%",
-          background: `${colors.green}18`,
-          border: `2px solid ${colors.green}50`,
+          background: "rgba(21,101,192,0.18)",
+          border: "2px solid rgba(21,101,192,0.50)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           opacity: checkOpacity,
           transform: `scale(${checkScale})`,
-          boxShadow: `0 0 40px ${colors.green}20`,
+          boxShadow: "0 0 40px rgba(21,101,192,0.20)",
         }}
       >
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
           <path
             d="M5 12l5 5L20 7"
-            stroke={colors.green}
+            stroke="#1565C0"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -97,7 +97,7 @@ export const OutroCard: React.FC<OutroCardProps> = ({ title, nextTopic }) => {
           }}
         >
           <span>Up next:</span>
-          <span style={{ color: colors.blue, fontWeight: 600 }}>
+          <span style={{ color: "#1565C0", fontWeight: 600 }}>
             {nextTopic}
           </span>
           <svg
@@ -109,7 +109,7 @@ export const OutroCard: React.FC<OutroCardProps> = ({ title, nextTopic }) => {
           >
             <path
               d="M5 12h14m-6-6l6 6-6 6"
-              stroke={colors.blue}
+              stroke="#1565C0"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"

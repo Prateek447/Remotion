@@ -34,7 +34,7 @@ const scenes = [
   { title: "Insert at Head", complexity: "O(1)", frames: 2756, key: "insertHead" },
   { title: "Insert at Tail", complexity: "O(n)", frames: 2911, key: "insertTail" },
   { title: "Delete Node", complexity: "O(n)", frames: 315, key: "delete" },
-  { title: "Search", complexity: "O(n)", frames: 315, key: "search" },
+  { title: "Search", complexity: "O(n)", frames: 2622, key: "search" },
   { title: "Traverse", complexity: "O(n)", frames: 280, key: "traverse" },
   { title: "Reverse", complexity: "O(n)", frames: 400, key: "reverse" },
   { title: "Detect Cycle", complexity: "O(n)", subtitle: "Floyd's Algorithm", frames: 360, key: "detectCycle" },

@@ -131,10 +131,21 @@ export const SearchNodeVideo: React.FC<TokenProps> = ({ tokens }) => (
   <StandaloneVideo
     title="Search"
     complexity="O(n)"
-    sceneFrames={315}
+    sceneFrames={2622}
     nextTopic="Traverse"
   >
     <SearchNode tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const SearchNodeReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo
+    title="Search"
+    complexity="O(n)"
+    sceneFrames={2622}
+    nextTopic="Traverse"
+  >
+    <SearchNode tokens={tokens} format="reel" />
   </StandaloneVideo>
 );
 

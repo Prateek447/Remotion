@@ -135,25 +135,33 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
       )}
 
       {tokens.map((lineTokens, i) => {
-        const revealProgress = spring({
-          frame,
-          fps,
-          delay: i * 2,
-          config: springPresets.enter,
-        });
+        const currVisible = current.visibleLines;
+        const prevVisible = previous.visibleLines;
+        const hasRevealControl = currVisible !== undefined;
+
+        const isVisible = !hasRevealControl || i < currVisible;
+        const wasVisible = !hasRevealControl || prevVisible === undefined || i < prevVisible;
+        const isNewlyRevealed = hasRevealControl && isVisible && !wasVisible;
+
+        if (!isVisible) {
+          return (
+            <div key={i} style={{ whiteSpace: "pre", lineHeight: `${lineHeight}`, opacity: 0, height: lineH }}>
+              {"\u200b"}
+            </div>
+          );
+        }
+
+        const revealProgress = isNewlyRevealed
+          ? spring({ frame: localFrame, fps, delay: (i - (prevVisible ?? 0)) * 3, config: springPresets.enter })
+          : spring({ frame, fps, delay: i * 2, config: springPresets.enter });
         const revealOpacity = interpolate(revealProgress, [0, 1], [0, 1]);
-        const revealX = interpolate(revealProgress, [0, 1], [16, 0]);
+        const revealX = interpolate(revealProgress, [0, 1], [24, 0]);
 
         const isHighlighted = i >= currStart && i <= currEnd;
         const wasHighlighted = i >= prevStart && i <= prevEnd;
         const dimTarget = isHighlighted ? 1 : colors.dimmed;
         const dimFrom = wasHighlighted ? 1 : colors.dimmed;
         const lineDim = interpolate(t, [0, 1], [dimFrom, dimTarget]);
-
-        // Glow springs in at every step transition for highlighted lines
-        const glowP = isHighlighted
-          ? spring({ frame: localFrame, fps, config: { damping: 10, stiffness: 120 } })
-          : 0;
 
         return (
           <div
@@ -167,7 +175,6 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
               alignItems: "center",
             }}
           >
-            {/* Tokens with per-token stagger glow */}
             <span>
               {lineTokens.map((tok, j) => {
                 const rawColor = tok.color ?? colors.text;

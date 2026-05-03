@@ -117,6 +117,7 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
   areaHeight = DEFAULT_AREA_HEIGHT,
   nodeScale = 1,
   verticalOffset = 0,
+  verticalOffset = 0,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -165,6 +166,14 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
         overflow: "hidden",
       }}
     >
+      {snapshot.searchTarget !== undefined && (
+        <SearchTargetBadge
+          target={snapshot.searchTarget}
+          prevTarget={prevSnapshot.searchTarget}
+          localFrame={localFrame}
+        />
+      )}
+
       {snapshot.arrows.map((arrow, i) => {
         const fromIdx = nodes.findIndex((n) => n.id === arrow.from);
         if (fromIdx < 0) return null;
@@ -413,7 +422,7 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
                 fontSize: Math.max(13, layout.nodeH * 0.28),
                 fontWeight: 700,
                 color: colors.nullNode,
-                opacity: 0.6,
+                opacity: 0.85,
                 letterSpacing: 0.5,
                 pointerEvents: "none",
               }}
@@ -568,6 +577,29 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
         );
       })}
 
+      {(() => {
+        const cmp = parseComparison(snapshot.caption);
+        if (!cmp) return null;
+        const activeIdx = nodes.findIndex((n) => n.highlight === "active" || n.highlight === "found");
+        if (activeIdx < 0) return null;
+        const pos = getNodePos(activeIdx, layout);
+        return (
+          <ComparisonBadge
+            comparison={cmp}
+            x={pos.x + layout.nodeW / 2}
+            y={pos.y}
+            nodeH={layout.nodeH}
+            localFrame={localFrame}
+          />
+        );
+      })()}
+
+      <CaptionCrossfade
+        currentCaption={snapshot.caption}
+        previousCaption={prevSnapshot.caption}
+        localFrame={localFrame}
+      />
+
       {departingPointers.map((ptr) => {
         const targetNodeId = ptr.targetNodeId;
         let ptrX: number;
@@ -617,6 +649,121 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
         );
       })}
 
+    </div>
+  );
+};
+
+const SearchTargetBadge: React.FC<{
+  target: number | string;
+  prevTarget?: number | string;
+  localFrame: number;
+}> = ({ target, prevTarget, localFrame }) => {
+  const { fps } = useVideoConfig();
+  const isNew = prevTarget !== target;
+  const p = isNew
+    ? spring({ frame: localFrame, fps, delay: 3, config: springPresets.enter })
+    : 1;
+  const scale = interpolate(p, [0, 0.5, 1], [0.6, 1.06, 1]);
+  const opacity = interpolate(p, [0, 0.3], [0, 1], { extrapolateRight: "clamp" });
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 36,
+        left: 20,
+        zIndex: 20,
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        fontFamily: fonts.sans,
+        fontSize: 17,
+        fontWeight: 600,
+        color: "#cdd6f4",
+        background: "rgba(255, 255, 255, 0.05)",
+        border: "1px solid rgba(255, 255, 255, 0.12)",
+        borderRadius: 10,
+        padding: "8px 18px",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        boxShadow: "0 0 12px rgba(0,0,0,0.2)",
+        opacity,
+        transform: `scale(${scale})`,
+        transformOrigin: "top left",
+        pointerEvents: "none",
+        letterSpacing: 0.3,
+      }}
+    >
+      <span style={{ color: "#a6adc8", fontWeight: 400 }}>target</span>
+      <span
+        style={{
+          fontFamily: fonts.mono,
+          fontSize: 22,
+          fontWeight: 800,
+          color: "#f9e2af",
+          textShadow: "0 0 8px rgba(249,226,175,0.4)",
+        }}
+      >
+        {target}
+      </span>
+    </div>
+  );
+};
+
+function parseComparison(caption?: string): { left: string; right: string; match: boolean } | null {
+  if (!caption) return null;
+  const m = caption.match(/curr\.val\((\d+)\)\s*(==|≠|!=)\s*(\d+)/);
+  if (!m) return null;
+  return { left: m[1], right: m[3], match: m[2] === "==" };
+}
+
+const ComparisonBadge: React.FC<{
+  comparison: { left: string; right: string; match: boolean };
+  x: number;
+  y: number;
+  nodeH: number;
+  localFrame: number;
+}> = ({ comparison, x, y, nodeH, localFrame }) => {
+  const { fps } = useVideoConfig();
+  const p = spring({ frame: localFrame, fps, delay: 4, config: springPresets.emphasis });
+  const scale = interpolate(p, [0, 0.5, 1], [0.4, 1.08, 1]);
+  const opacity = interpolate(p, [0, 0.3], [0, 1], { extrapolateRight: "clamp" });
+
+  const isMatch = comparison.match;
+  const bg = isMatch ? "rgba(21, 101, 192, 0.30)" : "rgba(192, 57, 43, 0.30)";
+  const border = isMatch ? "rgba(21, 101, 192, 0.7)" : "rgba(192, 57, 43, 0.7)";
+  const glow = isMatch ? "0 0 12px rgba(21,101,192,0.5)" : "0 0 12px rgba(192,57,43,0.5)";
+  const textColor = isMatch ? "#5b9bd5" : "#ffffff";
+  const symbol = isMatch ? "==" : "≠";
+  const suffix = isMatch ? " ✓" : "";
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: x,
+        top: y + nodeH + 14,
+        transform: `translateX(-50%) scale(${scale})`,
+        transformOrigin: "center top",
+        opacity,
+        zIndex: 20,
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        fontFamily: fonts.mono,
+        fontSize: 18,
+        fontWeight: 700,
+        color: textColor,
+        background: bg,
+        border: `1px solid ${border}`,
+        borderRadius: 20,
+        padding: "4px 14px",
+        boxShadow: glow,
+        whiteSpace: "nowrap",
+        pointerEvents: "none",
+      }}
+    >
+      {comparison.left} {symbol} {comparison.right}{suffix}
     </div>
   );
 };

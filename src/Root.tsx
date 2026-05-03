@@ -43,6 +43,7 @@ import {
   InsertHeadReel,
   InsertTailReel,
   DeleteNodeReel,
+  SearchNodeReel,
   DeleteHeadReel,
   DeleteMiddleReel,
   DeleteTailReel,
@@ -215,7 +216,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="SearchNode"
           component={SearchNode}
-          durationInFrames={315}
+          durationInFrames={2622}
           fps={FPS}
           width={WIDTH}
           height={HEIGHT}
@@ -319,7 +320,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="Video-SearchNode"
           component={SearchNodeVideo}
-          durationInFrames={standaloneDuration(315)}
+          durationInFrames={standaloneDuration(2622)}
           fps={FPS}
           width={WIDTH}
           height={HEIGHT}
@@ -388,6 +389,16 @@ export const RemotionRoot: React.FC = () => {
           height={REEL_HEIGHT}
           defaultProps={{ tokens: emptyTokens }}
           calculateMetadata={makeCalcMetadata(insertAtTailCode)}
+        />
+        <Composition
+          id="Reel-SearchNode"
+          component={SearchNodeReel}
+          durationInFrames={standaloneDuration(2622)}
+          fps={FPS}
+          width={REEL_WIDTH}
+          height={REEL_HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(searchNodeCode)}
         />
         <Composition
           id="Reel-DeleteNode"

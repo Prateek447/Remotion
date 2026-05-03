@@ -157,32 +157,6 @@ function getAudioDuration(filePath) {
   }
 }
 
-function buildSsml(text, voice, rate, pitch) {
-  const escaped = text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-
-  return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-IN">
-  <voice name="${voice}">
-    <prosody rate="${rate}" pitch="${pitch}">
-      ${escaped}
-    </prosody>
-  </voice>
-</speak>`;
-}
-
-function generateWithSsml(ssml, outputPath) {
-  const tmpSsml = outputPath + ".ssml";
-  fs.writeFileSync(tmpSsml, ssml, "utf-8");
-  execSync(
-    `edge-tts --voice "${VOICE}" -f "${tmpSsml}" --write-media "${outputPath}"`,
-    { encoding: "utf-8", stdio: "pipe" },
-  );
-  fs.unlinkSync(tmpSsml);
-}
-
 function generateWithEdgeTts(text, outputPath, voice, rate) {
   const escaped = text.replace(/"/g, '\\"');
   execSync(
@@ -191,7 +165,19 @@ function generateWithEdgeTts(text, outputPath, voice, rate) {
   );
 }
 
-async function main() {
+function main() {
+  const filterScene = process.argv[2];
+
+  const scenes = filterScene
+    ? allNarrations.filter((n) => n.sceneId === filterScene)
+    : allNarrations;
+
+  if (scenes.length === 0) {
+    console.error(`Unknown scene: ${filterScene}`);
+    console.error(`Available: ${allNarrations.map((n) => n.sceneId).join(", ")}`);
+    process.exit(1);
+  }
+
   console.log("Generating narration audio files...\n");
 
   const onlyScene = process.env.SCENE_ID;
@@ -241,9 +227,18 @@ async function main() {
     const durationsPath = path.join(outDir, "durations.json");
     fs.writeFileSync(durationsPath, JSON.stringify(durations, null, 2));
     console.log(`  Saved durations to ${durationsPath}\n`);
+
+    // Print startFrame suggestions (each step = prev startFrame + prev frames + 10 buffer)
+    console.log("Suggested startFrame values:");
+    let sf = 0;
+    for (let i = 0; i < durations.length; i++) {
+      console.log(`  Step ${durations[i].step}: startFrame: ${sf}`);
+      sf += durations[i].frames + 10;
+    }
+    console.log(`  Total scene frames: ${sf}\n`);
   }
 
   console.log("Done!");
 }
 
-main().catch(console.error);
+main();

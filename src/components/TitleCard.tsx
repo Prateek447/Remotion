@@ -66,14 +66,14 @@ export const TitleCard: React.FC<TitleCardProps> = ({
           style={{
             fontFamily: fonts.mono,
             fontSize: 30,
-            color: colors.green,
-            background: `${colors.green}10`,
+            color: "#1565C0",
+            background: "rgba(21,101,192,0.10)",
             padding: "6px 22px",
             borderRadius: 40,
-            border: `1px solid ${colors.green}30`,
+            border: "1px solid rgba(21,101,192,0.30)",
             opacity: badgeOpacity,
             transform: `scale(${badgeScale})`,
-            boxShadow: `0 0 20px ${colors.green}15`,
+            boxShadow: "0 0 20px rgba(21,101,192,0.15)",
           }}
         >
           {complexity}
