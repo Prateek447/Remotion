@@ -61,10 +61,88 @@ const deleteNodeLines = [
   { stepIndex: 16, text: "If this clicked for you, hit subscribe. Next up — searching a linked list." },
 ];
 
+const removeNthLines = [
+  // Phase 0: Problem intro (optimal code dimmed)
+  { stepIndex: 0, text: "Today's problem. Remove the nth node from the end of a linked list. Here's our list. One, two, three, four, five. And n equals two. So we have to delete the second node counting from the end — which means four. The result should be one, two, three, five." },
+  // Phase 1: Naive approach (naive code active)
+  { stepIndex: 1, text: "The obvious idea? Do it in two passes. First pass, count the length. Second pass, walk to the right spot and splice." },
+  { stepIndex: 2, text: "Pass one. Walk a pointer through the list, bumping a counter. One, two, three, four, five. Length is five." },
+  { stepIndex: 3, text: "Now the target. Length minus n is three. But we count from zero — so index three is actually the fourth node, which holds four. That's what we're removing. We reset curr to head, and walk two steps, landing on node three — the predecessor, at index two." },
+  { stepIndex: 4, text: "And splice. curr dot next equals curr dot next dot next. Four is bypassed. Done. But that was two passes. Can we do better?", rate: "+5%" },
+  // Phase 2: Optimal (optimal code active)
+  { stepIndex: 5, text: "Enter the two-pointer trick. Step one, we add a dummy node in front of head. This matters — I'll show you why in a minute." },
+  { stepIndex: 6, text: "Now two pointers, fast and slow, both starting at dummy. We move fast forward by n plus one steps. With n equals two, fast advances three times and lands on node three." },
+  { stepIndex: 7, text: "Now the magic. We move fast and slow together, one step at a time. They keep that same gap — always n plus one apart." },
+  { stepIndex: 8, text: "When fast falls off the end and becomes null, slow is sitting right before the node we want to remove. Exactly the predecessor. Every single time." },
+  { stepIndex: 9, text: "One line. slow dot next equals slow dot next dot next. Four is bypassed. Return dummy dot next, and we're done. One pass, no counting." },
+  // Phase 3: Edge case - remove head
+  { stepIndex: 10, text: "Now let me show you why that dummy node matters. What if n equals five? We're removing the head itself — node one." },
+  { stepIndex: 11, text: "Fast advances six steps. It walks through every node and lands on null immediately. Slow never moves, still at dummy." },
+  { stepIndex: 12, text: "slow dot next dot next just skips past the old head. No null checks, no special case. The dummy absorbs what would otherwise be a crash." },
+  // Phase 4: Complexity
+  { stepIndex: 13, text: "Both versions are O of n time and O of one space. But the two-pointer version does it in a single pass, no length counting. Elegant.", rate: "+5%" },
+  // Phase 5: CTA
+  { stepIndex: 14, text: "If this two-pointer trick clicked for you, smash that subscribe. More LeetCode patterns coming up." },
+];
+
+const reverseLines = [
+  { stepIndex: 0, text: "Alright, here's our linked list. Three, seven, nine. Three nodes, each pointing to the next. Today we're flipping the whole thing around." },
+  { stepIndex: 1, text: "So what does reversing actually mean? Instead of three pointing to seven pointing to nine, we want nine pointing to seven pointing to three. Every arrow flips direction." },
+  { stepIndex: 2, text: "To pull this off, we need three pointers. Prev starts at null. Curr starts at head, which is three. And next, we'll use that to save our place before we break any links." },
+  { stepIndex: 3, text: "First thing, we save curr dot next into next. That's seven. We need this because we're about to destroy the link from three to seven." },
+  { stepIndex: 4, text: "Now the key move. We set curr dot next to prev. So three no longer points to seven. It points to null. We just reversed our first link." },
+  { stepIndex: 5, text: "Time to advance. Prev moves to curr, which is three. And curr moves to next, which is seven. We slide everything forward by one." },
+  { stepIndex: 6, text: "Same pattern again. Save next. That's nine." },
+  { stepIndex: 7, text: "Reverse the link. Seven's next now points to three instead of nine." },
+  { stepIndex: 8, text: "Advance again. Prev moves to seven, curr moves to nine." },
+  { stepIndex: 9, text: "One more time. Save next. It's null this time. We're at the last node." },
+  { stepIndex: 10, text: "Reverse the link. Nine now points back to seven." },
+  { stepIndex: 11, text: "Advance. Prev is nine, curr is null. The loop condition fails. We're done iterating." },
+  { stepIndex: 12, text: "Last step. We set head to prev. And prev is nine. So the list now starts at nine, goes to seven, then three. Fully reversed." },
+  { stepIndex: 13, text: "Here's the beauty of it. We touched every node exactly once. No extra memory, no recursion. O of n time, O of one space. Clean.", rate: "+5%" },
+  { stepIndex: 14, text: "If this helped you visualize linked list reversal, hit subscribe. More data structures and algorithms coming soon." },
+];
+
+const detectCycleLines = [
+  { stepIndex: 0, text: "Here's a tricky one. How do you know if a linked list has a cycle? Meaning, some node's next pointer loops back to an earlier node, creating an infinite loop." },
+  { stepIndex: 1, text: "Here's our list. One, two, three, four, five. But look, five's next doesn't point to null. It points back to three. That's a cycle. If you tried to traverse this list, you'd loop forever." },
+  { stepIndex: 2, text: "The trick is called Floyd's algorithm. Two pointers, slow and fast, both starting at head. Slow moves one step at a time. Fast moves two steps." },
+  { stepIndex: 3, text: "Let's run it. Slow moves to two. Fast jumps to three. They're at different nodes." },
+  { stepIndex: 4, text: "We check. Slow is at two, fast is at three. Not equal. Keep going." },
+  { stepIndex: 5, text: "Slow moves to three. Fast jumps two steps and lands on five." },
+  { stepIndex: 6, text: "Still not equal. Slow is three, fast is five. Continue." },
+  { stepIndex: 7, text: "Now watch the fast pointer carefully. Slow moves to four. Fast follows the cycle arrow from five back to three, then hops one more to four. They're both at four." },
+  { stepIndex: 8, text: "Slow equals fast. Cycle detected. We return true." },
+  { stepIndex: 9, text: "But what if there's no cycle? Say the list is just one through five with null at the end. No loop." },
+  { stepIndex: 10, text: "Fast would reach null before slow catches up. The while condition fails, and we return false. Simple." },
+  { stepIndex: 11, text: "Why does this work? Think of it like two runners on a circular track. The fast one will always lap the slow one. If there's a cycle, they must meet. If not, fast hits the end.", rate: "+5%" },
+  { stepIndex: 12, text: "Time complexity, O of n. Space, O of one. No hash sets, no extra memory. Just two pointers. Elegant." },
+  { stepIndex: 13, text: "If Floyd's algorithm clicked for you, hit that subscribe button. More algorithm breakdowns on the way." },
+];
+
+const mergeListsLines = [
+  { stepIndex: 0, text: "Two sorted linked lists. List A has one, four, six. List B has two, three, five. We need to merge them into one sorted list." },
+  { stepIndex: 1, text: "The trick? A dummy node. We create a fake node with value zero. It won't be in the final answer, but it gives us a stable starting point. Tail points to dummy." },
+  { stepIndex: 2, text: "Now we compare. A is at one, B is at two. One is smaller, so we take from A. Tail dot next equals A. Then we advance A to four, and tail to one." },
+  { stepIndex: 3, text: "Compare again. A is four, B is two. Two is smaller. Take from B. Tail dot next equals B. Advance B to three, tail to two." },
+  { stepIndex: 4, text: "A is four, B is three. Three is smaller. Take from B. Advance B to five, tail to three." },
+  { stepIndex: 5, text: "A is four, B is five. Four is smaller. Take from A. Advance A to six, tail to four." },
+  { stepIndex: 6, text: "A is six, B is five. Five is smaller. Take from B. Advance B to null, tail to five." },
+  { stepIndex: 7, text: "B is null now. The while loop ends. But A still has six left." },
+  { stepIndex: 8, text: "We just attach whatever's remaining. Tail dot next equals A. Six gets linked to the end." },
+  { stepIndex: 9, text: "And we're done. The merged list is one, two, three, four, five, six. Perfectly sorted. We return dummy dot next to skip that fake zero node." },
+  { stepIndex: 10, text: "Time complexity? O of n plus m, where n and m are the lengths of the two lists. We visit every node exactly once. Space is O of one, we're just rearranging pointers.", rate: "+5%" },
+  { stepIndex: 11, text: "If this merge technique made sense to you, smash that subscribe. More algorithm deep dives are coming." },
+];
+
 const allNarrations = [
   { sceneId: "insert-head", lines: insertHeadLines },
   { sceneId: "insert-tail", lines: insertTailLines },
   { sceneId: "delete-node", lines: deleteNodeLines },
+  { sceneId: "remove-nth-from-end", lines: removeNthLines },
+  { sceneId: "reverse", lines: reverseLines },
+  { sceneId: "detect-cycle", lines: detectCycleLines },
+  { sceneId: "merge-lists", lines: mergeListsLines },
 ];
 
 function getAudioDuration(filePath) {
@@ -116,7 +194,17 @@ function generateWithEdgeTts(text, outputPath, voice, rate) {
 async function main() {
   console.log("Generating narration audio files...\n");
 
-  for (const narration of allNarrations) {
+  const onlyScene = process.env.SCENE_ID;
+  const target = onlyScene
+    ? allNarrations.filter((n) => n.sceneId === onlyScene)
+    : allNarrations;
+
+  if (onlyScene && target.length === 0) {
+    console.error(`No narration found for scene id: ${onlyScene}`);
+    process.exit(1);
+  }
+
+  for (const narration of target) {
     const outDir = path.join("public", "narration", narration.sceneId);
     fs.mkdirSync(outDir, { recursive: true });
 

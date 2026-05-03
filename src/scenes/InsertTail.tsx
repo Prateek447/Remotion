@@ -10,7 +10,6 @@ import { CodeWindow } from "../components/CodeWindow";
 import { SfxLayer } from "../components/SfxLayer";
 import { NarrationLayer } from "../components/NarrationLayer";
 import { AmbientLayer } from "../components/AmbientLayer";
-import { colors } from "../lib/theme";
 
 /*
  * Code lines:
@@ -29,7 +28,7 @@ import { colors } from "../lib/theme";
  *  12: }
  */
 
-const HEAD_COLOR = "#2196F3";
+const HEAD_COLOR = "#1565C0";
 const CURR_COLOR = "#2E7D32";
 
 const steps: SceneStep[] = [

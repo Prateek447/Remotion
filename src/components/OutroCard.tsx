@@ -7,6 +7,7 @@ import {
   interpolate,
 } from "remotion";
 import { colors, fonts, springPresets } from "../lib/theme";
+import { NoiseOverlay } from "./NoiseOverlay";
 
 interface OutroCardProps {
   title: string;
@@ -116,6 +117,8 @@ export const OutroCard: React.FC<OutroCardProps> = ({ title, nextTopic }) => {
           </svg>
         </div>
       )}
+
+      <NoiseOverlay />
     </AbsoluteFill>
   );
 };

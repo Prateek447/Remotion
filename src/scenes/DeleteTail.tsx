@@ -30,7 +30,7 @@ import { AmbientLayer } from "../components/AmbientLayer";
  *  14: }
  */
 
-const HEAD_COLOR = "#2196F3";
+const HEAD_COLOR = "#1565C0";
 const CURR_COLOR = "#2E7D32";
 
 const steps: SceneStep[] = [

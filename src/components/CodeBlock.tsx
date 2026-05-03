@@ -20,6 +20,24 @@ const CHAR_W_RATIO = 0.601;
 const LINE_NUM_W = 0;
 const PILL_PAD = 10; // breathing room on left & right inside the pill
 
+const COLOR_REMAP: Record<string, string> = {
+  "#e06c75": "#61AFEF", // red → blue
+  "#E06C75": "#61AFEF",
+  "#61afef": "#E06C75", // blue → red
+  "#61AFEF": "#E06C75",
+};
+
+function remapTokenColor(hex: string): string {
+  if (COLOR_REMAP[hex]) return COLOR_REMAP[hex];
+  const c = hex.replace("#", "");
+  if (c.length < 6) return hex;
+  const r = parseInt(c.slice(0, 2), 16);
+  const g = parseInt(c.slice(2, 4), 16);
+  const b = parseInt(c.slice(4, 6), 16);
+  if (r > 180 && g > 140 && b < 140) return "#E0E0E0"; // yellow → white
+  return hex;
+}
+
 function maxCharsInRange(tokens: ThemedToken[][], start: number, end: number): number {
   let max = 0;
   for (let i = start; i <= end; i++) {
@@ -105,11 +123,11 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
             width: pillWidth,
             top: pillTop,
             height: pillHeight,
-            background: "rgba(137,180,250,0.07)",
-            border: "1px solid rgba(137,180,250,0.32)",
+            background: "rgba(110,155,255,0.08)",
+            border: "1px solid rgba(110,155,255,0.35)",
             borderRadius: 8,
             boxShadow:
-              "0 0 10px rgba(137,180,250,0.28), 0 0 30px rgba(137,180,250,0.12), inset 0 0 12px rgba(137,180,250,0.05)",
+              "0 0 12px rgba(110,155,255,0.30), 0 0 36px rgba(110,155,255,0.10), inset 0 0 14px rgba(110,155,255,0.06)",
             pointerEvents: "none",
             opacity: pillOpacity,
           }}
@@ -152,7 +170,8 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
             {/* Tokens with per-token stagger glow */}
             <span>
               {lineTokens.map((tok, j) => {
-                const tokenColor = tok.color ?? colors.text;
+                const rawColor = tok.color ?? colors.text;
+                const tokenColor = remapTokenColor(rawColor);
 
                 const tokenGlowP = isHighlighted
                   ? spring({

@@ -1,5 +1,6 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
+import { NoiseOverlay } from "./NoiseOverlay";
 
 interface SplitLayoutProps {
   left: React.ReactNode;
@@ -15,12 +16,7 @@ export const SplitLayout: React.FC<SplitLayoutProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: [
-          "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
-          "linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
-          "#000",
-        ].join(", "),
-        backgroundSize: "60px 60px, 60px 60px, 100% 100%",
+        background: "#000",
       }}
     >
       <div style={{ position: "absolute", inset: 0 }}>
@@ -41,6 +37,8 @@ export const SplitLayout: React.FC<SplitLayoutProps> = ({
       >
         {right}
       </div>
+
+      <NoiseOverlay />
     </AbsoluteFill>
   );
 };

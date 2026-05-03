@@ -12,6 +12,13 @@ interface LinkedListDiagramProps {
   areaWidth?: number;
   areaHeight?: number;
   nodeScale?: number;
+  // Extra pixels added to the vertical position of the node row. The diagram
+  // normally centers the node box inside `areaHeight`, but that leaves the
+  // pointer labels — which always sit ABOVE the nodes — visually biased
+  // toward the top of the panel. A positive value shifts the whole row down,
+  // which is useful for reel/portrait layouts where the diagram panel is
+  // short and the pointer stack can otherwise look glued to the top edge.
+  verticalOffset?: number;
 }
 
 const MAX_NODES_FOR_NULL = 5;
@@ -32,7 +39,13 @@ interface LayoutInfo {
 // Space reserved on the right when showing null as compact text (arrow + label)
 const NULL_TEXT_RESERVE = 100;
 
-function computeLayout(nodeCount: number, areaWidth: number, areaHeight: number, nodeScale: number): LayoutInfo {
+function computeLayout(
+  nodeCount: number,
+  areaWidth: number,
+  areaHeight: number,
+  nodeScale: number,
+  verticalOffset: number,
+): LayoutInfo {
   const showNull = nodeCount <= MAX_NODES_FOR_NULL;
   const pad = spacing.diagramPadding;
 
@@ -54,10 +67,13 @@ function computeLayout(nodeCount: number, areaWidth: number, areaHeight: number,
 
   const totalSlots = showNullBox ? nodeCount + 1 : nodeCount;
 
-  // Cap maxGap so nodes fit within effectiveAreaW, allow slightly shorter arrows when tight
-  const effectiveMaxGap = (showNullText && totalSlots > 1)
-    ? Math.min(maxGap, (effectiveAreaW - pad - baseW) / (totalSlots - 1))
-    : maxGap;
+  // Cap maxGap so nodes always fit within effectiveAreaW — required for layouts
+  // with more than MAX_NODES_FOR_NULL nodes, otherwise they overflow the panel.
+  const fitCap =
+    totalSlots > 1
+      ? Math.max(0, (effectiveAreaW - pad * 2 - baseW) / (totalSlots - 1))
+      : maxGap;
+  const effectiveMaxGap = Math.min(maxGap, fitCap);
   const effectiveMinGap = showNullText ? baseW + 20 : minGap;
 
   let gap: number;
@@ -69,7 +85,7 @@ function computeLayout(nodeCount: number, areaWidth: number, areaHeight: number,
 
   const totalWidth = totalSlots <= 1 ? baseW : (totalSlots - 1) * gap + baseW;
   const startX = Math.max(pad, (effectiveAreaW - totalWidth) / 2);
-  const y = areaHeight / 2 - baseH / 2;
+  const y = areaHeight / 2 - baseH / 2 + verticalOffset;
 
   return { nodeW: baseW, nodeH: baseH, gap, startX, y, showNullBox, showNullText, totalSlots };
 }
@@ -81,14 +97,16 @@ function getNodePos(index: number, layout: LayoutInfo) {
   };
 }
 
+const pointerKey = (p: PointerData): string => p.id ?? p.label;
+
 function computePointerStacks(pointers: PointerData[]): Map<string, number> {
   const stacks = new Map<string, number>();
   const targetCounts = new Map<string | null, number>();
   for (const ptr of pointers) {
-    if (!ptr.targetNodeId) continue;
-    const count = targetCounts.get(ptr.targetNodeId) || 0;
-    stacks.set(ptr.label, count);
-    targetCounts.set(ptr.targetNodeId, count + 1);
+    const target = ptr.targetNodeId ?? "__null__";
+    const count = targetCounts.get(target) || 0;
+    stacks.set(pointerKey(ptr), count);
+    targetCounts.set(target, count + 1);
   }
   return stacks;
 }
@@ -98,6 +116,7 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
   areaWidth = DEFAULT_AREA_WIDTH,
   areaHeight = DEFAULT_AREA_HEIGHT,
   nodeScale = 1,
+  verticalOffset = 0,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -108,8 +127,8 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
   const nodes = snapshot.nodes;
   const prevNodes = prevSnapshot.nodes;
 
-  const layout = computeLayout(nodes.length, areaWidth, areaHeight, nodeScale);
-  const prevLayout = computeLayout(prevNodes.length, areaWidth, areaHeight, nodeScale);
+  const layout = computeLayout(nodes.length, areaWidth, areaHeight, nodeScale, verticalOffset);
+  const prevLayout = computeLayout(prevNodes.length, areaWidth, areaHeight, nodeScale, verticalOffset);
 
   const pointerStacks = computePointerStacks(snapshot.pointers);
 
@@ -129,7 +148,7 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
 
   const departingPointers = hasRemovingExit
     ? prevSnapshot.pointers.filter(
-        (pp) => !snapshot.pointers.find((p) => p.label === pp.label),
+        (pp) => !snapshot.pointers.find((p) => pointerKey(p) === pointerKey(pp)),
       )
     : [];
 
@@ -148,16 +167,71 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
     >
       {snapshot.arrows.map((arrow, i) => {
         const fromIdx = nodes.findIndex((n) => n.id === arrow.from);
-        const toIdx = nodes.findIndex((n) => n.id === arrow.to);
-        if (fromIdx < 0 || toIdx < 0) return null;
+        if (fromIdx < 0) return null;
         const fromPos = getNodePos(fromIdx, layout);
+
+        // Arrow to null: short leftward arrow ending in a "null" label
+        if (arrow.to === "__null__") {
+          const arrowLen = 50;
+          const midY = fromPos.y + layout.nodeH / 2;
+          const startX = fromPos.x;
+          const endX = startX - arrowLen;
+          const nullW = layout.nodeW * 0.45;
+          const nullH = layout.nodeH * 0.7;
+          return (
+            <React.Fragment key={`${arrow.from}-null`}>
+              <Arrow
+                fromX={startX}
+                fromY={midY}
+                toX={endX}
+                toY={midY}
+                dashed={arrow.dashed}
+                highlight={arrow.highlight}
+                delay={i * 2}
+              />
+              <NodeBox
+                value="null"
+                x={endX - nullW - 4}
+                y={fromPos.y + (layout.nodeH - nullH) / 2}
+                w={nullW}
+                h={nullH}
+                isNull
+                delay={i * 2 + 1}
+              />
+            </React.Fragment>
+          );
+        }
+
+        const toIdx = nodes.findIndex((n) => n.id === arrow.to);
+        if (toIdx < 0) return null;
         const toPos = getNodePos(toIdx, layout);
+        const isReversed = toIdx < fromIdx;
+
+        if (arrow.curved) {
+          return (
+            <Arrow
+              key={`${arrow.from}-${arrow.to}-curved`}
+              fromX={fromPos.x + layout.nodeW / 2}
+              fromY={fromPos.y + layout.nodeH}
+              toX={toPos.x + layout.nodeW / 2}
+              toY={toPos.y + layout.nodeH}
+              dashed={arrow.dashed}
+              highlight={arrow.highlight}
+              curved
+              color={arrow.highlight ? undefined : "#FFFFFF"}
+              delay={i * 2}
+            />
+          );
+        }
+
+        const fX = isReversed ? fromPos.x : fromPos.x + layout.nodeW;
+        const tX = isReversed ? toPos.x + layout.nodeW : toPos.x;
         return (
           <Arrow
             key={`${arrow.from}-${arrow.to}`}
-            fromX={fromPos.x + layout.nodeW}
+            fromX={fX}
             fromY={fromPos.y + layout.nodeH / 2}
-            toX={toPos.x}
+            toX={tX}
             toY={toPos.y + layout.nodeH / 2}
             dashed={arrow.dashed}
             highlight={arrow.highlight}
@@ -168,16 +242,35 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
 
       {departingArrows.map((arrow) => {
         const fromIdx = prevNodes.findIndex((n) => n.id === arrow.from);
-        const toIdx = prevNodes.findIndex((n) => n.id === arrow.to);
-        if (fromIdx < 0 || toIdx < 0) return null;
+        if (fromIdx < 0) return null;
         const fromPos = getNodePos(fromIdx, prevLayout);
+
+        if (arrow.to === "__null__") {
+          const arrowLen = 50;
+          const midY = fromPos.y + prevLayout.nodeH / 2;
+          return (
+            <Arrow
+              key={`exit-${arrow.from}-null`}
+              fromX={fromPos.x}
+              fromY={midY}
+              toX={fromPos.x - arrowLen}
+              toY={midY}
+              opacity={1 - exitP}
+              delay={0}
+            />
+          );
+        }
+
+        const toIdx = prevNodes.findIndex((n) => n.id === arrow.to);
+        if (toIdx < 0) return null;
         const toPos = getNodePos(toIdx, prevLayout);
+        const isRevExit = toIdx < fromIdx;
         return (
           <Arrow
             key={`exit-${arrow.from}-${arrow.to}`}
-            fromX={fromPos.x + prevLayout.nodeW}
+            fromX={isRevExit ? fromPos.x : fromPos.x + prevLayout.nodeW}
             fromY={fromPos.y + prevLayout.nodeH / 2}
-            toX={toPos.x}
+            toX={isRevExit ? toPos.x + prevLayout.nodeW : toPos.x}
             toY={toPos.y + prevLayout.nodeH / 2}
             opacity={1 - exitP}
             delay={0}
@@ -200,6 +293,10 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
           finalY = interpolate(t, [0, 1], [pY, finalY]);
         }
 
+        const outArrow = snapshot.arrows.find((a) => a.from === node.id);
+        const nextNode = outArrow ? nodes.find((n) => n.id === outArrow.to) : undefined;
+        const nextAddr = nextNode?.address;
+
         return (
           <NodeBox
             key={node.id}
@@ -211,6 +308,9 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
             h={layout.nodeH}
             delay={i * 3}
             localStepFrame={localFrame}
+            reversed={node.reversed}
+            address={node.address}
+            nextAddress={nextAddr}
           />
         );
       })}
@@ -260,7 +360,7 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
           );
         })()}
 
-      {layout.showNullBox && nodes.length > 0 && (() => {
+      {layout.showNullBox && !snapshot.hideEndNull && nodes.length > 0 && (() => {
         const lastIdx = nodes.length - 1;
         const lastPos = getNodePos(lastIdx, layout);
         const nullPos = getNodePos(nodes.length, layout);
@@ -286,7 +386,7 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
         );
       })()}
 
-      {layout.showNullText && nodes.length > 0 && (() => {
+      {layout.showNullText && !snapshot.hideEndNull && nodes.length > 0 && (() => {
         const lastIdx = nodes.length - 1;
         const lastPos = getNodePos(lastIdx, layout);
         const arrowLen = 40;
@@ -325,64 +425,186 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
       })()}
 
       {snapshot.pointers.map((ptr, i) => {
-        const currNodeIdx = nodes.findIndex((n) => n.id === ptr.targetNodeId);
-        if (currNodeIdx < 0) return null;
+        const currNodeIdx = ptr.targetNodeId
+          ? nodes.findIndex((n) => n.id === ptr.targetNodeId)
+          : -1;
 
-        const currPos = getNodePos(currNodeIdx, layout);
-        let ptrX = currPos.x + layout.nodeW / 2;
+        // Null-target pointers: "prev" goes left of first node, others go right of last node
+        const isLeftNull = ptr.label.toLowerCase() === "prev";
+        const nullLeftX = Math.max(layout.nodeW / 2 + 10, layout.startX - layout.gap * 0.5);
+        const lastNodePos = nodes.length > 0 ? getNodePos(nodes.length - 1, layout) : null;
+        const endNullVisible = (layout.showNullBox || layout.showNullText) && !snapshot.hideEndNull && nodes.length > 0;
+        const nullRightX = (!isLeftNull && endNullVisible && layout.showNullBox)
+          ? getNodePos(nodes.length, layout).x + layout.nodeW / 2
+          : lastNodePos
+            ? lastNodePos.x + layout.nodeW + layout.gap * 0.5 + layout.nodeW / 2
+            : layout.startX + layout.gap * 0.5;
+        const nullPtrX = isLeftNull ? nullLeftX : nullRightX;
+        const nullPtrY = layout.y;
 
-        const prevPtr = prevSnapshot.pointers.find((p) => p.label === ptr.label);
-        if (prevPtr?.targetNodeId) {
-          const prevNodeIdx = prevNodes.findIndex((n) => n.id === prevPtr.targetNodeId);
-          if (prevNodeIdx >= 0) {
-            const prevPos = getNodePos(prevNodeIdx, prevLayout);
-            const prevX = prevPos.x + prevLayout.nodeW / 2;
-            ptrX = interpolate(t, [0, 1], [prevX, ptrX]);
+        const currPos = currNodeIdx >= 0
+          ? getNodePos(currNodeIdx, layout)
+          : { x: nullPtrX - layout.nodeW / 2, y: nullPtrY };
+        const targetX = currPos.x + layout.nodeW / 2;
+        let ptrX = targetX;
+        let tilt = 0;
+        let stretch = 0;
+
+        let ptrY = currPos.y;
+
+        const key = pointerKey(ptr);
+        const prevPtr = prevSnapshot.pointers.find((p) => pointerKey(p) === key);
+        if (prevPtr && (prevPtr.targetNodeId !== ptr.targetNodeId)) {
+          let prevX: number | null = null;
+          let prevY: number | null = null;
+
+          if (prevPtr.targetNodeId) {
+            const prevNodeIdx = prevNodes.findIndex((n) => n.id === prevPtr.targetNodeId);
+            if (prevNodeIdx >= 0) {
+              const prevPos = getNodePos(prevNodeIdx, prevLayout);
+              prevX = prevPos.x + prevLayout.nodeW / 2;
+              prevY = prevPos.y;
+            }
+          } else {
+            const slideIsLeft = prevPtr.label.toLowerCase() === "prev";
+            const slidePrevLastPos = prevNodes.length > 0 ? getNodePos(prevNodes.length - 1, prevLayout) : null;
+            prevX = slideIsLeft
+              ? Math.max(prevLayout.nodeW / 2 + 10, prevLayout.startX - prevLayout.gap * 0.5)
+              : slidePrevLastPos
+                ? slidePrevLastPos.x + prevLayout.nodeW + prevLayout.gap * 0.5 + prevLayout.nodeW / 2
+                : prevLayout.startX + prevLayout.gap * 0.5;
+            prevY = prevLayout.y;
+          }
+
+          if (prevX !== null) {
+            const ptProgress = spring({
+              frame: localFrame,
+              fps,
+              config: springPresets.pointerMove,
+            });
+
+            const cycleEdge = prevPtr.targetNodeId && ptr.targetNodeId
+              ? snapshot.arrows.find(
+                  (a) => a.curved && a.from === prevPtr.targetNodeId && a.to === ptr.targetNodeId,
+                ) ?? prevSnapshot.arrows.find(
+                  (a) => a.curved && a.from === prevPtr.targetNodeId && a.to === ptr.targetNodeId,
+                )
+              : undefined;
+
+            if (cycleEdge && prevY !== null) {
+              const CYCLE_DROP = 55;
+              const startX = prevX;
+              const startY = prevY!;
+              const endX = targetX;
+              const endY = currPos.y;
+              const bottomY = Math.max(startY, endY) + layout.nodeH + CYCLE_DROP;
+
+              const downLen = bottomY - startY;
+              const horizLen = Math.abs(endX - startX);
+              const upLen = bottomY - endY;
+              const totalLen = downLen + horizLen + upLen;
+
+              const seg1End = downLen / totalLen;
+              const seg2End = (downLen + horizLen) / totalLen;
+
+              const p = ptProgress;
+              if (p <= seg1End) {
+                ptrX = startX;
+                ptrY = interpolate(p, [0, seg1End], [startY, bottomY], { extrapolateRight: "clamp" });
+              } else if (p <= seg2End) {
+                ptrX = interpolate(p, [seg1End, seg2End], [startX, endX], { extrapolateRight: "clamp" });
+                ptrY = bottomY;
+              } else {
+                ptrX = endX;
+                ptrY = interpolate(p, [seg2End, 1], [bottomY, endY], { extrapolateRight: "clamp" });
+              }
+            } else {
+              const ptProgressPrev = spring({
+                frame: Math.max(0, localFrame - 1),
+                fps,
+                config: springPresets.pointerMove,
+              });
+              const xCurr = interpolate(ptProgress, [0, 1], [prevX, targetX]);
+              const xPrev = interpolate(ptProgressPrev, [0, 1], [prevX, targetX]);
+              ptrX = xCurr;
+
+              const vx = xCurr - xPrev;
+              const speed = Math.abs(vx);
+              tilt = Math.max(-14, Math.min(14, vx * 0.8));
+              stretch = Math.min(22, speed * 1.6);
+            }
           }
         }
 
-        const stackIdx = pointerStacks.get(ptr.label) || 0;
+        const stackIdx = pointerStacks.get(key) || 0;
+        const isNullTarget = !ptr.targetNodeId;
+        const pointerDelay = prevPtr ? 0 : i * 3 + 5;
 
         return (
-          <Pointer
-            key={ptr.label}
-            label={ptr.label}
-            x={ptrX}
-            y={currPos.y}
-            color={ptr.color || colors.lavender}
-            delay={prevPtr ? 0 : i * 3 + 5}
-            stackIndex={stackIdx}
-            scale={nodeScale}
-          />
+          <React.Fragment key={key}>
+            <Pointer
+              label={ptr.label}
+              x={ptrX}
+              y={ptrY}
+              color={ptr.color || colors.lavender}
+              delay={pointerDelay}
+              stackIndex={stackIdx}
+              scale={nodeScale}
+              tilt={tilt}
+              stretch={stretch}
+            />
+            {isNullTarget && !(endNullVisible && !isLeftNull) && (
+              <NodeBox
+                value="null"
+                x={currPos.x}
+                y={currPos.y}
+                w={layout.nodeW}
+                h={layout.nodeH}
+                isNull
+                delay={pointerDelay + 2}
+              />
+            )}
+          </React.Fragment>
         );
       })}
 
       {departingPointers.map((ptr) => {
         const targetNodeId = ptr.targetNodeId;
-        if (!targetNodeId) return null;
-        const prevNodeIdx = prevNodes.findIndex((n) => n.id === targetNodeId);
-        if (prevNodeIdx < 0) return null;
-
-        const currNodeIdx = nodes.findIndex((n) => n.id === targetNodeId);
         let ptrX: number;
         let ptrY: number;
-        if (currNodeIdx >= 0) {
-          const currPos = getNodePos(currNodeIdx, layout);
-          const prevPos = getNodePos(prevNodeIdx, prevLayout);
-          ptrX = interpolate(t, [0, 1], [
-            prevPos.x + prevLayout.nodeW / 2,
-            currPos.x + layout.nodeW / 2,
-          ]);
-          ptrY = interpolate(t, [0, 1], [prevPos.y, currPos.y]);
+
+        if (!targetNodeId) {
+          const depIsLeft = ptr.label.toLowerCase() === "prev";
+          const depLastPos = prevNodes.length > 0 ? getNodePos(prevNodes.length - 1, prevLayout) : null;
+          ptrX = depIsLeft
+            ? Math.max(prevLayout.nodeW / 2 + 10, prevLayout.startX - prevLayout.gap * 0.5)
+            : depLastPos
+              ? depLastPos.x + prevLayout.nodeW + prevLayout.gap * 0.5 + prevLayout.nodeW / 2
+              : prevLayout.startX + prevLayout.gap * 0.5;
+          ptrY = prevLayout.y;
         } else {
-          const prevPos = getNodePos(prevNodeIdx, prevLayout);
-          ptrX = prevPos.x + prevLayout.nodeW / 2;
-          ptrY = prevPos.y;
+          const prevNodeIdx = prevNodes.findIndex((n) => n.id === targetNodeId);
+          if (prevNodeIdx < 0) return null;
+
+          const currNodeIdx = nodes.findIndex((n) => n.id === targetNodeId);
+          if (currNodeIdx >= 0) {
+            const currPos = getNodePos(currNodeIdx, layout);
+            const prevPos = getNodePos(prevNodeIdx, prevLayout);
+            ptrX = interpolate(t, [0, 1], [
+              prevPos.x + prevLayout.nodeW / 2,
+              currPos.x + layout.nodeW / 2,
+            ]);
+            ptrY = interpolate(t, [0, 1], [prevPos.y, currPos.y]);
+          } else {
+            const prevPos = getNodePos(prevNodeIdx, prevLayout);
+            ptrX = prevPos.x + prevLayout.nodeW / 2;
+            ptrY = prevPos.y;
+          }
         }
 
         return (
           <Pointer
-            key={`exit-${ptr.label}`}
+            key={`exit-${pointerKey(ptr)}`}
             label={ptr.label}
             x={ptrX}
             y={ptrY}

@@ -10,7 +10,6 @@ import { CodeWindow } from "../components/CodeWindow";
 import { SfxLayer } from "../components/SfxLayer";
 import { NarrationLayer } from "../components/NarrationLayer";
 import { AmbientLayer } from "../components/AmbientLayer";
-import { colors } from "../lib/theme";
 
 /*
  * Code lines (0-indexed):
@@ -31,7 +30,7 @@ import { colors } from "../lib/theme";
  *  14: }
  */
 
-const HEAD_COLOR = "#2196F3";
+const HEAD_COLOR = "#1565C0";
 const CURR_COLOR = "#2E7D32";
 
 // startFrame[n] = startFrame[n-1] + frames[n-1] + 10 (buffer)

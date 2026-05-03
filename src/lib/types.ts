@@ -1,6 +1,6 @@
 import type { ThemedToken } from "shiki";
 
-export type NodeHighlight = "active" | "found" | "removing" | "new" | "error" | "none";
+export type NodeHighlight = "active" | "found" | "removing" | "new" | "error" | "pinned" | "none";
 
 export interface ListNodeData {
   id: string;
@@ -8,12 +8,18 @@ export interface ListNodeData {
   highlight?: NodeHighlight;
   x?: number;
   y?: number;
+  reversed?: boolean;
+  address?: string;
 }
 
 export interface PointerData {
   label: string;
   targetNodeId: string | null;
   color?: string;
+  // Stable identity for tracking across steps. Defaults to `label`.
+  // Use when the display label changes between steps (e.g. "len = 1" -> "len = 2")
+  // so the pointer slides/updates in place instead of re-mounting each step.
+  id?: string;
 }
 
 export interface ArrowData {
@@ -30,6 +36,7 @@ export interface ListSnapshot {
   arrows: ArrowData[];
   newNode?: ListNodeData;
   caption?: string;
+  hideEndNull?: boolean;
 }
 
 export interface HighlightStep {

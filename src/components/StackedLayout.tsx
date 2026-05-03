@@ -1,5 +1,6 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
+import { NoiseOverlay } from "./NoiseOverlay";
 
 export const STACKED_TOP_RATIO = 0.55;
 
@@ -95,6 +96,8 @@ export const StackedLayout: React.FC<StackedLayoutProps> = ({ top, bottom, safeA
           {bottom}
         </div>
       </div>
+
+      <NoiseOverlay />
     </AbsoluteFill>
   );
 };

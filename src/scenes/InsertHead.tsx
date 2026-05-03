@@ -10,7 +10,6 @@ import { CodeWindow } from "../components/CodeWindow";
 import { SfxLayer } from "../components/SfxLayer";
 import { NarrationLayer } from "../components/NarrationLayer";
 import { AmbientLayer } from "../components/AmbientLayer";
-import { colors } from "../lib/theme";
 
 /*
  * Code lines:
@@ -22,8 +21,8 @@ import { colors } from "../lib/theme";
  *   5: }
  */
 
-const HEAD_COLOR = "#2196F3";
-const NEWNODE_COLOR = colors.mauve;
+const HEAD_COLOR = "#1565C0";
+const NEWNODE_COLOR = "#7B1FA2";
 
 const steps: SceneStep[] = [
   // Phase 1: CONTEXT — explain what a node is

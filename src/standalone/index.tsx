@@ -1,5 +1,6 @@
 import React from "react";
 import type { ThemedToken } from "shiki";
+import type { KeyedTokensInfo } from "../lib/magic-move";
 import { StandaloneVideo } from "../StandaloneVideo";
 import { InsertHead } from "../scenes/InsertHead";
 import { InsertTail } from "../scenes/InsertTail";
@@ -9,12 +10,22 @@ import { DeleteMiddle } from "../scenes/DeleteMiddle";
 import { DeleteTail } from "../scenes/DeleteTail";
 import { SearchNode } from "../scenes/SearchNode";
 import { Traverse } from "../scenes/Traverse";
-import { Reverse } from "../scenes/Reverse";
-import { DetectCycle } from "../scenes/DetectCycle";
-import { MergeLists } from "../scenes/MergeLists";
+import { Reverse, REVERSE_SCENE_FRAMES } from "../scenes/Reverse";
+import { DetectCycle, DETECT_CYCLE_SCENE_FRAMES } from "../scenes/DetectCycle";
+import { MergeLists, MERGE_LISTS_SCENE_FRAMES } from "../scenes/MergeLists";
+import { RemoveNthFromEnd, REMOVE_NTH_SCENE_FRAMES } from "../scenes/RemoveNthFromEnd";
 
 interface TokenProps {
   tokens: ThemedToken[][];
+}
+
+interface DualTokenProps {
+  naiveTokens: ThemedToken[][];
+  optimalTokens: ThemedToken[][];
+  transitionInfo: {
+    from: KeyedTokensInfo;
+    to: KeyedTokensInfo;
+  };
 }
 
 export const InsertHeadVideo: React.FC<TokenProps> = ({ tokens }) => (
@@ -142,10 +153,21 @@ export const ReverseVideo: React.FC<TokenProps> = ({ tokens }) => (
   <StandaloneVideo
     title="Reverse"
     complexity="O(n)"
-    sceneFrames={400}
+    sceneFrames={REVERSE_SCENE_FRAMES}
     nextTopic="Detect Cycle"
   >
     <Reverse tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const ReverseReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo
+    title="Reverse"
+    complexity="O(n)"
+    sceneFrames={REVERSE_SCENE_FRAMES}
+    nextTopic="Detect Cycle"
+  >
+    <Reverse tokens={tokens} format="reel" />
   </StandaloneVideo>
 );
 
@@ -154,10 +176,22 @@ export const DetectCycleVideo: React.FC<TokenProps> = ({ tokens }) => (
     title="Detect Cycle"
     complexity="O(n)"
     subtitle="Floyd's Algorithm"
-    sceneFrames={360}
+    sceneFrames={DETECT_CYCLE_SCENE_FRAMES}
     nextTopic="Merge Sorted Lists"
   >
     <DetectCycle tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const DetectCycleReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo
+    title="Detect Cycle"
+    complexity="O(n)"
+    subtitle="Floyd's Algorithm"
+    sceneFrames={DETECT_CYCLE_SCENE_FRAMES}
+    nextTopic="Merge Sorted Lists"
+  >
+    <DetectCycle tokens={tokens} format="reel" />
   </StandaloneVideo>
 );
 
@@ -165,8 +199,57 @@ export const MergeListsVideo: React.FC<TokenProps> = ({ tokens }) => (
   <StandaloneVideo
     title="Merge Sorted Lists"
     complexity="O(n + m)"
-    sceneFrames={400}
+    sceneFrames={MERGE_LISTS_SCENE_FRAMES}
   >
     <MergeLists tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const MergeListsReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo
+    title="Merge Sorted Lists"
+    complexity="O(n + m)"
+    sceneFrames={MERGE_LISTS_SCENE_FRAMES}
+  >
+    <MergeLists tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const RemoveNthFromEndVideo: React.FC<DualTokenProps> = ({
+  naiveTokens,
+  optimalTokens,
+  transitionInfo,
+}) => (
+  <StandaloneVideo
+    title="Remove Nth From End"
+    complexity="O(n)"
+    subtitle="Two-Pointer Technique"
+    sceneFrames={REMOVE_NTH_SCENE_FRAMES}
+  >
+    <RemoveNthFromEnd
+      naiveTokens={naiveTokens}
+      optimalTokens={optimalTokens}
+      transitionInfo={transitionInfo}
+    />
+  </StandaloneVideo>
+);
+
+export const RemoveNthFromEndReel: React.FC<DualTokenProps> = ({
+  naiveTokens,
+  optimalTokens,
+  transitionInfo,
+}) => (
+  <StandaloneVideo
+    title="Remove Nth From End"
+    complexity="O(n)"
+    subtitle="Two-Pointer Technique"
+    sceneFrames={REMOVE_NTH_SCENE_FRAMES}
+  >
+    <RemoveNthFromEnd
+      naiveTokens={naiveTokens}
+      optimalTokens={optimalTokens}
+      transitionInfo={transitionInfo}
+      format="reel"
+    />
   </StandaloneVideo>
 );

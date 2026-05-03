@@ -5,8 +5,11 @@
   "main": "src/index.ts",
   "scripts": {
     "studio": "npx remotion studio src/index.ts",
-    "render": "npx remotion render src/index.ts FullVideo out/video.mp4",
-    "build": "npx remotion render src/index.ts"
+    "render": "bash scripts/render.sh",
+    "render:h264": "bash scripts/render-h264.sh",
+    "build": "npx remotion render src/index.ts",
+    "render:hq": "npx remotion render src/index.ts Video-RemoveNthFromEnd out/remove-nth-hq.mp4 --codec=h264 --video-bitrate=20M --pixel-format=yuv420p --color-space=bt709 --x264-preset=slow --audio-bitrate=320K --scale=2 --image-format=png",
+    "render:4k": "npx remotion render src/index.ts Video-RemoveNthFromEnd out/remove-nth-4k.mp4 --codec=h264 --video-bitrate=40M --pixel-format=yuv420p --color-space=bt709 --x264-preset=slow --audio-bitrate=320K --scale=2 --image-format=png"
   },
   "sideEffects": [
     "*.css"

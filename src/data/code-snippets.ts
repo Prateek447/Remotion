@@ -96,3 +96,36 @@ export const mergeSortedCode = `public static Node mergeSorted(Node a, Node b) {
     tail.next = (a != null) ? a : b;
     return dummy.next;
 }`;
+
+export const removeNthNaiveCode = `public ListNode removeNthFromEnd(ListNode head, int n) {
+    int length = 0;
+    ListNode curr = head;
+    while (curr != null) {
+        length++;
+        curr = curr.next;
+    }
+    int target = length - n;
+    if (target == 0) return head.next;
+    curr = head;
+    for (int i = 0; i < target - 1; i++) {
+        curr = curr.next;
+    }
+    curr.next = curr.next.next;
+    return head;
+}`;
+
+export const removeNthOptimalCode = `public ListNode removeNthFromEnd(ListNode head, int n) {
+    ListNode dummy = new ListNode(0);
+    dummy.next = head;
+    ListNode fast = dummy;
+    ListNode slow = dummy;
+    for (int i = 0; i <= n; i++) {
+        fast = fast.next;
+    }
+    while (fast != null) {
+        slow = slow.next;
+        fast = fast.next;
+    }
+    slow.next = slow.next.next;
+    return dummy.next;
+}`;

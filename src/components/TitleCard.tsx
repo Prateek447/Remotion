@@ -7,6 +7,7 @@ import {
   interpolate,
 } from "remotion";
 import { colors, fonts, springPresets } from "../lib/theme";
+import { NoiseOverlay } from "./NoiseOverlay";
 
 interface TitleCardProps {
   title: string;
@@ -93,6 +94,8 @@ export const TitleCard: React.FC<TitleCardProps> = ({
           {subtitle}
         </div>
       )}
+
+      <NoiseOverlay />
     </AbsoluteFill>
   );
 };

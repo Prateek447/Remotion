@@ -19,15 +19,27 @@ interface NodeBoxProps {
   localStepFrame?: number;
   isNull?: boolean;
   exitProgress?: number;
+  reversed?: boolean;
+  address?: string;
+  nextAddress?: string;
 }
 
-const highlightColorMap: Record<string, { bg: string; dark: string }> = {
-  active: { bg: "#2E7D32", dark: "#1B5E20" },
-  found: { bg: "#2196F3", dark: "#1565C0" },
-  removing: { bg: "#f38ba8", dark: "#d6768f" },
-  error: { bg: "#f38ba8", dark: "#d6768f" },
-  new: { bg: "#9C6ADE", dark: "#8455C0" },
-  none: { bg: colors.nodeDefault, dark: colors.nodeDefaultDark },
+// Each entry has three stops:
+//   light → ONE shade brighter than bg (a saturated highlight, NOT pastel)
+//   bg    → the "true" colour — what the node mostly looks like
+//   dark  → rolled-off shadow at the bottom-right of the gradient
+// Together they produce a **subtle** self-illuminated look: the body stays
+// saturated, only the top-left lifts a touch, and the outer bloom does the
+// heavy emission work. (Earlier we used near-white pastels for `light` — it
+// looked washed out / plasticky, like a glossy button rather than a glow.)
+const highlightColorMap: Record<string, { light: string; bg: string; dark: string }> = {
+  active: { light: "#A78BFA", bg: "#8B5CF6", dark: "#6D28D9" },
+  found: { light: "#60A5FA", bg: "#3B82F6", dark: "#1D4ED8" },
+  removing: { light: "#FB7185", bg: "#FF6B8A", dark: "#BE123C" },
+  error: { light: "#FB7185", bg: "#FF6B8A", dark: "#BE123C" },
+  new: { light: "#C084FC", bg: "#A855F7", dark: "#7E22CE" },
+  pinned: { light: "#C084FC", bg: "#A855F7", dark: "#7E22CE" },
+  none: { light: "#60A5FA", bg: colors.nodeDefault, dark: "#1D4ED8" },
 };
 
 export const NodeBox: React.FC<NodeBoxProps> = ({
@@ -41,6 +53,9 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
   localStepFrame = 0,
   isNull = false,
   exitProgress,
+  reversed = false,
+  address,
+  nextAddress,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -99,7 +114,7 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
   }
 
   const palette = highlightColorMap[highlight] || highlightColorMap.none;
-  const isEmphasized = highlight !== "none";
+  const isEmphasized = highlight !== "none" && highlight !== "pinned";
   const valueFontSize = Math.max(18, Math.min(28, h * 0.46));
 
   const emphasisP = isEmphasized
@@ -118,15 +133,163 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
   const finalScale = enterScale * emphasisScale * exitScale;
 
   const dividerW = 1;
-  const rightSectionW = w * 0.3;
+  const pointerSectionW = w * 0.3;
 
-  const removingGlow = isRemoving
-    ? `0 0 ${6 + pulseIntensity * 14}px ${palette.bg}dd, 0 0 ${16 + pulseIntensity * 24}px ${palette.bg}77, 0 0 ${30 + pulseIntensity * 20}px ${palette.bg}33`
-    : null;
-  const boxShadow = removingGlow
-    || (isEmphasized
-      ? `0 0 6px ${palette.bg}cc, 0 0 18px ${palette.bg}55`
-      : `0 0 4px ${palette.bg}99, 0 0 12px ${palette.bg}33`);
+  const bloomIntensity = isRemoving
+    ? 0.55 + pulseIntensity * 0.45
+    : isEmphasized
+      ? 0.85
+      : 0.55;
+  // Surface "emission" — a *subtle* lift toward white at the top-left of
+  // the node. Kept low (max ~25%) so the body stays saturated and the
+  // outer bloom does the visible glow work. Higher values made everything
+  // look plasticky and washed out.
+  const emissionAlpha = isRemoving
+    ? 0.20 + pulseIntensity * 0.15
+    : isEmphasized
+      ? 0.22
+      : 0.14;
+  const innerShadow = isEmphasized
+    ? `inset 0 1px 1px rgba(255,255,255,0.22), inset 0 -1px 2px rgba(0,0,0,0.35)`
+    : `inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -1px 2px rgba(0,0,0,0.30)`;
+
+  const arrowPath = reversed
+    ? "M12 8 L4 8 M7 5 L4 8 L7 11"
+    : "M4 8 L12 8 M9 5 L12 8 L9 11";
+
+  const pointerSection = (
+    <div
+      style={{
+        width: pointerSectionW,
+        // Pointer section reads as a "recessed back panel" containing
+        // pointer info — kept darker than the value section so the value
+        // side is clearly the emissive face and this side is the shadow.
+        background: palette.dark,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {nextAddress ? (
+        <span
+          style={{
+            fontFamily: fonts.mono,
+            fontSize: Math.max(10, h * 0.20),
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.9)",
+            letterSpacing: 0.3,
+            writingMode: "vertical-rl",
+            textOrientation: "mixed",
+            transform: "rotate(180deg)",
+            lineHeight: 1,
+          }}
+        >
+          {nextAddress}
+        </span>
+      ) : (
+        <svg
+          width={14}
+          height={14}
+          viewBox="0 0 16 16"
+          style={{ filter: "drop-shadow(0 0 3px rgba(255,255,255,0.8))" }}
+        >
+          <path
+            d={arrowPath}
+            stroke="rgba(255,255,255,0.95)"
+            strokeWidth="2"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+    </div>
+  );
+
+  const valueSection = (
+    <div
+      style={{
+        position: "relative",
+        flex: 1,
+        // Smaller, off-centre highlight: lighter only in the top-left
+        // 25%, body remains the saturated bg colour, bottom-right rolls
+        // into the dark shadow stop. Mimics how a glowing object in 3D
+        // catches more light at one shoulder.
+        background: `radial-gradient(ellipse 90% 80% at 25% 20%, ${palette.light} 0%, ${palette.bg} 45%, ${palette.dark} 100%)`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: fonts.mono,
+        fontSize: valueFontSize,
+        fontWeight: 800,
+        color: "#fff",
+        textShadow: "0 1px 2px rgba(0,0,0,0.45)",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(ellipse 60% 50% at 25% 20%, rgba(255,255,255,${emissionAlpha}) 0%, transparent 70%)`,
+          mixBlendMode: "screen",
+          pointerEvents: "none",
+        }}
+      />
+      <span style={{ position: "relative" }}>{value}</span>
+    </div>
+  );
+
+  const divider = (
+    <div
+      style={{
+        width: dividerW,
+        background: "rgba(255,255,255,0.35)",
+        boxShadow: "0 0 4px rgba(255,255,255,0.4)",
+      }}
+    />
+  );
+
+  const haloLayers = (
+    <>
+      <div
+        style={{
+          position: "absolute",
+          left: -w * 0.6,
+          top: -h * 0.9,
+          width: w * 2.2,
+          height: h * 2.8,
+          background: `radial-gradient(ellipse at center, ${palette.bg} 0%, ${palette.bg}00 60%)`,
+          filter: "blur(40px)",
+          opacity: 0.55 * bloomIntensity,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: -w * 0.25,
+          top: -h * 0.4,
+          width: w * 1.5,
+          height: h * 1.8,
+          background: `radial-gradient(ellipse at center, ${palette.bg} 0%, ${palette.bg}00 65%)`,
+          filter: "blur(18px)",
+          opacity: 0.7 * bloomIntensity,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: -8,
+          borderRadius: 12,
+          background: palette.bg,
+          filter: "blur(6px)",
+          opacity: 0.5 * bloomIntensity,
+          pointerEvents: "none",
+        }}
+      />
+    </>
+  );
 
   return (
     <div
@@ -139,62 +302,25 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
         transform: `scale(${finalScale}) rotate(${exitRotation}deg)`,
         transformOrigin: "center center",
         opacity: enterOpacity * contextOpacity * exitOpacity,
-        display: "flex",
-        borderRadius: 6,
-        overflow: "hidden",
-        border: `1.5px solid ${palette.bg}99`,
-        boxShadow,
       }}
     >
-      {/* Value section */}
+      {haloLayers}
       <div
         style={{
-          flex: 1,
-          background: palette.bg,
+          position: "absolute",
+          inset: 0,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: fonts.mono,
-          fontSize: valueFontSize,
-          fontWeight: 800,
-          color: "#fff",
+          borderRadius: 6,
+          overflow: "hidden",
+          border: `1.5px solid ${palette.light}`,
+          boxShadow: innerShadow,
         }}
       >
-        {value}
-      </div>
-      {/* Divider */}
-      <div
-        style={{
-          width: dividerW,
-          background: "rgba(255,255,255,0.35)",
-          boxShadow: "0 0 4px rgba(255,255,255,0.4)",
-        }}
-      />
-      {/* Next-pointer section */}
-      <div
-        style={{
-          width: rightSectionW,
-          background: palette.dark,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <svg
-          width={14}
-          height={14}
-          viewBox="0 0 16 16"
-          style={{ filter: "drop-shadow(0 0 3px rgba(255,255,255,0.8))" }}
-        >
-          <path
-            d="M4 8 L12 8 M9 5 L12 8 L9 11"
-            stroke="rgba(255,255,255,0.95)"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        {reversed ? (
+          <>{pointerSection}{divider}{valueSection}</>
+        ) : (
+          <>{valueSection}{divider}{pointerSection}</>
+        )}
       </div>
     </div>
   );

@@ -18,9 +18,10 @@ function buildTracks(sceneId: string, steps: SceneStep[]): NarrationTrack[] {
     .map((d) => {
       const step = steps[d.step];
       if (!step) return null;
+      const audioStep = d.audioStep ?? d.step;
       return {
         stepIndex: d.step,
-        audioFile: `narration/${sceneId}/step-${d.step}.mp3`,
+        audioFile: `narration/${sceneId}/step-${audioStep}.mp3`,
         startFrame: step.startFrame,
         durationFrames: d.frames + 5,
       };
