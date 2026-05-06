@@ -10,6 +10,8 @@ import { CodeWindow } from "../components/CodeWindow";
 import { SfxLayer } from "../components/SfxLayer";
 import { NarrationLayer } from "../components/NarrationLayer";
 import { AmbientLayer } from "../components/AmbientLayer";
+import { AnimationOnlyLayout, ANIM_DIAGRAM_HEIGHT } from "../components/AnimationOnlyLayout";
+import { compressStepsForAnim } from "../lib/animSteps";
 
 /*
  * Code lines (0-indexed):
@@ -130,24 +132,26 @@ const REEL_TOP_RATIO = 0.42;
 
 export interface DeleteHeadProps {
   tokens: ThemedToken[][];
-  format?: "youtube" | "reel";
+  format?: "youtube" | "reel" | "reel-anim";
 }
 
 export const DeleteHead: React.FC<DeleteHeadProps> = ({ tokens, format = "youtube" }) => {
   const { width, height } = useVideoConfig();
   const isReel = format === "reel";
+  const isAnim = format === "reel-anim";
+  const activeSteps = isAnim ? compressStepsForAnim(steps) : steps;
 
   const safeW = width - REEL_SAFE.left - REEL_SAFE.right;
   const safeH = height - REEL_SAFE.top - REEL_SAFE.bottom;
 
-  const diagramAreaW = isReel ? safeW : width * 0.62;
-  const diagramAreaH = isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
-  const nodeScale = isReel ? 1.2 : 1;
+  const diagramAreaW = isAnim ? width : isReel ? safeW : width * 0.62;
+  const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
+  const nodeScale = isAnim ? 1.4 : isReel ? 1.2 : 1;
   const codeFontSize = isReel ? 24 : 24;
 
   const diagram = (
     <LinkedListDiagram
-      steps={steps}
+      steps={activeSteps}
       areaWidth={diagramAreaW}
       areaHeight={diagramAreaH}
       nodeScale={nodeScale}
@@ -158,7 +162,7 @@ export const DeleteHead: React.FC<DeleteHeadProps> = ({ tokens, format = "youtub
     <CodeWindow title="LinkedList.java" hideTitle={isReel}>
       <CodeBlock
         tokens={tokens}
-        steps={steps}
+        steps={activeSteps}
         fontSize={codeFontSize}
         centered={isReel}
         centerWidth={isReel ? safeW : undefined}
@@ -168,14 +172,16 @@ export const DeleteHead: React.FC<DeleteHeadProps> = ({ tokens, format = "youtub
 
   return (
     <>
-      {isReel ? (
+      {isAnim ? (
+        <AnimationOnlyLayout>{diagram}</AnimationOnlyLayout>
+      ) : isReel ? (
         <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} />
       ) : (
         <SplitLayout left={diagram} right={code} />
       )}
-      <AmbientLayer />
-      <SfxLayer steps={steps} duckVolume={0.5} />
-      <NarrationLayer sceneId="delete-head" steps={steps} />
+      <AmbientLayer animOnly={isAnim} />
+      <SfxLayer steps={activeSteps} duckVolume={0.5} animOnly={isAnim} />
+      {!isAnim && <NarrationLayer sceneId="delete-head" steps={activeSteps} />}
     </>
   );
 };

@@ -12,6 +12,8 @@ import { InlineCodeMagicMove } from "../components/InlineCodeMagicMove";
 import { SfxLayer } from "../components/SfxLayer";
 import { NarrationLayer } from "../components/NarrationLayer";
 import { AmbientLayer } from "../components/AmbientLayer";
+import { AnimationOnlyLayout, ANIM_DIAGRAM_HEIGHT } from "../components/AnimationOnlyLayout";
+import { compressStepsForAnim } from "../lib/animSteps";
 
 /*
  * LeetCode #19 — Remove Nth Node From End of List.
@@ -1039,7 +1041,7 @@ export interface RemoveNthFromEndProps {
   naiveTokens: ThemedToken[][];
   optimalTokens: ThemedToken[][];
   transitionInfo: { from: KeyedTokensInfo; to: KeyedTokensInfo };
-  format?: "youtube" | "reel";
+  format?: "youtube" | "reel" | "reel-anim";
 }
 
 export const RemoveNthFromEnd: React.FC<RemoveNthFromEndProps> = ({
@@ -1050,30 +1052,22 @@ export const RemoveNthFromEnd: React.FC<RemoveNthFromEndProps> = ({
 }) => {
   const { width, height } = useVideoConfig();
   const isReel = format === "reel";
+  const isAnim = format === "reel-anim";
+  const activeDiagramSteps = isAnim ? compressStepsForAnim(diagramSteps) : diagramSteps;
 
   const safeW = width - REEL_SAFE.left - REEL_SAFE.right;
   const safeH = height - REEL_SAFE.top - REEL_SAFE.bottom;
 
-  // 55/45 split (vs the default 62/38) — the two-pointer code has long lines
-  // and the 6-node list needs breathing room to avoid colliding with the code.
   const LEFT_WIDTH_RATIO = 0.55;
-  const diagramAreaW = isReel ? safeW : width * LEFT_WIDTH_RATIO;
-  const diagramAreaH = isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
-  // The optimal phase renders 6 nodes (dummy + n1..n5). At a 1080-wide reel
-  // with the standard 60/160 safe-area padding, a node width of 130 (scale 1)
-  // leaves zero horizontal room for the arrows between nodes — the boxes end
-  // up touching edge-to-edge. 0.7 shrinks the nodes to ~91px and frees up
-  // ~47px per gap for visible arrows.
-  const nodeScale = isReel ? 0.7 : 0.88;
+  const diagramAreaW = isAnim ? width : isReel ? safeW : width * LEFT_WIDTH_RATIO;
+  const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
+  const nodeScale = isAnim ? 0.9 : isReel ? 0.7 : 0.88;
   const codeFontSize = isReel ? 22 : 22;
-  // On the reel, pointer labels above the nodes make the default vertical
-  // centering look top-biased — shift the whole node row down so the diagram
-  // sits closer to the middle of the top panel rather than hugging its ceiling.
-  const diagramVerticalOffset = isReel ? 90 : 0;
+  const diagramVerticalOffset = isReel || isAnim ? 90 : 0;
 
   const diagram = (
     <LinkedListDiagram
-      steps={diagramSteps}
+      steps={activeDiagramSteps}
       areaWidth={diagramAreaW}
       areaHeight={diagramAreaH}
       nodeScale={nodeScale}
@@ -1094,14 +1088,16 @@ export const RemoveNthFromEnd: React.FC<RemoveNthFromEndProps> = ({
 
   return (
     <>
-      {isReel ? (
+      {isAnim ? (
+        <AnimationOnlyLayout>{diagram}</AnimationOnlyLayout>
+      ) : isReel ? (
         <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} />
       ) : (
         <SplitLayout left={diagram} right={code} leftWidth={`${LEFT_WIDTH_RATIO * 100}%`} />
       )}
-      <AmbientLayer />
-      <SfxLayer steps={diagramSteps} duckVolume={0.5} />
-      <NarrationLayer sceneId="remove-nth-from-end" steps={diagramSteps} />
+      <AmbientLayer animOnly={isAnim} />
+      <SfxLayer steps={activeDiagramSteps} duckVolume={0.5} animOnly={isAnim} />
+      {!isAnim && <NarrationLayer sceneId="remove-nth-from-end" steps={diagramSteps} />}
     </>
   );
 };

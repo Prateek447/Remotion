@@ -11,6 +11,8 @@ import { SfxLayer } from "../components/SfxLayer";
 import { NarrationLayer } from "../components/NarrationLayer";
 import { AmbientLayer } from "../components/AmbientLayer";
 import { fonts } from "../lib/theme";
+import { AnimationOnlyLayout, ANIM_DIAGRAM_HEIGHT } from "../components/AnimationOnlyLayout";
+import { compressStepsForAnim } from "../lib/animSteps";
 
 /*
  * Code lines (0-indexed):
@@ -629,28 +631,30 @@ const REEL_SAFE: SafeArea = { top: 190, bottom: 380, left: 60, right: 160 };
 
 export interface SearchNodeProps {
   tokens: ThemedToken[][];
-  format?: "youtube" | "reel";
+  format?: "youtube" | "reel" | "reel-anim";
 }
 
 export const SearchNode: React.FC<SearchNodeProps> = ({ tokens, format = "youtube" }) => {
   const { width, height } = useVideoConfig();
   const isReel = format === "reel";
+  const isAnim = format === "reel-anim";
+  const activeSteps = isAnim ? compressStepsForAnim(steps) : steps;
 
   const safeW = width - REEL_SAFE.left - REEL_SAFE.right;
   const safeH = height - REEL_SAFE.top - REEL_SAFE.bottom;
 
-  const diagramAreaW = isReel ? safeW : width * 0.62;
-  const diagramAreaH = isReel ? Math.round(safeH * STACKED_TOP_RATIO) : height;
-  const nodeScale = isReel ? 1.2 : 1;
+  const diagramAreaW = isAnim ? width : isReel ? safeW : width * 0.62;
+  const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * STACKED_TOP_RATIO) : height;
+  const nodeScale = isAnim ? 1.4 : isReel ? 1.2 : 1;
   const codeFontSize = isReel ? 30 : 24;
 
   const diagram = (
     <LinkedListDiagram
-      steps={steps}
+      steps={activeSteps}
       areaWidth={diagramAreaW}
       areaHeight={diagramAreaH}
       nodeScale={nodeScale}
-      verticalOffset={isReel ? 60 : 0}
+      verticalOffset={isReel || isAnim ? 60 : 0}
     />
   );
 
@@ -658,7 +662,7 @@ export const SearchNode: React.FC<SearchNodeProps> = ({ tokens, format = "youtub
     <CodeWindow title="LinkedList.java" hideTitle={isReel}>
       <CodeBlock
         tokens={tokens}
-        steps={steps}
+        steps={activeSteps}
         fontSize={codeFontSize}
         centered={isReel}
         centerWidth={isReel ? safeW : undefined}
@@ -669,7 +673,9 @@ export const SearchNode: React.FC<SearchNodeProps> = ({ tokens, format = "youtub
   return (
     <>
       <CameraShake triggerFrame={ERROR_FRAME} duration={14}>
-        {isReel ? (
+        {isAnim ? (
+          <AnimationOnlyLayout>{diagram}</AnimationOnlyLayout>
+        ) : isReel ? (
           <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} />
         ) : (
           <SplitLayout left={diagram} right={code} />
@@ -689,9 +695,9 @@ export const SearchNode: React.FC<SearchNodeProps> = ({ tokens, format = "youtub
         <ComplexityCounter />
       </Sequence>
 
-      <AmbientLayer />
-      <SfxLayer steps={steps} duckVolume={0.5} />
-      <NarrationLayer sceneId="search-node" steps={steps} />
+      <AmbientLayer animOnly={isAnim} />
+      <SfxLayer steps={activeSteps} duckVolume={0.5} animOnly={isAnim} />
+      {!isAnim && <NarrationLayer sceneId="search-node" steps={activeSteps} />}
     </>
   );
 };

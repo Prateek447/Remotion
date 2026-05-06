@@ -117,7 +117,6 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
   areaHeight = DEFAULT_AREA_HEIGHT,
   nodeScale = 1,
   verticalOffset = 0,
-  verticalOffset = 0,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -293,7 +292,9 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
         let finalY = node.y ?? currPos.y;
 
         const prevIdx = prevNodes.findIndex((n) => n.id === node.id);
-        if (prevIdx >= 0) {
+        const isNew = prevIdx < 0;
+
+        if (!isNew) {
           const prevPos = getNodePos(prevIdx, prevLayout);
           const prevNodeData = prevNodes[prevIdx];
           const pX = prevNodeData.x ?? prevPos.x;
@@ -305,6 +306,47 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
         const outArrow = snapshot.arrows.find((a) => a.from === node.id);
         const nextNode = outArrow ? nodes.find((n) => n.id === outArrow.to) : undefined;
         const nextAddr = nextNode?.address;
+
+        if (isNew) {
+          const enterP = spring({
+            frame: localFrame,
+            fps,
+            delay: i * 3,
+            config: springPresets.enter,
+          });
+          const enterScale = interpolate(enterP, [0, 1], [0, 1]);
+          const enterOpacity = interpolate(enterP, [0, 0.3], [0, 1], { extrapolateRight: "clamp" });
+          const cx = finalX + layout.nodeW / 2;
+          const cy = finalY + layout.nodeH / 2;
+
+          return (
+            <div
+              key={node.id}
+              style={{
+                position: "absolute",
+                left: 0, top: 0, right: 0, bottom: 0,
+                pointerEvents: "none",
+                opacity: enterOpacity,
+                transform: `scale(${enterScale})`,
+                transformOrigin: `${cx}px ${cy}px`,
+              }}
+            >
+              <NodeBox
+                value={node.value}
+                highlight={node.highlight || "none"}
+                x={finalX}
+                y={finalY}
+                w={layout.nodeW}
+                h={layout.nodeH}
+                delay={0}
+                localStepFrame={localFrame}
+                reversed={node.reversed}
+                address={node.address}
+                nextAddress={nextAddr}
+              />
+            </div>
+          );
+        }
 
         return (
           <NodeBox

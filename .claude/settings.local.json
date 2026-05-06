@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(del \"public\\\\narration\\\\left-view\\\\step-8.mp3\")",
+      "Bash(edge-tts --voice \"en-US-BrianMultilingualNeural\" --rate=\"+10%\" --text \"Five comes out next. i is one, not the first of the row. Don't print. Push its children if any.\" --write-media \"public\\\\narration\\\\left-view\\\\step-8.mp3\")",
+      "Bash(edge-tts --voice \"en-US-BrianMultilingualNeural\" --rate=\"+10%\" --text \"Five comes out next. i is one, not the first of the row. Don't print. Push its children if any.\" --write-media \"public/narration/left-view/step-8.mp3\")",
+      "Bash(ffprobe:*)",
+      "Bash(gh api *)",
+      "Bash(ffmpeg -y -i \"C:/workspace/Remotion/scripts/My voiceee.m4a\" -ar 16000 -ac 1 \"C:/workspace/Remotion/scripts/my-voice.wav\")",
+      "Bash(python scripts/generate-narration-voxcpm.py search-node)",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(pip show *)",
+      "Bash(pip3 show *)",
+      "Bash(where pip *)",
+      "Bash(where pip3 *)",
+      "Bash(python -m pip install voxcpm soundfile)",
+      "Bash(python *)",
+      "WebFetch(domain:absolutedentalcare.in)",
+      "Bash(edge-tts --voice \"en-US-BrianMultilingualNeural\" --rate=\"+10%\" --text \"Now we combine. The loop runs O of n times. Each pass does O of one work. Multiply them: O of n. The return outside adds O of one — but O of n plus O of one simplifies to O of n, because for large n the smaller term becomes negligible. Final time complexity: O of n.\" --write-media /tmp/ls-step4.mp3 --write-subtitles /tmp/ls-step4.vtt)",
+      "Read(//tmp/**)",
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem public\\\\narration -Recurse -Filter \"*.mp3\")",
+      "Bash(Remove-Item -Force)",
+      "Bash(Write-Host \"Deleted all MP3s\")",
+      "PowerShell(node scripts/generate-narration.mjs 2>&1)",
+      "Bash(git reset *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\workspace\\\\Remotion\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "Bash(Format-Table -AutoSize)",
+      "Read(//c/c/workspace/Remotion/src/**)",
+      "Bash(xargs sed *)"
+    ]
+  }
+}

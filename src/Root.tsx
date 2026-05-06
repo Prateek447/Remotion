@@ -31,28 +31,20 @@ import { RemoveNthFromEnd, REMOVE_NTH_SCENE_FRAMES } from "./scenes/RemoveNthFro
 import { FullVideo, FULL_VIDEO_DURATION } from "./FullVideo";
 import { TitleCard } from "./components/TitleCard";
 import { standaloneDuration } from "./StandaloneVideo";
+import { ANIM_FRAMES_PER_STEP } from "./lib/animSteps";
 import {
-  InsertHeadVideo,
-  InsertTailVideo,
-  DeleteNodeVideo,
-  SearchNodeVideo,
-  TraverseVideo,
-  ReverseVideo,
-  DetectCycleVideo,
-  MergeListsVideo,
-  InsertHeadReel,
-  InsertTailReel,
-  DeleteNodeReel,
-  SearchNodeReel,
-  DeleteHeadReel,
-  DeleteMiddleReel,
-  DeleteTailReel,
-  ReverseReel,
-  DetectCycleReel,
-  MergeListsReel,
-  RemoveNthFromEndVideo,
-  RemoveNthFromEndReel,
-} from "./standalone";
+  // YouTube
+  InsertHeadVideo, InsertTailVideo, DeleteNodeVideo, SearchNodeVideo,
+  TraverseVideo, ReverseVideo, DetectCycleVideo, MergeListsVideo, RemoveNthFromEndVideo,
+  // Reels with code
+  InsertHeadReel, InsertTailReel, DeleteNodeReel, SearchNodeReel,
+  DeleteHeadReel, DeleteMiddleReel, DeleteTailReel,
+  ReverseReel, DetectCycleReel, MergeListsReel, RemoveNthFromEndReel,
+  // Reels animation only
+  InsertHeadReelAnim, InsertTailReelAnim, DeleteNodeReelAnim, SearchNodeReelAnim,
+  DeleteHeadReelAnim, DeleteMiddleReelAnim, DeleteTailReelAnim,
+  ReverseReelAnim, DetectCycleReelAnim, MergeListsReelAnim, RemoveNthFromEndReelAnim,
+} from "./compositions";
 
 const WIDTH = 1920;
 const HEIGHT = 1080;
@@ -286,7 +278,7 @@ export const RemotionRoot: React.FC = () => {
         calculateMetadata={calcFullVideoMetadata}
       />
 
-      <Folder name="Standalone">
+      <Folder name="YouTube">
         <Composition
           id="Video-InsertHead"
           component={InsertHeadVideo}
@@ -369,7 +361,7 @@ export const RemotionRoot: React.FC = () => {
         />
       </Folder>
 
-      <Folder name="Reels">
+      <Folder name="Reels-With-Code">
         <Composition
           id="Reel-InsertHead"
           component={InsertHeadReel}
@@ -472,6 +464,19 @@ export const RemotionRoot: React.FC = () => {
         />
       </Folder>
 
+      <Folder name="Reels-Animation-Only">
+        <Composition id="Anim-InsertHead"   component={InsertHeadReelAnim}   durationInFrames={standaloneDuration(14 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtHeadCode)} />
+        <Composition id="Anim-InsertTail"   component={InsertTailReelAnim}   durationInFrames={standaloneDuration(15 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtTailCode)} />
+        <Composition id="Anim-DeleteNode"   component={DeleteNodeReelAnim}   durationInFrames={standaloneDuration(17 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+        <Composition id="Anim-DeleteHead"   component={DeleteHeadReelAnim}   durationInFrames={standaloneDuration( 5 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+        <Composition id="Anim-DeleteMiddle" component={DeleteMiddleReelAnim} durationInFrames={standaloneDuration( 6 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+        <Composition id="Anim-DeleteTail"   component={DeleteTailReelAnim}   durationInFrames={standaloneDuration( 6 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+        <Composition id="Anim-SearchNode"   component={SearchNodeReelAnim}   durationInFrames={standaloneDuration(18 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(searchNodeCode)} />
+        <Composition id="Anim-Reverse"      component={ReverseReelAnim}      durationInFrames={standaloneDuration(20 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(reverseCode)} />
+        <Composition id="Anim-DetectCycle"  component={DetectCycleReelAnim}  durationInFrames={standaloneDuration(15 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(detectCycleCode)} />
+        <Composition id="Anim-MergeLists"   component={MergeListsReelAnim}   durationInFrames={standaloneDuration(12 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(mergeSortedCode)} />
+      </Folder>
+
       <Folder name="LeetCode">
         <Composition
           id="RemoveNthFromEnd"
@@ -497,6 +502,16 @@ export const RemotionRoot: React.FC = () => {
           id="Reel-RemoveNthFromEnd"
           component={RemoveNthFromEndReel}
           durationInFrames={standaloneDuration(REMOVE_NTH_SCENE_FRAMES)}
+          fps={FPS}
+          width={REEL_WIDTH}
+          height={REEL_HEIGHT}
+          defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }}
+          calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)}
+        />
+        <Composition
+          id="Anim-RemoveNthFromEnd"
+          component={RemoveNthFromEndReelAnim}
+          durationInFrames={standaloneDuration(30 * ANIM_FRAMES_PER_STEP)}
           fps={FPS}
           width={REEL_WIDTH}
           height={REEL_HEIGHT}

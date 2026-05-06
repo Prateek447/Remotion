@@ -10,6 +10,8 @@ import { CodeWindow } from "../components/CodeWindow";
 import { SfxLayer } from "../components/SfxLayer";
 import { NarrationLayer } from "../components/NarrationLayer";
 import { AmbientLayer } from "../components/AmbientLayer";
+import { AnimationOnlyLayout, ANIM_DIAGRAM_HEIGHT } from "../components/AnimationOnlyLayout";
+import { compressStepsForAnim } from "../lib/animSteps";
 
 /*
  * Code lines (0-indexed) for detectCycleCode:
@@ -175,10 +177,25 @@ const steps: SceneStep[] = [
   },
 
   // ─── Phase 4: ITERATION 3 — slow=4, fast wraps (5->3->4) — MEET! ───────
-  // Step 7: slow=4, fast=4 (fast.next.next: 5->3->4). Cycle arrow highlighted.
-  // Audio 7: 300 frames
+  // Step 7: fast.next = n3 (traverses cycle back-edge 5→3). Slow already at n4.
+  // Audio 7: 300 frames (shared window with step 8 sub-step)
   {
     startFrame: 1581,
+    highlightLines: { startLine: 4, endLine: 5 },
+    snapshot: {
+      hideEndNull: true,
+      nodes: baseNodes.map((n) => ({ ...n })),
+      pointers: [
+        { label: "slow", targetNodeId: "n4", color: SLOW_COLOR },
+        { label: "fast", targetNodeId: "n3", color: FAST_COLOR },
+      ],
+      arrows: [...linearArrows, cycleArrowHighlight],
+    },
+  },
+
+  // Step 8: fast.next.next = n4 — both pointers meet. Cycle confirmed.
+  {
+    startFrame: 1731,
     highlightLines: { startLine: 4, endLine: 5 },
     snapshot: {
       hideEndNull: true,
@@ -194,7 +211,7 @@ const steps: SceneStep[] = [
     },
   },
 
-  // Step 8: slow == fast — return true
+  // Step 9: slow == fast — return true
   // Audio 8: 129 frames
   {
     startFrame: 1891,
@@ -214,7 +231,7 @@ const steps: SceneStep[] = [
   },
 
   // ─── Phase 5: NO-CYCLE CASE ──────────────────────────────────────────────
-  // Step 9: No cycle — reset pointers
+  // Step 10: No cycle — reset pointers
   // Audio 9: 178 frames
   {
     startFrame: 2030,
@@ -229,7 +246,7 @@ const steps: SceneStep[] = [
     },
   },
 
-  // Step 10: fast reaches null — return false
+  // Step 11: fast reaches null — return false
   // Audio 10: 201 frames
   {
     startFrame: 2218,
@@ -291,24 +308,26 @@ const REEL_TOP_RATIO = 0.42;
 
 export interface DetectCycleProps {
   tokens: ThemedToken[][];
-  format?: "youtube" | "reel";
+  format?: "youtube" | "reel" | "reel-anim";
 }
 
 export const DetectCycle: React.FC<DetectCycleProps> = ({ tokens, format = "youtube" }) => {
   const { width, height } = useVideoConfig();
   const isReel = format === "reel";
+  const isAnim = format === "reel-anim";
+  const activeSteps = isAnim ? compressStepsForAnim(steps) : steps;
 
   const safeW = width - REEL_SAFE.left - REEL_SAFE.right;
   const safeH = height - REEL_SAFE.top - REEL_SAFE.bottom;
 
-  const diagramAreaW = isReel ? safeW : width * 0.62;
-  const diagramAreaH = isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
-  const nodeScale = isReel ? 0.85 : 1;
+  const diagramAreaW = isAnim ? width : isReel ? safeW : width * 0.62;
+  const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
+  const nodeScale = isAnim ? 1.1 : isReel ? 0.85 : 1;
   const codeFontSize = isReel ? 24 : 24;
 
   const diagram = (
     <LinkedListDiagram
-      steps={steps}
+      steps={activeSteps}
       areaWidth={diagramAreaW}
       areaHeight={diagramAreaH}
       nodeScale={nodeScale}
@@ -319,7 +338,7 @@ export const DetectCycle: React.FC<DetectCycleProps> = ({ tokens, format = "yout
     <CodeWindow title="LinkedList.java" hideTitle={isReel}>
       <CodeBlock
         tokens={tokens}
-        steps={steps}
+        steps={activeSteps}
         fontSize={codeFontSize}
         centered={isReel}
         centerWidth={isReel ? safeW : undefined}
@@ -329,14 +348,16 @@ export const DetectCycle: React.FC<DetectCycleProps> = ({ tokens, format = "yout
 
   return (
     <>
-      {isReel ? (
+      {isAnim ? (
+        <AnimationOnlyLayout>{diagram}</AnimationOnlyLayout>
+      ) : isReel ? (
         <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} />
       ) : (
         <SplitLayout left={diagram} right={code} leftWidth="58%" />
       )}
-      <AmbientLayer />
-      <SfxLayer steps={steps} duckVolume={0.5} />
-      <NarrationLayer sceneId="detect-cycle" steps={steps} />
+      <AmbientLayer animOnly={isAnim} />
+      <SfxLayer steps={activeSteps} duckVolume={0.5} animOnly={isAnim} />
+      {!isAnim && <NarrationLayer sceneId="detect-cycle" steps={activeSteps} />}
     </>
   );
 };

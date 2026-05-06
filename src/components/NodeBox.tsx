@@ -100,7 +100,6 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
           justifyContent: "center",
           borderRadius: 6,
           border: `1.5px dashed ${colors.nullNode}cc`,
-          boxShadow: `0 0 8px ${colors.nullNode}55`,
           fontFamily: fonts.mono,
           fontSize: Math.max(13, h * 0.26),
           fontWeight: 600,
@@ -136,23 +135,7 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
   const dividerW = 1;
   const pointerSectionW = w * 0.3;
 
-  const bloomIntensity = isRemoving
-    ? 0.55 + pulseIntensity * 0.45
-    : isEmphasized
-      ? 0.85
-      : 0.55;
-  // Surface "emission" — a *subtle* lift toward white at the top-left of
-  // the node. Kept low (max ~25%) so the body stays saturated and the
-  // outer bloom does the visible glow work. Higher values made everything
-  // look plasticky and washed out.
-  const emissionAlpha = isRemoving
-    ? 0.20 + pulseIntensity * 0.15
-    : isEmphasized
-      ? 0.22
-      : 0.14;
-  const innerShadow = isEmphasized
-    ? `inset 0 1px 1px rgba(255,255,255,0.22), inset 0 -1px 2px rgba(0,0,0,0.35)`
-    : `inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -1px 2px rgba(0,0,0,0.30)`;
+  const innerShadow = `inset 0 -1px 2px rgba(0,0,0,0.30)`;
 
   const arrowPath = reversed
     ? "M12 8 L4 8 M7 5 L4 8 L7 11"
@@ -210,13 +193,8 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
   const valueSection = (
     <div
       style={{
-        position: "relative",
         flex: 1,
-        // Smaller, off-centre highlight: lighter only in the top-left
-        // 25%, body remains the saturated bg colour, bottom-right rolls
-        // into the dark shadow stop. Mimics how a glowing object in 3D
-        // catches more light at one shoulder.
-        background: `radial-gradient(ellipse 90% 80% at 25% 20%, ${palette.light} 0%, ${palette.bg} 45%, ${palette.dark} 100%)`,
+        background: palette.bg,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -227,16 +205,7 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
         textShadow: "0 1px 2px rgba(0,0,0,0.45)",
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: `radial-gradient(ellipse 60% 50% at 25% 20%, rgba(255,255,255,${emissionAlpha}) 0%, transparent 70%)`,
-          mixBlendMode: "screen",
-          pointerEvents: "none",
-        }}
-      />
-      <span style={{ position: "relative" }}>{value}</span>
+      {value}
     </div>
   );
 
@@ -245,51 +214,8 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
       style={{
         width: dividerW,
         background: "rgba(255,255,255,0.35)",
-        boxShadow: "0 0 4px rgba(255,255,255,0.4)",
       }}
     />
-  );
-
-  const haloLayers = (
-    <>
-      <div
-        style={{
-          position: "absolute",
-          left: -w * 0.6,
-          top: -h * 0.9,
-          width: w * 2.2,
-          height: h * 2.8,
-          background: `radial-gradient(ellipse at center, ${palette.bg} 0%, ${palette.bg}00 60%)`,
-          filter: "blur(40px)",
-          opacity: 0.55 * bloomIntensity,
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          left: -w * 0.25,
-          top: -h * 0.4,
-          width: w * 1.5,
-          height: h * 1.8,
-          background: `radial-gradient(ellipse at center, ${palette.bg} 0%, ${palette.bg}00 65%)`,
-          filter: "blur(18px)",
-          opacity: 0.7 * bloomIntensity,
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          inset: -8,
-          borderRadius: 12,
-          background: palette.bg,
-          filter: "blur(6px)",
-          opacity: 0.5 * bloomIntensity,
-          pointerEvents: "none",
-        }}
-      />
-    </>
   );
 
   return (
@@ -305,7 +231,6 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
         opacity: enterOpacity * contextOpacity * exitOpacity,
       }}
     >
-      {haloLayers}
       <div
         style={{
           position: "absolute",
@@ -313,7 +238,7 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
           display: "flex",
           borderRadius: 6,
           overflow: "hidden",
-          border: `1.5px solid ${palette.light}`,
+          border: `1.5px solid ${palette.bg}`,
           boxShadow: innerShadow,
         }}
       >

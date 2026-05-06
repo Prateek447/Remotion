@@ -334,12 +334,12 @@ export const detectCycleDurations: NarrationDuration[] = [
   { step: 5,  audioStep: 5,  duration: 4.32,  frames: 130 },
   { step: 6,  audioStep: 6,  duration: 4.51,  frames: 136 },
   { step: 7,  audioStep: 7,  duration: 9.98,  frames: 300 },
-  { step: 8,  audioStep: 8,  duration: 4.27,  frames: 129 },
-  { step: 9,  audioStep: 9,  duration: 5.93,  frames: 178 },
-  { step: 10, audioStep: 10, duration: 6.67,  frames: 201 },
-  { step: 11, audioStep: 11, duration: 11.69, frames: 351 },
-  { step: 12, audioStep: 12, duration: 8.57,  frames: 258 },
-  { step: 13, audioStep: 13, duration: 6.29,  frames: 189 },
+  { step: 9,  audioStep: 8,  duration: 4.27,  frames: 129 },
+  { step: 10, audioStep: 9,  duration: 5.93,  frames: 178 },
+  { step: 11, audioStep: 10, duration: 6.67,  frames: 201 },
+  { step: 12, audioStep: 11, duration: 11.69, frames: 351 },
+  { step: 13, audioStep: 12, duration: 8.57,  frames: 258 },
+  { step: 14, audioStep: 13, duration: 6.29,  frames: 189 },
 ];
 
 export const mergeListsDurations: NarrationDuration[] = [

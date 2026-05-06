@@ -10,6 +10,8 @@ import { CodeWindow } from "../components/CodeWindow";
 import { SfxLayer } from "../components/SfxLayer";
 import { NarrationLayer } from "../components/NarrationLayer";
 import { AmbientLayer } from "../components/AmbientLayer";
+import { AnimationOnlyLayout, ANIM_DIAGRAM_HEIGHT } from "../components/AnimationOnlyLayout";
+import { compressStepsForAnim } from "../lib/animSteps";
 
 /*
  * Code lines (0-indexed) for reverseCode:
@@ -470,28 +472,30 @@ const REEL_TOP_RATIO = 0.45;
 
 export interface ReverseProps {
   tokens: ThemedToken[][];
-  format?: "youtube" | "reel";
+  format?: "youtube" | "reel" | "reel-anim";
 }
 
 export const Reverse: React.FC<ReverseProps> = ({ tokens, format = "youtube" }) => {
   const { width, height } = useVideoConfig();
   const isReel = format === "reel";
+  const isAnim = format === "reel-anim";
+  const activeSteps = isAnim ? compressStepsForAnim(steps) : steps;
 
   const safeW = width - REEL_SAFE.left - REEL_SAFE.right;
   const safeH = height - REEL_SAFE.top - REEL_SAFE.bottom;
 
-  const diagramAreaW = isReel ? safeW : width * 0.62;
-  const diagramAreaH = isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
-  const nodeScale = isReel ? 0.9 : 1;
+  const diagramAreaW = isAnim ? width : isReel ? safeW : width * 0.62;
+  const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
+  const nodeScale = isAnim ? 1.2 : isReel ? 0.9 : 1;
   const codeFontSize = isReel ? 26 : 24;
 
   const diagram = (
     <LinkedListDiagram
-      steps={steps}
+      steps={activeSteps}
       areaWidth={diagramAreaW}
       areaHeight={diagramAreaH}
       nodeScale={nodeScale}
-      verticalOffset={isReel ? -30 : 0}
+      verticalOffset={isReel || isAnim ? -30 : 0}
     />
   );
 
@@ -499,7 +503,7 @@ export const Reverse: React.FC<ReverseProps> = ({ tokens, format = "youtube" }) 
     <CodeWindow title="LinkedList.java" hideTitle={isReel}>
       <CodeBlock
         tokens={tokens}
-        steps={steps}
+        steps={activeSteps}
         fontSize={codeFontSize}
         centered={isReel}
         centerWidth={isReel ? safeW : undefined}
@@ -509,14 +513,16 @@ export const Reverse: React.FC<ReverseProps> = ({ tokens, format = "youtube" }) 
 
   return (
     <>
-      {isReel ? (
+      {isAnim ? (
+        <AnimationOnlyLayout>{diagram}</AnimationOnlyLayout>
+      ) : isReel ? (
         <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} />
       ) : (
         <SplitLayout left={diagram} right={code} />
       )}
-      <AmbientLayer />
-      <SfxLayer steps={steps} duckVolume={0.5} />
-      <NarrationLayer sceneId="reverse" steps={steps} />
+      <AmbientLayer animOnly={isAnim} />
+      <SfxLayer steps={activeSteps} duckVolume={0.5} animOnly={isAnim} />
+      {!isAnim && <NarrationLayer sceneId="reverse" steps={activeSteps} />}
     </>
   );
 };
