@@ -8,5 +8,13 @@ Config.setOverwriteOutput(true);
 // is uncompressed and rejects --crf. H.264/H.265 commands set their own.
 
 Config.overrideWebpackConfig((config) => {
-  return enableTailwind(config);
+  const updated = enableTailwind(config);
+  return {
+    ...updated,
+    experiments: {
+      ...updated.experiments,
+      lazyCompilation: false,
+      asyncWebAssembly: true,
+    },
+  };
 });

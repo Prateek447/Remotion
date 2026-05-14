@@ -11,11 +11,11 @@ export interface QueueItem {
 
 type HL = NonNullable<QueueItem["highlight"]>;
 
-const PALETTE: Record<HL, { bg: string; border: string; glow: string | null }> = {
-  active:  { bg: "#1F5FAE", border: "#4A86C8", glow: "#4A86C8" },
-  new:     { bg: "#2E7D32", border: "#66BB6A", glow: "#66BB6A" },
-  visited: { bg: "#1F3552", border: "#2B5C8A", glow: null },
-  none:    { bg: "#1a2235", border: "#3A5070", glow: null },
+const PALETTE: Record<HL, { bg: string; border: string; glow: string | null; opacity: number }> = {
+  active:  { bg: "#0096FF", border: "#0096FF", glow: "#0096FF", opacity: 1.0 },
+  new:     { bg: "#40c057", border: "#40c057", glow: "#40c057", opacity: 1.0 },
+  visited: { bg: "#0096FF", border: "#0096FF", glow: null,      opacity: 0.28 },
+  none:    { bg: "#0096FF", border: "#0096FF", glow: null,      opacity: 0.55 },
 };
 
 const GAP = 10;
@@ -67,8 +67,8 @@ const ItemCircle: React.FC<{
 
   const palette   = PALETTE[hl];
   const boxShadow = palette.glow
-    ? `0 0 16px ${palette.glow}55, 0 0 30px ${palette.glow}1A`
-    : undefined;
+    ? `0 0 ${10 + 14}px ${palette.glow}66, 0 0 ${22 + 20}px ${palette.glow}22`
+    : `0 0 10px #0096FF22`;
 
   return (
     <div
@@ -77,14 +77,14 @@ const ItemCircle: React.FC<{
         height:         size,
         borderRadius:   "50%",
         background:     palette.bg,
-        border:         `2.5px solid ${palette.border}`,
+        border:         `3px solid ${palette.border}`,
         boxShadow,
         display:        "flex",
         alignItems:     "center",
         justifyContent: "center",
         flexShrink:     0,
         transform: `translateX(${enterTX + exitTX + wobbleShiftX}px) translateY(${exitGravY}px) scale(${enterSc * emphSc * exitSc}) rotate(${exitTumble + wobbleAngle}deg)`,
-        opacity: enterOp * exitOp,
+        opacity: enterOp * exitOp * palette.opacity,
       }}
     >
       <span

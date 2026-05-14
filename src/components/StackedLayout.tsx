@@ -16,9 +16,10 @@ interface StackedLayoutProps {
   bottom: React.ReactNode;
   safeArea?: SafeArea;
   topRatio?: number;
+  contentPaddingTop?: number;
 }
 
-export const StackedLayout: React.FC<StackedLayoutProps> = ({ top, bottom, safeArea, topRatio }) => {
+export const StackedLayout: React.FC<StackedLayoutProps> = ({ top, bottom, safeArea, topRatio, contentPaddingTop = 36 }) => {
   const ratio = topRatio ?? STACKED_TOP_RATIO;
   const topPct = `${ratio * 100}%`;
 
@@ -81,7 +82,7 @@ export const StackedLayout: React.FC<StackedLayoutProps> = ({ top, bottom, safeA
           }}
         />
 
-        {/* Code panel */}
+        {/* Code panel — card background */}
         <div
           style={{
             position: "absolute",
@@ -89,11 +90,32 @@ export const StackedLayout: React.FC<StackedLayoutProps> = ({ top, bottom, safeA
             left: 0,
             right: 0,
             top: topPct,
-            padding: 20,
-            boxSizing: "border-box",
           }}
         >
-          {bottom}
+          {/* Card face */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(6, 6, 16, 0.78)",
+              borderTop: "1.5px solid rgba(0, 150, 255, 0.22)",
+              borderLeft: "1px solid rgba(255,255,255,0.055)",
+              borderRight: "1px solid rgba(255,255,255,0.055)",
+              borderRadius: "22px 22px 0 0",
+              boxShadow: "0 -8px 40px rgba(0,150,255,0.06)",
+            }}
+          />
+          {/* Content */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              padding: `${contentPaddingTop}px 20px 20px`,
+              boxSizing: "border-box",
+            }}
+          >
+            {bottom}
+          </div>
         </div>
       </div>
 

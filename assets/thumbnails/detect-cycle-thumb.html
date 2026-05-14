@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    background: #000000;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  /* Subtle ambient glows only — no grid, no patterns */
+  .glow-left {
+    position: absolute;
+    left: -100px;
+    top: 100px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(16,185,129,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .glow-right {
+    position: absolute;
+    right: -50px;
+    top: 50px;
+    width: 700px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ─── LEFT PANEL ─────────────────────────────── */
+  .left {
+    position: absolute;
+    left: 64px;
+    top: 0;
+    width: 520px;
+    height: 720px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(139,92,246,0.15);
+    border: 1px solid rgba(139,92,246,0.45);
+    border-radius: 100px;
+    padding: 5px 14px;
+    width: fit-content;
+    margin-bottom: 22px;
+  }
+  .tag-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #8B5CF6;
+    box-shadow: 0 0 6px #8B5CF6;
+  }
+  .tag-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #a78bfa;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .title-detect {
+    font-size: 116px;
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -4px;
+    color: #ffffff;
+  }
+  .title-cycle {
+    font-size: 116px;
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -4px;
+    background: linear-gradient(135deg, #10B981 0%, #34d399 50%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 24px rgba(16,185,129,0.45));
+  }
+
+  .subtitle {
+    margin-top: 26px;
+    font-size: 20px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.3px;
+  }
+
+  .pointers-row {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .ptr-badge {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    border-radius: 8px;
+    padding: 9px 16px;
+  }
+  .ptr-badge.slow {
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.4);
+  }
+  .ptr-badge.fast {
+    background: rgba(139,92,246,0.12);
+    border: 1px solid rgba(139,92,246,0.4);
+  }
+  .ptr-dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+  }
+  .ptr-dot.slow { background: #10B981; box-shadow: 0 0 8px #10B981; }
+  .ptr-dot.fast { background: #8B5CF6; box-shadow: 0 0 8px #8B5CF6; }
+  .ptr-name { font-size: 15px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+  .ptr-name.slow { color: #10B981; }
+  .ptr-name.fast { color: #8B5CF6; }
+
+  .complexity {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .cx-badge {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 7px;
+    padding: 5px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+  }
+  .cx-badge .label { color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 600; margin-right: 5px; }
+  .cx-badge.time .value { color: #34d399; }
+  .cx-badge.space .value { color: #a78bfa; }
+
+  /* ─── DIVIDER ─────────────────────────────────── */
+  .divider {
+    position: absolute;
+    left: 584px;
+    top: 100px;
+    width: 1px;
+    height: 520px;
+    background: linear-gradient(to bottom,
+      transparent 0%,
+      rgba(255,255,255,0.12) 20%,
+      rgba(255,255,255,0.12) 80%,
+      transparent 100%);
+  }
+
+  /* ─── RIGHT PANEL ────────────────────────────── */
+  .right {
+    position: absolute;
+    left: 600px;
+    top: 0;
+    width: 680px;
+    height: 720px;
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-left"></div>
+<div class="glow-right"></div>
+
+<!-- LEFT -->
+<div class="left">
+  <div class="tag">
+    <div class="tag-dot"></div>
+    <span class="tag-text">Linked List</span>
+  </div>
+  <div class="title-detect">DETECT</div>
+  <div class="title-cycle">CYCLE</div>
+  <div class="subtitle">Floyd's Tortoise &amp; Hare Algorithm</div>
+  <div class="pointers-row">
+    <div class="ptr-badge slow">
+      <div class="ptr-dot slow"></div>
+      <span class="ptr-name slow">Slow</span>
+    </div>
+    <div class="ptr-badge fast">
+      <div class="ptr-dot fast"></div>
+      <span class="ptr-name fast">Fast</span>
+    </div>
+  </div>
+  <div class="complexity">
+    <div class="cx-badge time">
+      <span class="label">TIME</span><span class="value">O(n)</span>
+    </div>
+    <div class="cx-badge space">
+      <span class="label">SPACE</span><span class="value">O(1)</span>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- RIGHT: exact node style from the video -->
+<div class="right">
+<svg width="680" height="720" viewBox="0 0 680 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-green" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-purple" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-node" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arr-white" markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="rgba(255,255,255,0.75)"/>
+    </marker>
+    <marker id="arr-amber" markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arr-green" markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#10B981"/>
+    </marker>
+  </defs>
+
+  <!--
+    Node: 80×44px  value=56px  pointer=24px
+    Gap between nodes: 22px (for arrow)
+    Row Y center: 330
+    n1 x=30   n2 x=132   n3 x=234   n4 x=336   n5 x=438
+    centers:    70        172        274         376        478
+    top=308  bottom=352
+  -->
+
+  <!-- ══ CONNECTION ARROWS ══ -->
+  <line x1="110" y1="330" x2="129" y2="330" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" marker-end="url(#arr-white)"/>
+  <line x1="212" y1="330" x2="231" y2="330" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" marker-end="url(#arr-white)"/>
+  <line x1="314" y1="330" x2="333" y2="330" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" marker-end="url(#arr-white)"/>
+  <line x1="416" y1="330" x2="435" y2="330" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" marker-end="url(#arr-white)"/>
+
+  <!-- ══ CYCLE ARROW n5→n3 (dashed amber, goes below) ══ -->
+  <path d="M 478 352 L 478 430 L 274 430 L 274 352"
+    stroke="#f59e0b" stroke-width="2.5" fill="none"
+    stroke-dasharray="8 5"
+    marker-end="url(#arr-amber)"
+    filter="url(#glow-soft)"/>
+  <text x="376" y="456" text-anchor="middle"
+    fill="#f59e0b" font-size="15" font-weight="700"
+    font-family="'Courier New', monospace" letter-spacing="2"
+    filter="url(#glow-soft)">cycle</text>
+
+  <!-- ══ NODE MACRO (80×44, value 56px, pointer 24px, rx=5) ══ -->
+
+  <!-- ── n1 ── -->
+  <g>
+    <rect x="30" y="308" width="80" height="44" rx="5" fill="none" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect x="30" y="308" width="56" height="44" rx="0" fill="#3B82F6"/>
+    <rect x="30" y="308" width="5"  height="44" rx="5" fill="#3B82F6"/>
+    <rect x="86" y="308" width="24" height="44" rx="0" fill="#1D4ED8"/>
+    <rect x="101" y="308" width="9"  height="44" rx="5" fill="#1D4ED8"/>
+    <line x1="86" y1="309" x2="86" y2="351" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+    <text x="58" y="335" text-anchor="middle" fill="white" font-size="22" font-weight="800" font-family="'Courier New', monospace">1</text>
+    <text x="98" y="334" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="9" font-weight="700"
+      font-family="'Courier New', monospace" transform="rotate(-90,98,330)">3947</text>
+  </g>
+
+  <!-- ── n2 ── -->
+  <g>
+    <rect x="132" y="308" width="80" height="44" rx="5" fill="none" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect x="132" y="308" width="56" height="44" rx="0" fill="#3B82F6"/>
+    <rect x="132" y="308" width="5"  height="44" rx="5" fill="#3B82F6"/>
+    <rect x="188" y="308" width="24" height="44" rx="0" fill="#1D4ED8"/>
+    <rect x="203" y="308" width="9"  height="44" rx="5" fill="#1D4ED8"/>
+    <line x1="188" y1="309" x2="188" y2="351" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+    <text x="160" y="335" text-anchor="middle" fill="white" font-size="22" font-weight="800" font-family="'Courier New', monospace">2</text>
+    <text x="200" y="334" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="9" font-weight="700"
+      font-family="'Courier New', monospace" transform="rotate(-90,200,330)">2716</text>
+  </g>
+
+  <!-- ── n3 (cycle target — amber glow border) ── -->
+  <g filter="url(#glow-soft)">
+    <rect x="234" y="308" width="80" height="44" rx="5" fill="none" stroke="#f59e0b" stroke-width="2"/>
+    <rect x="234" y="308" width="56" height="44" rx="0" fill="#3B82F6"/>
+    <rect x="234" y="308" width="5"  height="44" rx="5" fill="#3B82F6"/>
+    <rect x="290" y="308" width="24" height="44" rx="0" fill="#1D4ED8"/>
+    <rect x="305" y="308" width="9"  height="44" rx="5" fill="#1D4ED8"/>
+    <line x1="290" y1="309" x2="290" y2="351" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+    <text x="262" y="335" text-anchor="middle" fill="white" font-size="22" font-weight="800" font-family="'Courier New', monospace">3</text>
+    <text x="302" y="334" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="9" font-weight="700"
+      font-family="'Courier New', monospace" transform="rotate(-90,302,330)">4321</text>
+  </g>
+
+  <!-- ── n4 (MEETING POINT — glowing blue border) ── -->
+  <rect x="332" y="304" width="88" height="52" rx="7" fill="rgba(59,130,246,0.12)" filter="url(#glow-node)"/>
+  <g>
+    <rect x="336" y="308" width="80" height="44" rx="5" fill="none" stroke="#60A5FA" stroke-width="2.5"/>
+    <rect x="336" y="308" width="56" height="44" rx="0" fill="#3B82F6"/>
+    <rect x="336" y="308" width="5"  height="44" rx="5" fill="#3B82F6"/>
+    <rect x="392" y="308" width="24" height="44" rx="0" fill="#1D4ED8"/>
+    <rect x="407" y="308" width="9"  height="44" rx="5" fill="#1D4ED8"/>
+    <line x1="392" y1="309" x2="392" y2="351" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+    <text x="364" y="335" text-anchor="middle" fill="white" font-size="22" font-weight="800" font-family="'Courier New', monospace">4</text>
+    <text x="404" y="334" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="9" font-weight="700"
+      font-family="'Courier New', monospace" transform="rotate(-90,404,330)">7687</text>
+  </g>
+
+  <!-- ── n5 (cycle source — amber glow border) ── -->
+  <g filter="url(#glow-soft)">
+    <rect x="438" y="308" width="80" height="44" rx="5" fill="none" stroke="#f59e0b" stroke-width="2"/>
+    <rect x="438" y="308" width="56" height="44" rx="0" fill="#3B82F6"/>
+    <rect x="438" y="308" width="5"  height="44" rx="5" fill="#3B82F6"/>
+    <rect x="494" y="308" width="24" height="44" rx="0" fill="#1D4ED8"/>
+    <rect x="509" y="308" width="9"  height="44" rx="5" fill="#1D4ED8"/>
+    <line x1="494" y1="309" x2="494" y2="351" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+    <text x="466" y="335" text-anchor="middle" fill="white" font-size="22" font-weight="800" font-family="'Courier New', monospace">5</text>
+    <text x="506" y="334" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="9" font-weight="700"
+      font-family="'Courier New', monospace" transform="rotate(-90,506,330)">2716</text>
+  </g>
+
+  <!-- ══ ADDRESS LABELS BELOW NODES ══ -->
+  <text x="70"  y="368" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="12" font-family="'Courier New', monospace">1028</text>
+  <text x="172" y="368" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="12" font-family="'Courier New', monospace">3947</text>
+  <text x="274" y="368" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="12" font-family="'Courier New', monospace">2716</text>
+  <text x="376" y="368" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="12" font-family="'Courier New', monospace">4321</text>
+  <text x="478" y="368" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="12" font-family="'Courier New', monospace">7687</text>
+
+  <!-- ══ POINTER BADGES above n4 (stacked: fast on top, slow below) ══ -->
+  <!-- fast badge (purple) -->
+  <g filter="url(#glow-purple)">
+    <rect x="346" y="222" width="60" height="28" rx="5" fill="#7C3AED"/>
+    <rect x="346" y="222" width="60" height="28" rx="5" fill="none" stroke="#8B5CF6" stroke-width="1.5"/>
+    <text x="376" y="241" text-anchor="middle" fill="white" font-size="14" font-weight="800"
+      font-family="'Courier New', monospace">fast</text>
+  </g>
+
+  <!-- slow badge (green) -->
+  <g filter="url(#glow-green)">
+    <rect x="346" y="258" width="60" height="28" rx="5" fill="#059669"/>
+    <rect x="346" y="258" width="60" height="28" rx="5" fill="none" stroke="#10B981" stroke-width="1.5"/>
+    <text x="376" y="277" text-anchor="middle" fill="white" font-size="14" font-weight="800"
+      font-family="'Courier New', monospace">slow</text>
+  </g>
+
+  <!-- arrow from slow badge down to n4 top -->
+  <line x1="376" y1="286" x2="376" y2="305" stroke="#10B981" stroke-width="2.5" marker-end="url(#arr-green)" filter="url(#glow-green)"/>
+
+</svg>
+</div>
+
+</body>
+</html>

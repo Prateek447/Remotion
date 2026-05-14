@@ -12,13 +12,13 @@ interface CodeBlockProps {
   lineHeight?: number;
   padding?: number;
   centered?: boolean;
-  centerWidth?: number; // override canvas width for centering (e.g. safe area width)
+  centerWidth?: number;
+  bold?: boolean;
 }
 
 // JetBrains Mono character width ratio (width / fontSize)
 const CHAR_W_RATIO = 0.601;
-const LINE_NUM_W = 0;
-const PILL_PAD = 10; // breathing room on left & right inside the pill
+const PILL_PAD = 10; // breathing room used for centered-layout width calculation
 
 const COLOR_REMAP: Record<string, string> = {
   "#e06c75": "#61AFEF", // red → blue
@@ -26,6 +26,7 @@ const COLOR_REMAP: Record<string, string> = {
   "#61afef": "#E06C75", // blue → red
   "#61AFEF": "#E06C75",
 };
+
 
 function remapTokenColor(hex: string): string {
   if (COLOR_REMAP[hex]) return COLOR_REMAP[hex];
@@ -38,24 +39,24 @@ function remapTokenColor(hex: string): string {
   return hex;
 }
 
-function maxCharsInRange(tokens: ThemedToken[][], start: number, end: number): number {
-  let max = 0;
-  for (let i = start; i <= end; i++) {
-    if (!tokens[i]) continue;
-    const chars = tokens[i].reduce((acc, tok) => acc + tok.content.length, 0);
-    if (chars > max) max = chars;
-  }
-  return max;
+// Keywords → node blue, functions/methods → purple, everything else → white
+function getTokenColor(shikiColor: string): string {
+  const normalized = shikiColor.toUpperCase();
+  if (normalized === "#C678DD") return "#0096FF";           // keywords
+  if (normalized === "#61AFEF") return "#B07EFF";           // functions / method names
+  return "#ffffff";
 }
+
 
 export const CodeBlock: React.FC<CodeBlockProps> = ({
   tokens,
   steps,
   fontSize = 24,
-  lineHeight = 1.75,
+  lineHeight = 2.1,
   padding = 40,
   centered = false,
   centerWidth,
+  bold = false,
 }) => {
   const frame = useCurrentFrame();
   const { fps, width: canvasWidth } = useVideoConfig();
@@ -72,33 +73,21 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   const centeredLeft = Math.max(padding, (referenceWidth - contentWidth) / 2);
   const pLeft = centered ? centeredLeft : padding;
 
-  const { current, previous, t, localFrame } = useStepTransition(steps);
+  const { current, previous, localFrame } = useStepTransition(steps);
 
-  const prevStart = previous.highlightLines.startLine;
-  const prevEnd = previous.highlightLines.endLine;
   const currStart = current.highlightLines.startLine;
   const currEnd = current.highlightLines.endLine;
 
-  // Pill vertical position & height
-  const pillTop = interpolate(t, [0, 1], [
-    padding + prevStart * lineH,
-    padding + currStart * lineH,
-  ]);
-  const pillHeight = interpolate(t, [0, 1], [
-    (prevEnd - prevStart + 1) * lineH,
-    (currEnd - currStart + 1) * lineH,
-  ]);
-
-  // Pill width: starts at first character, sized to widest highlighted line
-  const currW = PILL_PAD + LINE_NUM_W + maxCharsInRange(tokens, currStart, currEnd) * charW + PILL_PAD;
-  const prevW = PILL_PAD + LINE_NUM_W + maxCharsInRange(tokens, prevStart, prevEnd) * charW + PILL_PAD;
-  const pillWidth = interpolate(t, [0, 1], [prevW, currW]);
-
-  const pillOpacity = spring({
+  // Left-to-right wipe: resets every time a new step begins
+  const wipeProgress = spring({
     frame: localFrame,
     fps,
-    config: springPresets.gentle,
+    config: { damping: 22, stiffness: 250 },
   });
+  const getLineWidthPx = (lineIndex: number) => {
+    const lineChars = tokens[lineIndex]?.reduce((acc, tok) => acc + tok.content.length, 0) ?? 0;
+    return lineChars * charW + PILL_PAD * 2;
+  };
 
   return (
     <div
@@ -114,25 +103,28 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
         overflow: "hidden",
       }}
     >
-      {/* Neon pill — starts at first character */}
-      {currStart >= 0 && (
-        <div
-          style={{
-            position: "absolute",
-            left: pLeft - PILL_PAD,
-            width: pillWidth,
-            top: pillTop,
-            height: pillHeight,
-            background: "rgba(110,155,255,0.08)",
-            border: "1px solid rgba(110,155,255,0.35)",
-            borderRadius: 8,
-            boxShadow:
-              "0 0 12px rgba(110,155,255,0.30), 0 0 36px rgba(110,155,255,0.10), inset 0 0 14px rgba(110,155,255,0.06)",
-            pointerEvents: "none",
-            opacity: pillOpacity,
-          }}
-        />
-      )}
+      {/* Per-line highlighter strips — each line gets its own band */}
+      {currStart >= 0 &&
+        Array.from({ length: currEnd - currStart + 1 }, (_, idx) => {
+          const lineIndex = currStart + idx;
+          const targetW = getLineWidthPx(lineIndex);
+          const stripW  = targetW * wipeProgress;
+          return (
+            <div
+              key={lineIndex}
+              style={{
+                position: "absolute",
+                left: pLeft,
+                width: stripW,
+                top: padding + lineIndex * lineH + lineH * 0.12,
+                height: lineH * 0.76,
+                borderRadius: 6,
+                background: "#0096FF",
+                pointerEvents: "none",
+              }}
+            />
+          );
+        })}
 
       {tokens.map((lineTokens, i) => {
         const currVisible = current.visibleLines;
@@ -157,48 +149,28 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
         const revealOpacity = interpolate(revealProgress, [0, 1], [0, 1]);
         const revealX = interpolate(revealProgress, [0, 1], [24, 0]);
 
-        const isHighlighted = i >= currStart && i <= currEnd;
-        const wasHighlighted = i >= prevStart && i <= prevEnd;
-        const dimTarget = isHighlighted ? 1 : colors.dimmed;
-        const dimFrom = wasHighlighted ? 1 : colors.dimmed;
-        const lineDim = interpolate(t, [0, 1], [dimFrom, dimTarget]);
-
         return (
           <div
             key={i}
             style={{
               whiteSpace: "pre",
-              lineHeight: `${lineHeight}`,
-              opacity: revealOpacity * lineDim,
+              height: lineH,
+              lineHeight: `${lineH}px`,
+              opacity: revealOpacity,
               transform: `translateX(${revealX}px)`,
               display: "flex",
               alignItems: "center",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             <span>
               {lineTokens.map((tok, j) => {
-                const rawColor = tok.color ?? colors.text;
-                const tokenColor = remapTokenColor(rawColor);
-
-                const tokenGlowP = isHighlighted
-                  ? spring({
-                      frame: localFrame,
-                      fps,
-                      delay: j * 3,
-                      config: { damping: 12, stiffness: 160 },
-                    })
-                  : 0;
-                const tg = interpolate(tokenGlowP, [0, 1], [0, 1], {
-                  extrapolateRight: "clamp",
-                });
-
-                const textShadow =
-                  tg > 0.04
-                    ? `0 0 ${tg * 7}px ${tokenColor}, 0 0 ${tg * 20}px ${tokenColor}77`
-                    : undefined;
+                const isHighlightedLine = i >= currStart && i <= currEnd;
+                const tokenColor = isHighlightedLine ? "#0a0a18" : getTokenColor(tok.color ?? "");
 
                 return (
-                  <span key={j} style={{ color: tokenColor, textShadow }}>
+                  <span key={j} style={{ color: tokenColor, fontWeight: bold ? 700 : 400 }}>
                     {tok.content}
                   </span>
                 );

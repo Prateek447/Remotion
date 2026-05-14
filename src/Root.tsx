@@ -17,6 +17,15 @@ import {
   mergeSortedCode,
   removeNthNaiveCode,
   removeNthOptimalCode,
+  linearSearchCode,
+  binarySearchCode,
+  bubbleSortCode,
+  mergeSortCode,
+  fibonacciCode,
+  permutationsCode,
+  bstInsertCode,
+  topViewCode,
+  leftViewCode,
 } from "./data/code-snippets";
 
 import { InsertHead } from "./scenes/InsertHead";
@@ -28,6 +37,21 @@ import { Reverse, REVERSE_SCENE_FRAMES } from "./scenes/Reverse";
 import { DetectCycle, DETECT_CYCLE_SCENE_FRAMES } from "./scenes/DetectCycle";
 import { MergeLists, MERGE_LISTS_SCENE_FRAMES } from "./scenes/MergeLists";
 import { RemoveNthFromEnd, REMOVE_NTH_SCENE_FRAMES } from "./scenes/RemoveNthFromEnd";
+import { ConstantTime, CONSTANT_TIME_SCENE_FRAMES } from "./scenes/ConstantTime";
+import { LinearSearch, LINEAR_SEARCH_SCENE_FRAMES } from "./scenes/LinearSearch";
+import { BinarySearch, BINARY_SEARCH_SCENE_FRAMES } from "./scenes/BinarySearch";
+import { BubbleSort, BUBBLE_SORT_SCENE_FRAMES } from "./scenes/BubbleSort";
+import { MergeSort, MERGE_SORT_SCENE_FRAMES } from "./scenes/MergeSort";
+import { Exponential, EXPONENTIAL_SCENE_FRAMES } from "./scenes/Exponential";
+import { Factorial, FACTORIAL_SCENE_FRAMES } from "./scenes/Factorial";
+import { TLSHandshake, TLS_HANDSHAKE_SCENE_FRAMES } from "./scenes/TLSHandshake";
+import { BSTInsert, BST_INSERT_SCENE_FRAMES } from "./scenes/BSTInsert";
+import { TopViewTraversal, TOP_VIEW_SCENE_FRAMES } from "./scenes/TopViewTraversal";
+import { LeftViewTraversal, LEFT_VIEW_SCENE_FRAMES } from "./scenes/LeftViewTraversal";
+import { TLSThumbnail } from "./thumbnails/TLSThumbnail";
+import { FactorialThumbnail } from "./thumbnails/FactorialThumbnail";
+import { DetectCycleThumbnail } from "./thumbnails/DetectCycleThumbnail";
+import { RemoveNthThumbnail } from "./thumbnails/RemoveNthThumbnail";
 import { FullVideo, FULL_VIDEO_DURATION } from "./FullVideo";
 import { TitleCard } from "./components/TitleCard";
 import { standaloneDuration } from "./StandaloneVideo";
@@ -36,14 +60,19 @@ import {
   // YouTube
   InsertHeadVideo, InsertTailVideo, DeleteNodeVideo, SearchNodeVideo,
   TraverseVideo, ReverseVideo, DetectCycleVideo, MergeListsVideo, RemoveNthFromEndVideo,
+  ConstantTimeVideo, LinearSearchVideo, BinarySearchVideo, BubbleSortVideo,
+  MergeSortVideo, ExponentialVideo, FactorialVideo, BSTInsertVideo,
+  TopViewVideo, LeftViewVideo,
   // Reels with code
   InsertHeadReel, InsertTailReel, DeleteNodeReel, SearchNodeReel,
   DeleteHeadReel, DeleteMiddleReel, DeleteTailReel,
-  ReverseReel, DetectCycleReel, MergeListsReel, RemoveNthFromEndReel,
+  ReverseReel, DetectCycleReel, MergeListsReel, RemoveNthFromEndReel, BSTInsertReel,
+  TopViewReel, LeftViewReel,
   // Reels animation only
   InsertHeadReelAnim, InsertTailReelAnim, DeleteNodeReelAnim, SearchNodeReelAnim,
   DeleteHeadReelAnim, DeleteMiddleReelAnim, DeleteTailReelAnim,
   ReverseReelAnim, DetectCycleReelAnim, MergeListsReelAnim, RemoveNthFromEndReelAnim,
+  BSTInsertReelAnim,
 } from "./compositions";
 
 const WIDTH = 1920;
@@ -161,6 +190,42 @@ const emptyDualTransition = { from: emptyKeyedTokens, to: emptyKeyedTokens };
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      <Composition
+        id="TLS-Thumbnail"
+        component={TLSThumbnail}
+        durationInFrames={1}
+        fps={FPS}
+        width={1280}
+        height={720}
+      />
+
+      <Composition
+        id="DetectCycle-Thumbnail"
+        component={DetectCycleThumbnail}
+        durationInFrames={1}
+        fps={FPS}
+        width={1280}
+        height={720}
+      />
+
+      <Composition
+        id="RemoveNth-Thumbnail"
+        component={RemoveNthThumbnail}
+        durationInFrames={1}
+        fps={FPS}
+        width={1280}
+        height={720}
+      />
+
+      <Composition
+        id="Factorial-Thumbnail"
+        component={FactorialThumbnail}
+        durationInFrames={1}
+        fps={FPS}
+        width={1280}
+        height={720}
+      />
+
       <Composition
         id="TitleIntro"
         component={TitleCard}
@@ -517,6 +582,164 @@ export const RemotionRoot: React.FC = () => {
           height={REEL_HEIGHT}
           defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }}
           calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)}
+        />
+      </Folder>
+
+      <Folder name="TimeComplexity">
+        <Composition
+          id="Video-ConstantTime"
+          component={ConstantTimeVideo}
+          durationInFrames={standaloneDuration(CONSTANT_TIME_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(insertAtHeadCode)}
+        />
+        <Composition
+          id="Video-LinearSearch"
+          component={LinearSearchVideo}
+          durationInFrames={standaloneDuration(LINEAR_SEARCH_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(linearSearchCode)}
+        />
+        <Composition
+          id="Video-BinarySearch"
+          component={BinarySearchVideo}
+          durationInFrames={standaloneDuration(BINARY_SEARCH_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(binarySearchCode)}
+        />
+        <Composition
+          id="Video-BubbleSort"
+          component={BubbleSortVideo}
+          durationInFrames={standaloneDuration(BUBBLE_SORT_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(bubbleSortCode)}
+        />
+        <Composition
+          id="Video-MergeSort"
+          component={MergeSortVideo}
+          durationInFrames={standaloneDuration(MERGE_SORT_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(mergeSortCode)}
+        />
+        <Composition
+          id="Video-Exponential"
+          component={ExponentialVideo}
+          durationInFrames={standaloneDuration(EXPONENTIAL_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(fibonacciCode)}
+        />
+        <Composition
+          id="Video-Factorial"
+          component={FactorialVideo}
+          durationInFrames={standaloneDuration(FACTORIAL_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(permutationsCode)}
+        />
+      </Folder>
+
+      <Folder name="Diagrams">
+        <Composition
+          id="TLS-Handshake"
+          component={TLSHandshake}
+          durationInFrames={TLS_HANDSHAKE_SCENE_FRAMES}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{}}
+        />
+      </Folder>
+
+      <Folder name="Trees">
+        <Composition
+          id="Video-BSTInsert"
+          component={BSTInsertVideo}
+          durationInFrames={standaloneDuration(BST_INSERT_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(bstInsertCode)}
+        />
+        <Composition
+          id="Reel-BSTInsert"
+          component={BSTInsertReel}
+          durationInFrames={standaloneDuration(BST_INSERT_SCENE_FRAMES)}
+          fps={FPS}
+          width={REEL_WIDTH}
+          height={REEL_HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(bstInsertCode)}
+        />
+        <Composition
+          id="Anim-BSTInsert"
+          component={BSTInsertReelAnim}
+          durationInFrames={standaloneDuration(16 * ANIM_FRAMES_PER_STEP)}
+          fps={FPS}
+          width={REEL_WIDTH}
+          height={REEL_HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(bstInsertCode)}
+        />
+        <Composition
+          id="Video-TopView"
+          component={TopViewVideo}
+          durationInFrames={standaloneDuration(TOP_VIEW_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(topViewCode)}
+        />
+        <Composition
+          id="Reel-TopView"
+          component={TopViewReel}
+          durationInFrames={standaloneDuration(TOP_VIEW_SCENE_FRAMES)}
+          fps={FPS}
+          width={REEL_WIDTH}
+          height={REEL_HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(topViewCode)}
+        />
+        <Composition
+          id="Video-LeftView"
+          component={LeftViewVideo}
+          durationInFrames={standaloneDuration(LEFT_VIEW_SCENE_FRAMES)}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(leftViewCode)}
+        />
+        <Composition
+          id="Reel-LeftView"
+          component={LeftViewReel}
+          durationInFrames={standaloneDuration(LEFT_VIEW_SCENE_FRAMES)}
+          fps={FPS}
+          width={REEL_WIDTH}
+          height={REEL_HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(leftViewCode)}
         />
       </Folder>
     </>

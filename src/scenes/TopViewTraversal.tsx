@@ -15,7 +15,7 @@ import { TreeDiagram } from "../components/TreeDiagram";
 import { QueueVisualization } from "../components/QueueVisualization";
 
 const REEL_SAFE: SafeArea = { top: 150, bottom: 380, left: 90, right: 130 };
-const REEL_TOP_RATIO = 0.52;
+const REEL_TOP_RATIO = 0.50;
 
 export const TOP_VIEW_SCENE_FRAMES = 4957;
 
@@ -96,7 +96,6 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 0,
       highlightLines: { startLine: 0, endLine: 0 },
-      visibleLines: 1,
       snapshot: {
         nodes: buildNodes(),
         pointers: [],
@@ -112,7 +111,6 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 338,
       highlightLines: { startLine: 1, endLine: 1 },
-      visibleLines: 2,
       snapshot: {
         nodes: buildNodes(),
         pointers: [],
@@ -127,7 +125,6 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 467,
       highlightLines: { startLine: 2, endLine: 4 },
-      visibleLines: 5,
       snapshot: {
         nodes: buildNodes(),
         pointers: [],
@@ -143,7 +140,6 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 825,
       highlightLines: { startLine: 5, endLine: 6 },
-      visibleLines: 7,
       snapshot: {
         nodes: buildNodes("n1"),
         pointers: [],
@@ -158,7 +154,6 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 1046,
       highlightLines: { startLine: 7, endLine: 7 },
-      visibleLines: 8,
       snapshot: {
         nodes: buildNodes("n1"),
         pointers: [],
@@ -173,7 +168,6 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 1138,
       highlightLines: { startLine: 8, endLine: 9 },
-      visibleLines: 10,
       snapshot: {
         nodes: buildNodes("n1"),
         pointers: [],
@@ -188,7 +182,6 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 1250,
       highlightLines: { startLine: 10, endLine: 10 },
-      visibleLines: 11,
       snapshot: {
         nodes: buildNodes("n1", F1),
         pointers: [],
@@ -203,7 +196,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 1566,
       highlightLines: { startLine: 11, endLine: 18 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n2", F1),
         pointers: [],
@@ -221,7 +214,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 1848,
       highlightLines: { startLine: 8, endLine: 9 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n2", F1),
         pointers: [],
@@ -236,7 +229,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 1949,
       highlightLines: { startLine: 10, endLine: 10 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n2", F12),
         pointers: [],
@@ -251,7 +244,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 2061,
       highlightLines: { startLine: 11, endLine: 18 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n4", F12),
         pointers: [],
@@ -270,7 +263,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 2285,
       highlightLines: { startLine: 8, endLine: 9 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n3", F12),
         pointers: [],
@@ -285,7 +278,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 2385,
       highlightLines: { startLine: 10, endLine: 10 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n3", F123),
         pointers: [],
@@ -300,7 +293,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 2499,
       highlightLines: { startLine: 11, endLine: 18 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n6", F123),
         pointers: [],
@@ -320,7 +313,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 2725,
       highlightLines: { startLine: 8, endLine: 9 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n4", F123),
         pointers: [],
@@ -335,7 +328,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 2829,
       highlightLines: { startLine: 10, endLine: 10 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n4", F1234),
         pointers: [],
@@ -350,7 +343,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 3042,
       highlightLines: { startLine: 11, endLine: 14 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n8", F1234),
         pointers: [],
@@ -370,7 +363,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 3209,
       highlightLines: { startLine: 10, endLine: 10 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes(undefined, F1234, V5),
         pointers: [],
@@ -385,7 +378,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 3441,
       highlightLines: { startLine: 10, endLine: 10 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes(undefined, F1234, V56),
         pointers: [],
@@ -400,7 +393,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 3673,
       highlightLines: { startLine: 10, endLine: 10 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n7", F12347, V56),
         pointers: [],
@@ -415,7 +408,7 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 3829,
       highlightLines: { startLine: 10, endLine: 10 },
-      visibleLines: 19,
+
       snapshot: {
         nodes: buildNodes("n8", F123478, V56),
         pointers: [],
@@ -430,7 +423,6 @@ function makeSteps(): SceneStep[] {
     {
       startFrame: 3996,
       highlightLines: { startLine: 19, endLine: 20 },
-      visibleLines: 22,
       snapshot: {
         nodes: buildNodes(undefined, F123478, V56),
         pointers: [],
@@ -448,14 +440,14 @@ function makeSteps(): SceneStep[] {
 function makePositionMap(isReel: boolean): Record<string, { x: number; y: number }> {
   return isReel
     ? {
-        n1: { x: 0.50, y: 0.23 },
-        n2: { x: 0.34, y: 0.37 },
-        n3: { x: 0.66, y: 0.37 },
-        n4: { x: 0.24, y: 0.50 },
-        n5: { x: 0.43, y: 0.50 },
-        n6: { x: 0.57, y: 0.50 },
-        n7: { x: 0.74, y: 0.50 },
-        n8: { x: 0.18, y: 0.63 },
+        n1: { x: 0.50, y: 0.18 },
+        n2: { x: 0.34, y: 0.36 },
+        n3: { x: 0.66, y: 0.36 },
+        n4: { x: 0.24, y: 0.54 },
+        n5: { x: 0.43, y: 0.54 },
+        n6: { x: 0.57, y: 0.54 },
+        n7: { x: 0.74, y: 0.54 },
+        n8: { x: 0.18, y: 0.72 },
       }
     : {
         n1: { x: 0.47, y: 0.22 },
@@ -485,12 +477,16 @@ const ColumnLabels: React.FC<{
   const { fps } = useVideoConfig();
   const { current, previous, localFrame } = useStepTransition(steps);
 
-  const nodeSize = 56 * nodeScale;
-  const fontSize = Math.round(13 * nodeScale);
+  // Match TreeDiagram: nodeSize = spacing.nodeHeight * 1.18 * nodeScale
+  const nodeSize        = 56 * 1.18 * nodeScale;
+  const nodeRadius      = nodeSize / 2;
+  const ringPad         = Math.round(nodeSize * 0.22);   // same as TreeNodeCircle
+  const ringOuterRadius = nodeRadius + ringPad;           // label must clear this
+  const fontSize        = Math.round(18 * nodeScale);
 
   return (
     <>
-      {Object.entries(NODE_COL).map(([id, col]) => {
+      {Object.entries(NODE_COL).map(([id, col], nodeIndex) => {
         const pos = positionMap[id];
         if (!pos) return null;
 
@@ -498,6 +494,10 @@ const ColumnLabels: React.FC<{
         const cy = pos.y * areaHeight;
         const label = col === 0 ? "0" : col > 0 ? `+${col}` : `${col}`;
         const isTopViewNode = TOP_VIEW_NODE_IDS.includes(id);
+
+        // Mirror the idle wiggle from TreeNodeCircle (delay = nodeIndex * 3, phase = delay * 0.9)
+        const wigglePhase = nodeIndex * 3 * 0.9;
+        const idleY = Math.sin(frame * 0.055 + wigglePhase) * 10;
 
         const currHL = current.snapshot.nodes.find(n => n.id === id)?.highlight ?? "none";
         const prevHL = previous.snapshot.nodes.find(n => n.id === id)?.highlight ?? "none";
@@ -531,16 +531,16 @@ const ColumnLabels: React.FC<{
 
         // Color driven by highlight state
         const color =
-          currHL === "found" && isTopViewNode  ? colors.teal
+          currHL === "found" && isTopViewNode  ? "#40c057"
           : currHL === "active"                ? colors.blue
           : currHL === "visited" && !isTopViewNode ? colors.red
           : colors.subtext0;
 
-        const baseOpacity = currHL === "none" ? 0.40 : 0.88;
+        const baseOpacity = currHL === "none" ? 0.70 : 1.0;
 
         const textShadow =
           claimGlow > 0.04
-            ? `0 0 ${Math.round(14 * claimGlow)}px ${colors.teal}, 0 0 ${Math.round(30 * claimGlow)}px ${colors.teal}44`
+            ? `0 0 ${Math.round(14 * claimGlow)}px #40c057, 0 0 ${Math.round(30 * claimGlow)}px #40c05744`
             : takenGlow > 0.04
               ? `0 0 ${Math.round(14 * takenGlow)}px ${colors.red}, 0 0 ${Math.round(26 * takenGlow)}px ${colors.red}44`
               : "none";
@@ -550,9 +550,9 @@ const ColumnLabels: React.FC<{
             key={id}
             style={{
               position:        "absolute",
-              left:            cx - 20 + takenShakeX,
-              top:             cy - nodeSize / 2 - 26,
-              width:           40,
+              left:            cx - 24 + takenShakeX,
+              top:             cy + idleY - ringOuterRadius - fontSize - 6,
+              width:           48,
               textAlign:       "center",
               fontFamily:      fonts.mono,
               fontSize,
@@ -562,8 +562,9 @@ const ColumnLabels: React.FC<{
               transform:       `scale(${claimScale})`,
               transformOrigin: "bottom center",
               pointerEvents:   "none",
-              letterSpacing:   0.2,
+              letterSpacing:   0.5,
               textShadow,
+              zIndex:          20,
             }}
           >
             {label}
@@ -747,7 +748,7 @@ const TopViewResultPanel: React.FC<{
     { val: 7, col: +2 },
   ];
 
-  const circleSize    = isReel ? 78  : 100;
+  const circleSize    = isReel ? 60  : 78;
   const gap           = isReel ? 12  : 20;
   const valFontSize   = isReel ? 28  : 36;
   const colFontSize   = isReel ? 11  : 13;
@@ -808,14 +809,12 @@ const TopViewResultPanel: React.FC<{
                   width:          circleSize,
                   height:         circleSize,
                   borderRadius:   "50%",
-                  background:     `${colors.teal}18`,
-                  border:         `2px solid ${colors.teal}`,
+                  background:     "#40c057",
+                  border:         `3px solid #40c057`,
                   display:        "flex",
                   alignItems:     "center",
                   justifyContent: "center",
-                  boxShadow:      glowStr > 0.05
-                    ? `0 0 ${Math.round(28 * glowStr)}px ${colors.teal}99, 0 0 ${Math.round(56 * glowStr)}px ${colors.teal}33`
-                    : `0 0 8px ${colors.teal}22`,
+                  boxShadow:      `0 0 ${10 + Math.round(14 * glowStr)}px #40c05766, 0 0 ${22 + Math.round(20 * glowStr)}px #40c05722`,
                 }}
               >
                 <span
@@ -823,9 +822,9 @@ const TopViewResultPanel: React.FC<{
                     fontFamily: fonts.mono,
                     fontSize:   valFontSize,
                     fontWeight: 800,
-                    color:      colors.teal,
+                    color:      "#ffffff",
                     lineHeight: 1,
-                    textShadow: `0 0 12px ${colors.teal}88`,
+                    textShadow: "0 0 8px rgba(255,255,255,0.18)",
                   }}
                 >
                   {val}
@@ -927,7 +926,8 @@ export const TopViewTraversal: React.FC<TopViewTraversalProps> = ({
   // Actual pixel height available for code lines in the reel code panel
   // = safe area code portion minus 20px top/bottom padding from StackedLayout
   const codeViewH = Math.round(safeH * (1 - REEL_TOP_RATIO)) - 40;
-  const nodeScale = isReel ? 0.82 : 1;
+  const nodeScale  = isReel ? 1.1 : 0.72;
+  const treeScale  = 1;
 
   const steps = makeSteps();
   const { current, localFrame } = useStepTransition(steps);
@@ -959,27 +959,37 @@ export const TopViewTraversal: React.FC<TopViewTraversalProps> = ({
     >
       {/* ── Tree + all overlays — slides upward out on step 21 ── */}
       <div style={{ position: "absolute", inset: 0, transform: `translateY(${treeExitY}px)` }}>
-        <TreeDiagram
-          steps={steps}
-          positionMap={posMap}
-          areaWidth={diagramAreaW}
-          areaHeight={diagramAreaH}
-          nodeScale={nodeScale}
-          ringNodeIds={TOP_VIEW_NODE_IDS}
-        />
-        <ColumnLabels
-          steps={steps}
-          positionMap={posMap}
-          areaWidth={diagramAreaW}
-          areaHeight={diagramAreaH}
-          nodeScale={nodeScale}
-        />
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            transform: `scale(${treeScale})`,
+            transformOrigin: "50% 42%",
+            marginTop: 0,
+          }}
+        >
+          <TreeDiagram
+            steps={steps}
+            positionMap={posMap}
+            areaWidth={diagramAreaW}
+            areaHeight={diagramAreaH}
+            nodeScale={nodeScale}
+            ringNodeIds={isReel ? [] : TOP_VIEW_NODE_IDS}
+          />
+          <ColumnLabels
+            steps={steps}
+            positionMap={posMap}
+            areaWidth={diagramAreaW}
+            areaHeight={diagramAreaH}
+            nodeScale={nodeScale}
+          />
+        </div>
         <QueueVisualization
           steps={steps}
           itemSize={isReel ? 44 : 52}
           style={{
             position: "absolute",
-            bottom: isReel ? 130 : 200,
+            bottom: isReel ? 20 : 200,
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 5,
@@ -1002,11 +1012,13 @@ export const TopViewTraversal: React.FC<TopViewTraversalProps> = ({
       <CodeBlock
         tokens={tokens}
         steps={steps}
-        fontSize={isReel ? 20 : 22}
-        padding={isReel ? 24 : 20}
+        fontSize={isReel ? 17 : 19}
+        lineHeight={isReel ? 1.65 : 2.1}
+        padding={isReel ? 14 : 20}
         centered={isReel}
         centerWidth={isReel ? safeW : undefined}
         viewHeight={isReel ? codeViewH : undefined}
+        bold={false}
       />
     </CodeWindow>
   );
@@ -1017,7 +1029,7 @@ export const TopViewTraversal: React.FC<TopViewTraversalProps> = ({
   return (
     <>
       {isReel ? (
-        <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} />
+        <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} contentPaddingTop={16} />
       ) : (
         <SplitLayout left={diagram} right={code} leftWidth="54%" />
       )}

@@ -29,17 +29,15 @@ const steps: SceneStep[] = [
     highlightLines: { startLine: 0, endLine: 9 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "Binary search eliminates half the candidates each step. To find the time complexity, we ask: how many halvings does it take to go from n elements down to 1?",
     },
   },
 
   // Step 1 — initialization: runs once → O(1)
   {
-    startFrame: 358,
+    startFrame: 411,
     highlightLines: { startLine: 1, endLine: 1 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "Two variables set up once before the search starts. Whether n=10 or n=10,000,000, still exactly 2 assignments. We write O(1) not O(2) — the actual constant is irrelevant because it never grows with n.",
       arrowLabel: "O(1)",
       arrowAnchorLine: 1,
     },
@@ -47,11 +45,10 @@ const steps: SceneStep[] = [
 
   // Step 2 — while loop: halving the range each iteration → O(log n)
   {
-    startFrame: 724,
+    startFrame: 771,
     highlightLines: { startLine: 2, endLine: 7 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "Each iteration halves the range: n → n/2 → n/4 → … → 1. Solving n ÷ 2^k = 1 gives k = log₂(n) iterations. Double the input? Just one extra step. That slow growth is exactly what O(log n) means.",
       arrowLabel: "O(log n)",
       arrowAnchorLine: 2,
     },
@@ -59,11 +56,10 @@ const steps: SceneStep[] = [
 
   // Step 3 — body: constant per iteration → O(1)
   {
-    startFrame: 1405,
+    startFrame: 1203,
     highlightLines: { startLine: 3, endLine: 4 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "Inside the loop: compute mid, compare, update left or right — always 2 to 3 steps per pass, no matter how large n is. This is O(1) work per iteration. It scales the constant, not the loop count.",
       arrowLabel: "O(1)",
       arrowAnchorLine: 3,
     },
@@ -71,7 +67,7 @@ const steps: SceneStep[] = [
 
   // Step 4 — conclusion
   {
-    startFrame: 1660,
+    startFrame: 1485,
     highlightLines: { startLine: 0, endLine: 9 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
@@ -81,7 +77,7 @@ const steps: SceneStep[] = [
   },
 ];
 
-export const BINARY_SEARCH_SCENE_FRAMES = 2787;
+export const BINARY_SEARCH_SCENE_FRAMES = 1765;
 
 export interface BinarySearchProps {
   tokens: ThemedToken[][];

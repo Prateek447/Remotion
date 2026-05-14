@@ -25,17 +25,15 @@ const steps: SceneStep[] = [
     highlightLines: { startLine: 0, endLine: 5 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "O(1) means the step count stays fixed no matter how large n gets. To spot it: look for code with no loops and no recursion — every statement runs a set number of times.",
     },
   },
 
   // Step 1 — line 1: Node newNode = new Node(val)
   {
-    startFrame: 507,
+    startFrame: 392,
     highlightLines: { startLine: 1, endLine: 1 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "One allocation, one assignment — always, regardless of list size. 3 nodes or 3 million? Still exactly 2 things. Fixed step count → O(1).",
       arrowLabel: "O(1)",
       arrowAnchorLine: 1,
     },
@@ -43,11 +41,10 @@ const steps: SceneStep[] = [
 
   // Step 2 — line 2: newNode.next = head
   {
-    startFrame: 828,
+    startFrame: 704,
     highlightLines: { startLine: 2, endLine: 2 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "One pointer assignment. No traversal, no length check — just one wire connected, every single time. O(1).",
       arrowLabel: "O(1)",
       arrowAnchorLine: 2,
     },
@@ -55,11 +52,10 @@ const steps: SceneStep[] = [
 
   // Step 3 — line 3: head = newNode
   {
-    startFrame: 1183,
+    startFrame: 1029,
     highlightLines: { startLine: 3, endLine: 3 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "One assignment. Move head to the new node. Empty list or a billion nodes — this line does not care. O(1).",
       arrowLabel: "O(1)",
       arrowAnchorLine: 3,
     },
@@ -67,11 +63,10 @@ const steps: SceneStep[] = [
 
   // Step 4 — line 4: size++
   {
-    startFrame: 1512,
+    startFrame: 1297,
     highlightLines: { startLine: 4, endLine: 4 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "One increment. Always one. n does not appear here. O(1).",
       arrowLabel: "O(1)",
       arrowAnchorLine: 4,
     },
@@ -79,7 +74,7 @@ const steps: SceneStep[] = [
 
   // Step 5 — combine: O(1) + O(1) + O(1) + O(1) = O(1)
   {
-    startFrame: 1804,
+    startFrame: 1537,
     highlightLines: { startLine: 0, endLine: 5 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
@@ -89,7 +84,7 @@ const steps: SceneStep[] = [
   },
 ];
 
-export const CONSTANT_TIME_SCENE_FRAMES = 3167;
+export const CONSTANT_TIME_SCENE_FRAMES = 1892;
 
 export interface ConstantTimeProps {
   tokens: ThemedToken[][];

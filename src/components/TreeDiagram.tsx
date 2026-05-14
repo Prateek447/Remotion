@@ -1,5 +1,5 @@
 import React from "react";
-import { interpolate, useVideoConfig } from "remotion";
+import { interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import type { SceneStep } from "../lib/types";
 import { useStepTransition } from "../lib/useStepTransition";
 import { Arrow } from "./Arrow";
@@ -31,6 +31,7 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
   nodeScale   = 1,
   ringNodeIds = [],
 }) => {
+  const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const { current, previous, t, localFrame } = useStepTransition(steps);
 
@@ -50,10 +51,33 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
     anyHighlighted     ? 1 : 0,
   ]);
 
+  const isNodeHighlighted = (h?: string) =>
+    h === "active" || h === "found" || h === "new" || h === "removing" || h === "error";
+  const anyNodeHighlighted     = snapshot.nodes.some((n) => isNodeHighlighted(n.highlight));
+  const prevAnyNodeHighlighted = prevSnapshot.nodes.some((n) => isNodeHighlighted(n.highlight));
+  const nodeDimT = interpolate(t, [0, 1], [
+    prevAnyNodeHighlighted ? 1 : 0,
+    anyNodeHighlighted     ? 1 : 0,
+  ]);
+
   const getCenter = (nodeId: string) => {
     const pos = positionMap[nodeId];
     if (!pos) return { x: areaWidth / 2, y: areaHeight / 2 };
     return { x: pos.x * areaWidth, y: pos.y * areaHeight };
+  };
+
+  // Mirror the idle wiggle from TreeNodeCircle so arrows follow live node positions.
+  // delay = nodeIndex * 3, phase = delay * 0.9  (same constants as TreeNodeCircle)
+  const getNodeWiggleY = (nodeId: string): number => {
+    const idx = snapshot.nodes.findIndex((n) => n.id === nodeId);
+    if (idx < 0) return 0;
+    const phase = idx * 3 * 0.9;
+    return Math.sin(frame * 0.055 + phase) * 10;
+  };
+
+  const getWiggledCenter = (nodeId: string) => {
+    const c = getCenter(nodeId);
+    return { x: c.x, y: c.y + getNodeWiggleY(nodeId) };
   };
 
   const getCircleTopLeft = (nodeId: string) => {
@@ -62,18 +86,22 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
   };
 
   const getEdgeEndpoints = (fromId: string, toId: string) => {
-    const from = getCenter(fromId);
-    const to   = getCenter(toId);
+    const from = getWiggledCenter(fromId);
+    const to   = getWiggledCenter(toId);
     const dx   = to.x - from.x;
     const dy   = to.y - from.y;
     const len  = Math.hypot(dx, dy) || 1;
     const ux   = dx / len;
     const uy   = dy / len;
+    const edgeOffset = radius + 2;
+    // Rubber bend: when connected nodes are at different wiggle heights, arc the edge sideways
+    const bend = (getNodeWiggleY(fromId) - getNodeWiggleY(toId)) * 0.5;
     return {
-      fromX: from.x + ux * radius * 0.88,
-      fromY: from.y + uy * radius * 0.88,
-      toX:   to.x   - ux * radius * 0.88,
-      toY:   to.y   - uy * radius * 0.88,
+      fromX: from.x + ux * edgeOffset,
+      fromY: from.y + uy * edgeOffset,
+      toX:   to.x   - ux * edgeOffset,
+      toY:   to.y   - uy * edgeOffset,
+      bend,
     };
   };
 
@@ -103,6 +131,7 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
             highlight={isHighlighted}
             delay={index * 2}
             opacity={arrowOpacity}
+            bend={edge.bend}
           />
         );
       })}
@@ -118,6 +147,7 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
             highlight={node.highlight ?? "none"}
             prevHighlight={prevHighlight}
             transitionT={t}
+            nodeDimT={nodeDimT}
             x={rect.x}
             y={rect.y}
             size={nodeSize}

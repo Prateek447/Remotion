@@ -13,6 +13,7 @@ import { Reverse, REVERSE_SCENE_FRAMES } from "../scenes/Reverse";
 import { DetectCycle, DETECT_CYCLE_SCENE_FRAMES } from "../scenes/DetectCycle";
 import { MergeLists, MERGE_LISTS_SCENE_FRAMES } from "../scenes/MergeLists";
 import { RemoveNthFromEnd, REMOVE_NTH_SCENE_FRAMES } from "../scenes/RemoveNthFromEnd";
+import { BSTInsert, BST_INSERT_SCENE_FRAMES } from "../scenes/BSTInsert";
 
 interface TokenProps { tokens: ThemedToken[][] }
 interface DualTokenProps {
@@ -84,5 +85,11 @@ export const MergeListsReelAnim: React.FC<TokenProps> = ({ tokens }) => (
 export const RemoveNthFromEndReelAnim: React.FC<DualTokenProps> = ({ naiveTokens, optimalTokens, transitionInfo }) => (
   <StandaloneVideo title="Remove Nth From End" complexity="O(n)" subtitle="Two-Pointer Technique" sceneFrames={REMOVE_NTH_SCENE_FRAMES}>
     <RemoveNthFromEnd naiveTokens={naiveTokens} optimalTokens={optimalTokens} transitionInfo={transitionInfo} format="reel-anim" />
+  </StandaloneVideo>
+);
+
+export const BSTInsertReelAnim: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="BST Insert" complexity="O(h)" sceneFrames={BST_INSERT_SCENE_FRAMES}>
+    <BSTInsert tokens={tokens} format="reel-anim" />
   </StandaloneVideo>
 );

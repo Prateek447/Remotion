@@ -23,17 +23,15 @@ const steps: SceneStep[] = [
     highlightLines: { startLine: 0, endLine: 3 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "Naive recursive Fibonacci. Two lines of actual code — but it creates O(2^n) function calls, one of the slowest complexity classes. We count calls by tracing the recursion tree.",
     },
   },
 
   // Step 1 — base case: O(1) per leaf
   {
-    startFrame: 353,
+    startFrame: 295,
     highlightLines: { startLine: 1, endLine: 1 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "The base case. If n is 0 or 1, return immediately — O(1) per call. Every recursion tree has a bottom. This is it. Each leaf fires this line once and stops branching.",
       arrowLabel: "O(1)",
       arrowAnchorLine: 1,
     },
@@ -41,11 +39,10 @@ const steps: SceneStep[] = [
 
   // Step 2 — two recursive calls → 2^n total
   {
-    startFrame: 703,
+    startFrame: 571,
     highlightLines: { startLine: 2, endLine: 2 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
-      caption: "One return — but two recursive calls inside it. fib(n-1) and fib(n-2) each branch into two more. The root fans to 2 nodes, each fans to 2 more. After n levels the bottom row has ~2^n nodes. Total calls across all levels: approximately 2^n.",
       arrowLabel: "2^n calls",
       arrowAnchorLine: 2,
     },
@@ -53,7 +50,7 @@ const steps: SceneStep[] = [
 
   // Step 3 — conclusion
   {
-    startFrame: 1285,
+    startFrame: 928,
     highlightLines: { startLine: 0, endLine: 3 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
@@ -63,7 +60,7 @@ const steps: SceneStep[] = [
   },
 ];
 
-export const EXPONENTIAL_SCENE_FRAMES = 2076;
+export const EXPONENTIAL_SCENE_FRAMES = 1380;
 
 export interface ExponentialProps {
   tokens: ThemedToken[][];

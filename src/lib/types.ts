@@ -37,6 +37,7 @@ export interface ListSnapshot {
   newNode?: ListNodeData;
   caption?: string;
   hideEndNull?: boolean;
+  complexityInfo?: { time: string; space: string };
 }
 
 export interface HighlightStep {

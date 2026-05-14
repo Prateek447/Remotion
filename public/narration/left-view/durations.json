@@ -1,112 +1,112 @@
 [
   {
     "step": 0,
-    "duration": 8.688,
-    "frames": 261
+    "duration": 9.72,
+    "frames": 292
   },
   {
     "step": 1,
-    "duration": 4.272,
-    "frames": 129
+    "duration": 5.6,
+    "frames": 168
   },
   {
     "step": 2,
-    "duration": 7.152,
-    "frames": 215
+    "duration": 8.72,
+    "frames": 262
   },
   {
     "step": 3,
-    "duration": 6.168,
-    "frames": 186
+    "duration": 8.52,
+    "frames": 256
   },
   {
     "step": 4,
-    "duration": 4.536,
-    "frames": 137
+    "duration": 7.8,
+    "frames": 234
   },
   {
     "step": 5,
-    "duration": 5.136,
-    "frames": 155
+    "duration": 6.56,
+    "frames": 197
   },
   {
     "step": 6,
-    "duration": 7.056,
-    "frames": 212
+    "duration": 7.64,
+    "frames": 230
   },
   {
     "step": 7,
-    "duration": 5.184,
-    "frames": 156
+    "duration": 6.04,
+    "frames": 182
   },
   {
     "step": 8,
-    "duration": 2.4,
-    "frames": 72
+    "duration": 3.24,
+    "frames": 98
   },
   {
     "step": 9,
-    "duration": 3.216,
-    "frames": 97
+    "duration": 4.92,
+    "frames": 148
   },
   {
     "step": 10,
-    "duration": 5.136,
-    "frames": 155
+    "duration": 6.92,
+    "frames": 208
   },
   {
     "step": 11,
-    "duration": 2.616,
-    "frames": 79
+    "duration": 3.52,
+    "frames": 106
   },
   {
     "step": 12,
-    "duration": 5.256,
-    "frames": 158
+    "duration": 5.48,
+    "frames": 165
   },
   {
     "step": 13,
-    "duration": 6.72,
-    "frames": 202
+    "duration": 6.56,
+    "frames": 197
   },
   {
     "step": 14,
-    "duration": 4.896,
-    "frames": 147
-  },
-  {
-    "step": 15,
-    "duration": 4.416,
-    "frames": 133
-  },
-  {
-    "step": 16,
-    "duration": 5.112,
+    "duration": 5.12,
     "frames": 154
   },
   {
+    "step": 15,
+    "duration": 5.04,
+    "frames": 152
+  },
+  {
+    "step": 16,
+    "duration": 4.88,
+    "frames": 147
+  },
+  {
     "step": 17,
-    "duration": 7.464,
-    "frames": 224
+    "duration": 6.12,
+    "frames": 184
   },
   {
     "step": 18,
-    "duration": 4.272,
-    "frames": 129
+    "duration": 3.92,
+    "frames": 118
   },
   {
     "step": 19,
-    "duration": 3.048,
-    "frames": 92
+    "duration": 4.76,
+    "frames": 143
   },
   {
     "step": 20,
-    "duration": 2.544,
-    "frames": 77
+    "duration": 2.8,
+    "frames": 84
   },
   {
     "step": 21,
-    "duration": 9.072,
-    "frames": 273
+    "duration": 10.2,
+    "frames": 306
   }
 ]

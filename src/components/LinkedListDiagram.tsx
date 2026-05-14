@@ -216,13 +216,16 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
         const isReversed = toIdx < fromIdx;
 
         if (arrow.curved) {
+          // Start/end the curve below the address labels (nodeH * 0.65 ≈ 44px
+          // at scale 1.2) so the arc doesn't overlap with the text.
+          const curveYOffset = Math.round(layout.nodeH * 0.65);
           return (
             <Arrow
               key={`${arrow.from}-${arrow.to}-curved`}
               fromX={fromPos.x + layout.nodeW / 2}
-              fromY={fromPos.y + layout.nodeH}
+              fromY={fromPos.y + layout.nodeH + curveYOffset}
               toX={toPos.x + layout.nodeW / 2}
-              toY={toPos.y + layout.nodeH}
+              toY={toPos.y + layout.nodeH + curveYOffset}
               dashed={arrow.dashed}
               highlight={arrow.highlight}
               curved
@@ -319,6 +322,27 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
           const cx = finalX + layout.nodeW / 2;
           const cy = finalY + layout.nodeH / 2;
 
+          const addrLabel = node.address ? (
+            <div
+              style={{
+                position: "absolute",
+                left: finalX,
+                top: finalY + layout.nodeH + 7,
+                width: layout.nodeW,
+                textAlign: "center",
+                fontFamily: fonts.mono,
+                fontSize: Math.max(16, layout.nodeH * 0.40),
+                fontWeight: 700,
+                color: "rgba(255,255,255,0.78)",
+                textShadow: "0 1px 6px rgba(0,0,0,0.95)",
+                letterSpacing: 0.5,
+                pointerEvents: "none",
+              }}
+            >
+              {node.address}
+            </div>
+          ) : null;
+
           return (
             <div
               key={node.id}
@@ -344,25 +368,47 @@ export const LinkedListDiagram: React.FC<LinkedListDiagramProps> = ({
                 address={node.address}
                 nextAddress={nextAddr}
               />
+              {addrLabel}
             </div>
           );
         }
 
         return (
-          <NodeBox
-            key={node.id}
-            value={node.value}
-            highlight={node.highlight || "none"}
-            x={finalX}
-            y={finalY}
-            w={layout.nodeW}
-            h={layout.nodeH}
-            delay={i * 3}
-            localStepFrame={localFrame}
-            reversed={node.reversed}
-            address={node.address}
-            nextAddress={nextAddr}
-          />
+          <React.Fragment key={node.id}>
+            <NodeBox
+              value={node.value}
+              highlight={node.highlight || "none"}
+              x={finalX}
+              y={finalY}
+              w={layout.nodeW}
+              h={layout.nodeH}
+              delay={i * 3}
+              localStepFrame={localFrame}
+              reversed={node.reversed}
+              address={node.address}
+              nextAddress={nextAddr}
+            />
+            {node.address && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: finalX,
+                  top: finalY + layout.nodeH + 7,
+                  width: layout.nodeW,
+                  textAlign: "center",
+                  fontFamily: fonts.mono,
+                  fontSize: Math.max(16, layout.nodeH * 0.40),
+                  fontWeight: 700,
+                  color: "rgba(255,255,255,0.78)",
+                  textShadow: "0 1px 6px rgba(0,0,0,0.95)",
+                  letterSpacing: 0.5,
+                  pointerEvents: "none",
+                }}
+              >
+                {node.address}
+              </div>
+            )}
+          </React.Fragment>
         );
       })}
 

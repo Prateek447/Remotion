@@ -13,6 +13,9 @@ import { Reverse, REVERSE_SCENE_FRAMES } from "../scenes/Reverse";
 import { DetectCycle, DETECT_CYCLE_SCENE_FRAMES } from "../scenes/DetectCycle";
 import { MergeLists, MERGE_LISTS_SCENE_FRAMES } from "../scenes/MergeLists";
 import { RemoveNthFromEnd, REMOVE_NTH_SCENE_FRAMES } from "../scenes/RemoveNthFromEnd";
+import { BSTInsert, BST_INSERT_SCENE_FRAMES } from "../scenes/BSTInsert";
+import { TopViewTraversal, TOP_VIEW_SCENE_FRAMES } from "../scenes/TopViewTraversal";
+import { LeftViewTraversal, LEFT_VIEW_SCENE_FRAMES } from "../scenes/LeftViewTraversal";
 
 interface TokenProps { tokens: ThemedToken[][] }
 interface DualTokenProps {
@@ -84,5 +87,23 @@ export const MergeListsReel: React.FC<TokenProps> = ({ tokens }) => (
 export const RemoveNthFromEndReel: React.FC<DualTokenProps> = ({ naiveTokens, optimalTokens, transitionInfo }) => (
   <StandaloneVideo title="Remove Nth From End" complexity="O(n)" subtitle="Two-Pointer Technique" sceneFrames={REMOVE_NTH_SCENE_FRAMES}>
     <RemoveNthFromEnd naiveTokens={naiveTokens} optimalTokens={optimalTokens} transitionInfo={transitionInfo} format="reel" />
+  </StandaloneVideo>
+);
+
+export const BSTInsertReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="BST Insert" complexity="O(h)" sceneFrames={BST_INSERT_SCENE_FRAMES} nextTopic="BST Search">
+    <BSTInsert tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const TopViewReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Top View" complexity="O(n)" sceneFrames={TOP_VIEW_SCENE_FRAMES}>
+    <TopViewTraversal tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const LeftViewReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Left View" complexity="O(n)" sceneFrames={LEFT_VIEW_SCENE_FRAMES}>
+    <LeftViewTraversal tokens={tokens} format="reel" />
   </StandaloneVideo>
 );

@@ -1,27 +1,27 @@
 [
   {
     "step": 0,
-    "duration": 9.672,
-    "frames": 291
+    "duration": 11.48,
+    "frames": 345
   },
   {
     "step": 1,
-    "duration": 18.192,
-    "frames": 546
+    "duration": 14.44,
+    "frames": 434
   },
   {
     "step": 2,
-    "duration": 17.352,
-    "frames": 521
+    "duration": 16.2,
+    "frames": 486
   },
   {
     "step": 3,
-    "duration": 6.432,
-    "frames": 193
+    "duration": 8.08,
+    "frames": 243
   },
   {
     "step": 4,
-    "duration": 15.456,
-    "frames": 464
+    "duration": 9.96,
+    "frames": 299
   }
 ]

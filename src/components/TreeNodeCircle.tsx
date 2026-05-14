@@ -8,6 +8,7 @@ interface TreeNodeCircleProps {
   highlight?: NodeHighlight;
   prevHighlight?: NodeHighlight;
   transitionT?: number;
+  nodeDimT?: number;
   x: number;
   y: number;
   size: number;
@@ -17,13 +18,13 @@ interface TreeNodeCircleProps {
 }
 
 const highlightColorMap: Record<NodeHighlight, { bg: string; border: string }> = {
-  active:   { bg: "#1F5FAE", border: "#4A86C8" },
-  found:    { bg: "#2E7D32", border: "#66BB6A" },
-  removing: { bg: "#1F5FAE", border: "#4A86C8" },
-  error:    { bg: "#1F5FAE", border: "#4A86C8" },
-  new:      { bg: "#1F5FAE", border: "#4A86C8" },
-  visited:  { bg: "#1F3552", border: "#2B5C8A" },
-  none:     { bg: colors.nodeDefault, border: "#64B5F6" },
+  none:     { bg: "#0096FF", border: "#0096FF" },
+  active:   { bg: "#0096FF", border: "#0096FF" },
+  found:    { bg: "#40c057", border: "#40c057" },
+  new:      { bg: "#0096FF", border: "#0096FF" },
+  visited:  { bg: "#0096FF", border: "#0096FF" },
+  removing: { bg: "#0096FF", border: "#0096FF" },
+  error:    { bg: "#0096FF", border: "#0096FF" },
 };
 
 function lerpHex(from: string, to: string, t: number): string {
@@ -39,25 +40,20 @@ function lerpHex(from: string, to: string, t: number): string {
   return `rgb(${r},${g},${b})`;
 }
 
-function spotlightOpacityFor(h: NodeHighlight): number {
-  if (h === "active" || h === "found" || h === "new") return 1.0;
-  if (h === "visited") return 0.52;
-  if (h === "removing" || h === "error") return 0.85;
-  return 0.38; // "none" — dimmed
+function isEmphasizedHighlight(h: NodeHighlight): boolean {
+  return h === "active" || h === "found" || h === "new" || h === "removing" || h === "error";
 }
 
 // ─── ring helpers ────────────────────────────────────────────────────────────
-function ringColorFor(h: NodeHighlight): string {
-  if (h === "found")   return "#66BB6A";
-  if (h === "active")  return "#4A86C8";
-  if (h === "visited") return "#2B5C8A";
-  return "#89b4fa";
+function ringColorFor(_h: NodeHighlight): string {
+  return "#0096FF";
 }
 function ringOpacityFor(h: NodeHighlight): number {
   if (h === "found")   return 0.92;
-  if (h === "active")  return 0.80;
-  if (h === "visited") return 0.22;
-  return 0.48;
+  if (h === "active")  return 0.85;
+  if (h === "new")     return 0.85;
+  if (h === "visited") return 0.30;
+  return 0.50;
 }
 function ringWidthFor(h: NodeHighlight): number {
   return (h === "found" || h === "active") ? 2.8 : 2;
@@ -68,6 +64,7 @@ export const TreeNodeCircle: React.FC<TreeNodeCircleProps> = ({
   highlight = "none",
   prevHighlight = "none",
   transitionT = 1,
+  nodeDimT = 0,
   x,
   y,
   size,
@@ -97,11 +94,21 @@ export const TreeNodeCircle: React.FC<TreeNodeCircleProps> = ({
   const wobbleDecay  = isEmphasized ? Math.exp(-localStepFrame * 0.07) : 0;
   const wobbleSin    = Math.sin(localStepFrame * 0.55);
   const wobbleX      = wobbleDecay * 6 * wobbleSin;
-  const wobbleRotate = wobbleDecay * 1.8 * wobbleSin; // subtle tilt in phase with displacement
+  const wobbleRotate = wobbleDecay * 1.8 * wobbleSin;
 
-  // Spotlight: interpolate opacity from previous to current dim level
-  const targetOpacity  = spotlightOpacityFor(highlight);
-  const prevOpacity    = spotlightOpacityFor(prevHighlight);
+  // 3. IDLE WIGGLE — continuous gentle float, each node on a unique phase via delay
+  const phase       = delay * 0.9;
+  const idleY       = Math.sin(frame * 0.055 + phase) * 10;
+  const idleRotate  = Math.sin(frame * 0.04 + phase + 1.2) * 3;
+
+  // Spotlight: full opacity when no node is highlighted (hook/intro), dim non-active nodes otherwise
+  const dimmedOpacity = 0.28;
+  const targetOpacity = isEmphasizedHighlight(highlight)
+    ? 1.0
+    : interpolate(nodeDimT, [0, 1], [1.0, dimmedOpacity]);
+  const prevOpacity = isEmphasizedHighlight(prevHighlight)
+    ? 1.0
+    : interpolate(nodeDimT, [0, 1], [1.0, dimmedOpacity]);
   const spotlightOpacity = interpolate(transitionT, [0, 1], [prevOpacity, targetOpacity]);
 
   // Color crossfade between prev and current state
@@ -132,8 +139,8 @@ export const TreeNodeCircle: React.FC<TreeNodeCircleProps> = ({
     <div
       style={{
         position: "absolute",
-        left: x + wobbleX,
-        top: y + enterY,
+        left: x,
+        top: y,
         width: size,
         height: size,
         borderRadius: "50%",
@@ -143,7 +150,8 @@ export const TreeNodeCircle: React.FC<TreeNodeCircleProps> = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transform: `scale(${enterScale * emphasisScale}) rotate(${wobbleRotate}deg)`,
+        willChange: "transform",
+        transform: `translate(${wobbleX}px, ${enterY + idleY}px) scale(${enterScale * emphasisScale}) rotate(${wobbleRotate + idleRotate}deg)`,
         opacity: enterOpacity * spotlightOpacity,
       }}
     >
@@ -180,7 +188,7 @@ export const TreeNodeCircle: React.FC<TreeNodeCircleProps> = ({
           fontFamily: fonts.mono,
           fontSize: Math.max(24, size * 0.35),
           fontWeight: 800,
-          color: "#fff",
+          color: "#ffffff",
           textShadow: "0 0 8px rgba(255,255,255,0.18)",
           lineHeight: 1,
         }}

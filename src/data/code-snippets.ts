@@ -129,3 +129,112 @@ export const removeNthOptimalCode = `public ListNode removeNthFromEnd(ListNode h
     slow.next = slow.next.next;
     return dummy.next;
 }`;
+
+export const linearSearchCode = `int linearSearch(int[] arr, int target) {
+    for (int i = 0; i < arr.length; i++) {
+        if (arr[i] == target) return i;
+    }
+    return -1;
+}`;
+
+export const binarySearchCode = `int binarySearch(int[] arr, int target) {
+    int left = 0, right = arr.length - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] == target) return mid;
+        if (arr[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}`;
+
+export const bubbleSortCode = `void bubbleSort(int[] arr) {
+    int n = arr.length;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int tmp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = tmp;
+            }
+        }
+    }
+}`;
+
+export const mergeSortCode = `void mergeSort(int[] arr, int l, int r) {
+    if (l >= r) return;
+    int mid = l + (r - l) / 2;
+    mergeSort(arr, l, mid);
+    mergeSort(arr, mid + 1, r);
+    merge(arr, l, mid, r);
+}`;
+
+export const fibonacciCode = `int fib(int n) {
+    if (n <= 1) return n;
+    return fib(n - 1) + fib(n - 2);
+}`;
+
+export const permutationsCode = `void permute(int[] arr, int start) {
+    if (start == arr.length) {
+        print(arr);
+        return;
+    }
+    for (int i = start; i < arr.length; i++) {
+        swap(arr, start, i);
+        permute(arr, start + 1);
+        swap(arr, start, i);
+    }
+}`;
+
+export const topViewCode = `public List<Integer> topView(TreeNode root) {
+    if (root == null) return List.of();
+    TreeMap<Integer, Integer> colMap = new TreeMap<>();
+    Map<TreeNode, Integer> colOf = new HashMap<>();
+    Queue<TreeNode> q = new LinkedList<>();
+    colOf.put(root, 0);
+    q.add(root);
+    while (!q.isEmpty()) {
+        TreeNode node = q.poll();
+        int col = colOf.get(node);
+        colMap.putIfAbsent(col, node.val);
+        if (node.left != null) {
+            colOf.put(node.left, col - 1);
+            q.add(node.left);
+        }
+        if (node.right != null) {
+            colOf.put(node.right, col + 1);
+            q.add(node.right);
+        }
+    }
+    return new ArrayList<>(colMap.values());
+}`;
+
+export const leftViewCode = `public List<Integer> leftView(TreeNode root) {
+    if (root == null) return List.of();
+    List<Integer> res = new ArrayList<>();
+    Queue<TreeNode> q = new LinkedList<>(); q.add(root);
+    while (!q.isEmpty()) {
+        int size = q.size();
+        for (int i = 0; i < size; i++) {
+            TreeNode node = q.poll();
+            if (i == 0) res.add(node.val);
+            if (node.left  != null) q.add(node.left);
+            if (node.right != null) q.add(node.right);
+        }
+    }
+    return res;
+}`;
+
+export const bstInsertCode = `public void insert(int val) {
+    root = insertRec(root, val);
+}
+
+Node insertRec(Node node, int val) {
+    if (node == null)
+        return new Node(val);
+    if (val < node.val)
+        node.left = insertRec(node.left, val);
+    else if (val > node.val)
+        node.right = insertRec(node.right, val);
+    return node;
+}`;

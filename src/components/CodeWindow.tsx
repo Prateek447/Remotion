@@ -23,7 +23,41 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({
         background: "transparent",
       }}
     >
-      {!hideTitle && (
+      {hideTitle ? (
+        /* Reel — minimal header: glowing dot + filename */
+        <div
+          style={{
+            padding: "12px 20px 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexShrink: 0,
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
+          }}
+        >
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "#0096FF",
+              boxShadow: "0 0 8px #0096FFBB, 0 0 18px #0096FF55",
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              color: "rgba(160, 160, 184, 0.55)",
+              fontSize: 14,
+              fontFamily: fonts.mono,
+              letterSpacing: 0.8,
+            }}
+          >
+            {title}
+          </span>
+        </div>
+      ) : (
+        /* YouTube — Mac-style traffic-light header */
         <div
           style={{
             background: "transparent",

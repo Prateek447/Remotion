@@ -69,7 +69,7 @@ const cycleArrowHighlight = { ...cycleArrow, highlight: true };
 //   Iter 3: slow=4, fast wraps 5->3->4 — MEET at n4
 const steps: SceneStep[] = [
   // ─── Phase 0: INTRO — what is a cycle? ────────────────────────────────────
-  // Audio 0: 263 frames
+  // Audio 0: 262 frames
   {
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
@@ -81,9 +81,9 @@ const steps: SceneStep[] = [
   },
 
   // Step 1: Show the cycle arrow (5 -> 3)
-  // Audio 1: 363 frames
+  // Audio 1: 298 frames
   {
-    startFrame: 273,
+    startFrame: 272,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
       hideEndNull: true,
@@ -95,9 +95,9 @@ const steps: SceneStep[] = [
 
   // ─── Phase 1: CONCEPT — Floyd's algorithm setup ──────────────────────────
   // Step 2: slow = head, fast = head
-  // Audio 2: 283 frames
+  // Audio 2: 297 frames
   {
-    startFrame: 646,
+    startFrame: 580,
     highlightLines: { startLine: 1, endLine: 2 },
     snapshot: {
       hideEndNull: true,
@@ -112,9 +112,9 @@ const steps: SceneStep[] = [
 
   // ─── Phase 2: ITERATION 1 — slow=2, fast=3 ──────────────────────────────
   // Step 3: Move pointers
-  // Audio 3: 169 frames
+  // Audio 3: 196 frames
   {
-    startFrame: 939,
+    startFrame: 887,
     highlightLines: { startLine: 4, endLine: 5 },
     snapshot: {
       hideEndNull: true,
@@ -128,9 +128,9 @@ const steps: SceneStep[] = [
   },
 
   // Step 4: Check slow != fast
-  // Audio 4: 167 frames
+  // Audio 4: 221 frames
   {
-    startFrame: 1118,
+    startFrame: 1093,
     highlightLines: { startLine: 6, endLine: 6 },
     snapshot: {
       hideEndNull: true,
@@ -145,9 +145,9 @@ const steps: SceneStep[] = [
 
   // ─── Phase 3: ITERATION 2 — slow=3, fast=5 ──────────────────────────────
   // Step 5: Move pointers
-  // Audio 5: 130 frames
+  // Audio 5: 117 frames
   {
-    startFrame: 1295,
+    startFrame: 1324,
     highlightLines: { startLine: 4, endLine: 5 },
     snapshot: {
       hideEndNull: true,
@@ -161,9 +161,9 @@ const steps: SceneStep[] = [
   },
 
   // Step 6: Check slow != fast
-  // Audio 6: 136 frames
+  // Audio 6: 164 frames
   {
-    startFrame: 1435,
+    startFrame: 1451,
     highlightLines: { startLine: 6, endLine: 6 },
     snapshot: {
       hideEndNull: true,
@@ -178,9 +178,9 @@ const steps: SceneStep[] = [
 
   // ─── Phase 4: ITERATION 3 — slow=4, fast wraps (5->3->4) — MEET! ───────
   // Step 7: fast.next = n3 (traverses cycle back-edge 5→3). Slow already at n4.
-  // Audio 7: 300 frames (shared window with step 8 sub-step)
+  // Audio 7: 318 frames (shared window with step 8 sub-step)
   {
-    startFrame: 1581,
+    startFrame: 1625,
     highlightLines: { startLine: 4, endLine: 5 },
     snapshot: {
       hideEndNull: true,
@@ -195,7 +195,7 @@ const steps: SceneStep[] = [
 
   // Step 8: fast.next.next = n4 — both pointers meet. Cycle confirmed.
   {
-    startFrame: 1731,
+    startFrame: 1775,
     highlightLines: { startLine: 4, endLine: 5 },
     snapshot: {
       hideEndNull: true,
@@ -212,9 +212,9 @@ const steps: SceneStep[] = [
   },
 
   // Step 9: slow == fast — return true
-  // Audio 8: 129 frames
+  // Audio 8: 172 frames
   {
-    startFrame: 1891,
+    startFrame: 1953,
     highlightLines: { startLine: 6, endLine: 7 },
     snapshot: {
       hideEndNull: true,
@@ -232,9 +232,9 @@ const steps: SceneStep[] = [
 
   // ─── Phase 5: NO-CYCLE CASE ──────────────────────────────────────────────
   // Step 10: No cycle — reset pointers
-  // Audio 9: 178 frames
+  // Audio 9: 254 frames
   {
-    startFrame: 2030,
+    startFrame: 2135,
     highlightLines: { startLine: 3, endLine: 3 },
     snapshot: {
       nodes: baseNodes.map((n) => ({ ...n })),
@@ -247,9 +247,9 @@ const steps: SceneStep[] = [
   },
 
   // Step 11: fast reaches null — return false
-  // Audio 10: 201 frames
+  // Audio 10: 191 frames
   {
-    startFrame: 2218,
+    startFrame: 2399,
     highlightLines: { startLine: 10, endLine: 10 },
     snapshot: {
       nodes: baseNodes.map((n) => ({ ...n })),
@@ -262,9 +262,9 @@ const steps: SceneStep[] = [
   },
 
   // ─── Phase 6: WHY IT WORKS ───────────────────────────────────────────────
-  // Audio 11: 351 frames
+  // Audio 11: 344 frames
   {
-    startFrame: 2429,
+    startFrame: 2600,
     highlightLines: { startLine: 3, endLine: 8 },
     snapshot: {
       hideEndNull: true,
@@ -275,9 +275,9 @@ const steps: SceneStep[] = [
   },
 
   // ─── Phase 7: COMPLEXITY ─────────────────────────────────────────────────
-  // Audio 12: 258 frames
+  // Audio 12: 396 frames
   {
-    startFrame: 2790,
+    startFrame: 2954,
     highlightLines: { startLine: 0, endLine: 11 },
     snapshot: {
       hideEndNull: true,
@@ -288,9 +288,9 @@ const steps: SceneStep[] = [
   },
 
   // ─── CTA ──────────────────────────────────────────────────────────────────
-  // Audio 13: 189 frames
+  // Audio 13: 167 frames
   {
-    startFrame: 3058,
+    startFrame: 3360,
     highlightLines: { startLine: 0, endLine: 11 },
     snapshot: {
       hideEndNull: true,
@@ -301,7 +301,7 @@ const steps: SceneStep[] = [
   },
 ];
 
-export const DETECT_CYCLE_SCENE_FRAMES = 3247;
+export const DETECT_CYCLE_SCENE_FRAMES = 3527;
 
 const REEL_SAFE: SafeArea = { top: 150, bottom: 380, left: 30, right: 30 };
 const REEL_TOP_RATIO = 0.42;
@@ -322,7 +322,7 @@ export const DetectCycle: React.FC<DetectCycleProps> = ({ tokens, format = "yout
 
   const diagramAreaW = isAnim ? width : isReel ? safeW : width * 0.62;
   const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
-  const nodeScale = isAnim ? 1.1 : isReel ? 0.85 : 1;
+  const nodeScale = isAnim ? 1.1 : isReel ? 0.85 : 1.2;
   const codeFontSize = isReel ? 24 : 24;
 
   const diagram = (

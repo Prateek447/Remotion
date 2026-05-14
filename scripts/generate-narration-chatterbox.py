@@ -10,6 +10,7 @@ Requires:
     ffmpeg on PATH (for WAV -> MP3 conversion)
 """
 
+import argparse
 import json
 import math
 import os
@@ -216,20 +217,105 @@ factorial_lines = [
     {"stepIndex": 5, "text": "n factorial leaves, each doing O of one work. Final complexity: O of n factorial. For n equals twelve, that's nearly five hundred million calls. Always ask — is there a smarter algorithm?"},
 ]
 
+reverse_lines = [
+    {"stepIndex": 0,  "text": "Alright, here's our linked list. Three, seven, nine. Three nodes, each pointing to the next. Today we're flipping the whole thing around."},
+    {"stepIndex": 1,  "text": "So what does reversing actually mean? Instead of three pointing to seven pointing to nine, we want nine pointing to seven pointing to three. Every arrow flips direction."},
+    {"stepIndex": 2,  "text": "To pull this off, we need three pointers. Prev starts at null. Curr starts at head, which is three. And next, we'll use that to save our place before we break any links."},
+    {"stepIndex": 3,  "text": "First thing, we save curr dot next into next. That's seven. We need this because we're about to destroy the link from three to seven."},
+    {"stepIndex": 4,  "text": "Now the key move. We set curr dot next to prev. So three no longer points to seven. It points to null. We just reversed our first link."},
+    {"stepIndex": 5,  "text": "Time to advance. Prev moves to curr, which is three. And curr moves to next, which is seven. We slide everything forward by one."},
+    {"stepIndex": 6,  "text": "Same pattern again. Save next. That's nine."},
+    {"stepIndex": 7,  "text": "Reverse the link. Seven's next now points to three instead of nine."},
+    {"stepIndex": 8,  "text": "Advance again. Prev moves to seven, curr moves to nine."},
+    {"stepIndex": 9,  "text": "One more time. Save next. It's null this time. We're at the last node."},
+    {"stepIndex": 10, "text": "Reverse the link. Nine now points back to seven."},
+    {"stepIndex": 11, "text": "Advance. Prev is nine, curr is null. The loop condition fails. We're done iterating."},
+    {"stepIndex": 12, "text": "Last step. We set head to prev. And prev is nine. So the list now starts at nine, goes to seven, then three. Fully reversed."},
+    {"stepIndex": 13, "text": "Here's the beauty of it. We touched every node exactly once. No extra memory, no recursion. O of n time, O of one space. Clean."},
+    {"stepIndex": 14, "text": "If this helped you visualize linked list reversal, hit subscribe. More data structures and algorithms coming soon."},
+]
+
+merge_lists_lines = [
+    {"stepIndex": 0,  "text": "Two sorted linked lists. List A has one, four, six. List B has two, three, five. We need to merge them into one sorted list."},
+    {"stepIndex": 1,  "text": "The trick? A dummy node. We create a fake node with value zero. It won't be in the final answer, but it gives us a stable starting point. Tail points to dummy."},
+    {"stepIndex": 2,  "text": "Now we compare. A is at one, B is at two. One is smaller, so we take from A. Tail dot next equals A. Then we advance A to four, and tail to one."},
+    {"stepIndex": 3,  "text": "Compare again. A is four, B is two. Two is smaller. Take from B. Tail dot next equals B. Advance B to three, tail to two."},
+    {"stepIndex": 4,  "text": "A is four, B is three. Three is smaller. Take from B. Advance B to five, tail to three."},
+    {"stepIndex": 5,  "text": "A is four, B is five. Four is smaller. Take from A. Advance A to six, tail to four."},
+    {"stepIndex": 6,  "text": "A is six, B is five. Five is smaller. Take from B. Advance B to null, tail to five."},
+    {"stepIndex": 7,  "text": "B is null now. The while loop ends. But A still has six left."},
+    {"stepIndex": 8,  "text": "We just attach whatever's remaining. Tail dot next equals A. Six gets linked to the end."},
+    {"stepIndex": 9,  "text": "And we're done. The merged list is one, two, three, four, five, six. Perfectly sorted. We return dummy dot next to skip that fake zero node."},
+    {"stepIndex": 10, "text": "Time complexity? O of n plus m, where n and m are the lengths of the two lists. We visit every node exactly once. Space is O of one, we're just rearranging pointers."},
+    {"stepIndex": 11, "text": "If this merge technique made sense to you, smash that subscribe. More algorithm deep dives are coming."},
+]
+
+detect_cycle_lines = [
+    {"stepIndex": 0,  "text": "Here's a tricky problem — how do you even know if a linked list has a cycle, where some node's next pointer loops back to an earlier node and creates an infinite loop?"},
+    {"stepIndex": 1,  "text": "Here's our list, nodes one through five, but five's next doesn't point to null — it points back to three, and if you tried to traverse this list you'd loop forever with no way out."},
+    {"stepIndex": 2,  "text": "The trick is Floyd's algorithm, which uses two pointers called slow and fast, both starting at head — slow moves one step at a time while fast moves two steps at a time."},
+    {"stepIndex": 3,  "text": "Let's run it — slow moves to two and fast jumps ahead to three, so they're already at different nodes after just one iteration."},
+    {"stepIndex": 4,  "text": "We check if slow equals fast — slow is at two and fast is at three, they're not equal so we continue looping."},
+    {"stepIndex": 5,  "text": "Slow moves to three and fast jumps two steps to land on five."},
+    {"stepIndex": 6,  "text": "Still not equal — slow is at three and fast is at five — so we go around one more time."},
+    {"stepIndex": 7,  "text": "Now watch the fast pointer — slow moves to four, and fast follows the cycle arrow from five back to three then hops one more step to four, so now they're both at node four."},
+    {"stepIndex": 8,  "text": "Slow equals fast, which means a cycle was detected and we return true right here."},
+    {"stepIndex": 9,  "text": "But what if there's no cycle? Say the list is just one through five with null at the end and no loop anywhere in it."},
+    {"stepIndex": 10, "text": "Fast would reach null before slow ever catches up, the while condition fails and we return false — clean and simple."},
+    {"stepIndex": 11, "text": "Why does this actually work? Think of two runners on a circular track — the fast one will always eventually lap the slow one, so if there's a cycle they must meet, and if there's no cycle fast just falls off the end."},
+    {"stepIndex": 12, "text": "Time complexity is O of n and space is O of one — no hash sets, no extra memory, just two pointers doing all the work, which makes this one of the most elegant solutions in all of DSA."},
+    {"stepIndex": 13, "text": "If Floyd's algorithm clicked for you, hit that subscribe button because more algorithm breakdowns are on the way."},
+]
+
+tls_handshake_lines = [
+    {"stepIndex": 0, "text": "Every time you open a website that starts with HTTPS, something invisible happens before a single byte of your data moves. A handshake. Browser and server quietly agree on how to lock the conversation. That agreement is TLS."},
+    {"stepIndex": 1, "text": "The browser speaks first. It says, here are the encryption methods I know, the TLS versions I support, and a random number I just generated. That random number is called the client random. It's the first ingredient in what becomes your encryption key."},
+    {"stepIndex": 2, "text": "The server responds. It picks the strongest cipher suite both sides share, generates its own random number, the server random, and sends back a session ID. Two randoms, two sides, neither knows the key yet."},
+    {"stepIndex": 3, "text": "Now the server proves who it is. It sends its certificate, a document containing its public key, signed by a trusted Certificate Authority. Your browser checks that signature. If it's valid, you're talking to the real server, not an imposter."},
+    {"stepIndex": 4, "text": "The browser generates one more secret, the pre-master secret. It encrypts it using the server's public key from the certificate and sends it across. Only the server, with its private key, can decrypt this. No one watching the network can read it."},
+    {"stepIndex": 5, "text": "Here's where the magic happens. Both sides now have all three ingredients: client random, server random, and pre-master secret. Each side independently runs the same calculation and arrives at the exact same session keys. The key was never sent. It was derived."},
+    {"stepIndex": 6, "text": "The browser switches to encrypted mode and sends the first protected message, a Finished packet. It contains a fingerprint of the entire handshake so far. If anyone tampered with a single message, this check fails."},
+    {"stepIndex": 7, "text": "The server sends its own Finished message back. Both sides have now verified each other. The handshake is complete. You have a secure, authenticated, encrypted channel, built in milliseconds, before you even saw the page load."},
+    {"stepIndex": 8, "text": "And now everything flows. Every request, every response, every cookie, every header, all of it encrypted with AES-256-GCM. Symmetric, fast, unreadable to anyone in between. That lock icon in your browser, now you know exactly what it took to put it there."},
+]
+
+remove_nth_lines = [
+    {"stepIndex": 0,  "text": "The problem is to remove the nth node from the end of a linked list — we have nodes one through five with n equals two, so we need to delete the second node from the end which is four, and the result should be one, two, three, five."},
+    {"stepIndex": 1,  "text": "The obvious approach is two passes — a first pass to count the total length, then a second pass to walk to the right spot and splice the node out."},
+    {"stepIndex": 2,  "text": "In the first pass we walk a pointer through the whole list bumping a counter at each step — one, two, three, four, five — so the total length is five."},
+    {"stepIndex": 3,  "text": "Now the target — length minus n is three, but we count from zero, so index three is actually the fourth node which holds four, and that's what we're removing, so we reset curr to head and walk two steps to land on node three, the predecessor."},
+    {"stepIndex": 4,  "text": "Then we splice by setting curr dot next to curr dot next dot next, so four gets bypassed and we're done — but that was two passes, so can we do it in just one?"},
+    {"stepIndex": 5,  "text": "Here's the two-pointer trick — we start by adding a dummy node in front of head, and that one small detail is going to matter a lot when we hit edge cases."},
+    {"stepIndex": 6,  "text": "Now two pointers, fast and slow, both starting at dummy — we move fast forward by n plus one steps, and with n equals two, fast advances three times and lands on node three."},
+    {"stepIndex": 7,  "text": "Here's where the magic happens — we move fast and slow together one step at a time, and they maintain that exact gap of n plus one between them the entire way."},
+    {"stepIndex": 8,  "text": "When fast falls off the end and becomes null, slow is sitting right before the node we want to remove — exactly the predecessor, every single time."},
+    {"stepIndex": 9,  "text": "It's a single line — slow dot next equals slow dot next dot next — four is bypassed, we return dummy dot next and we're done in one pass with no counting at all."},
+    {"stepIndex": 10, "text": "Now let me show you why that dummy node matters — what if n equals five? We're removing the head itself, node one."},
+    {"stepIndex": 11, "text": "Fast advances six steps, walks right through every node and lands on null, while slow never moves and stays at dummy."},
+    {"stepIndex": 12, "text": "slow dot next dot next just skips past the old head — no null checks, no special cases needed, because the dummy node absorbs what would otherwise be a crash."},
+    {"stepIndex": 13, "text": "Both versions are O of n time and O of one space, but the two-pointer version does it in a single pass with no length counting, which makes it the cleaner and more elegant solution."},
+    {"stepIndex": 14, "text": "If this two-pointer trick clicked for you, smash that subscribe because more LeetCode patterns are on the way."},
+]
+
 ALL_NARRATIONS = [
-    {"sceneId": "insert-head",   "lines": insert_head_lines},
-    {"sceneId": "insert-tail",   "lines": insert_tail_lines},
-    {"sceneId": "delete-node",   "lines": delete_node_lines},
-    {"sceneId": "search-node",   "lines": search_node_lines},
-    {"sceneId": "left-view",     "lines": left_view_lines},
-    {"sceneId": "top-view",      "lines": top_view_lines},
-    {"sceneId": "o-n",           "lines": linear_search_lines},
-    {"sceneId": "o-log-n",       "lines": binary_search_lines},
-    {"sceneId": "o-n-squared",   "lines": bubble_sort_lines},
-    {"sceneId": "o-1",           "lines": constant_time_lines},
-    {"sceneId": "o-n-log-n",     "lines": merge_sort_lines},
-    {"sceneId": "o-2n",          "lines": exponential_lines},
-    {"sceneId": "o-n-factorial", "lines": factorial_lines},
+    {"sceneId": "insert-head",          "lines": insert_head_lines},
+    {"sceneId": "insert-tail",          "lines": insert_tail_lines},
+    {"sceneId": "delete-node",          "lines": delete_node_lines},
+    {"sceneId": "search-node",          "lines": search_node_lines},
+    {"sceneId": "remove-nth-from-end",  "lines": remove_nth_lines},
+    {"sceneId": "left-view",            "lines": left_view_lines},
+    {"sceneId": "top-view",             "lines": top_view_lines},
+    {"sceneId": "o-n",                  "lines": linear_search_lines},
+    {"sceneId": "o-log-n",             "lines": binary_search_lines},
+    {"sceneId": "o-n-squared",          "lines": bubble_sort_lines},
+    {"sceneId": "o-1",                  "lines": constant_time_lines},
+    {"sceneId": "o-n-log-n",           "lines": merge_sort_lines},
+    {"sceneId": "o-2n",                "lines": exponential_lines},
+    {"sceneId": "o-n-factorial",        "lines": factorial_lines},
+    {"sceneId": "detect-cycle",         "lines": detect_cycle_lines},
+    {"sceneId": "reverse",              "lines": reverse_lines},
+    {"sceneId": "merge-lists",          "lines": merge_lists_lines},
+    {"sceneId": "tls-handshake",        "lines": tls_handshake_lines},
 ]
 
 # ---------------------------------------------------------------------------
@@ -281,7 +367,12 @@ def generate_speech(model, text: str, output_mp3: str) -> None:
 # ---------------------------------------------------------------------------
 
 def main():
-    filter_scene = sys.argv[1] if len(sys.argv) > 1 else None
+    parser = argparse.ArgumentParser()
+    parser.add_argument("scene", nargs="?", default=None, help="Scene ID to generate (omit for all)")
+    parser.add_argument("--force", "-f", action="store_true", help="Overwrite existing MP3 files")
+    args = parser.parse_args()
+    filter_scene = args.scene
+    force = args.force
 
     scenes = (
         [n for n in ALL_NARRATIONS if n["sceneId"] == filter_scene]
@@ -318,7 +409,7 @@ def main():
             step_index = line["stepIndex"]
             output_path = out_dir / f"step-{step_index}.mp3"
 
-            if output_path.exists():
+            if output_path.exists() and not force:
                 print(f"  Step {step_index} [skip — already exists]")
                 duration = get_audio_duration(str(output_path))
                 frames = math.ceil(duration * 30)

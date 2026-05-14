@@ -158,9 +158,9 @@ export const NodeBox: React.FC<NodeBoxProps> = ({
         <span
           style={{
             fontFamily: fonts.mono,
-            fontSize: Math.max(10, h * 0.20),
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.9)",
+            fontSize: Math.max(11, Math.min(h / 4, h * 0.26)),
+            fontWeight: 700,
+            color: "rgba(255,255,255,0.95)",
             letterSpacing: 0.3,
             writingMode: "vertical-rl",
             textOrientation: "mixed",

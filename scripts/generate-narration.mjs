@@ -63,26 +63,26 @@ const deleteNodeLines = [
 
 const removeNthLines = [
   // Phase 0: Problem intro (optimal code dimmed)
-  { stepIndex: 0, text: "Today's problem. Remove the nth node from the end of a linked list. Here's our list. One, two, three, four, five. And n equals two. So we have to delete the second node counting from the end — which means four. The result should be one, two, three, five." },
+  { stepIndex: 0, text: "The problem is to remove the nth node from the end of a linked list — we have nodes one through five with n equals two, so we need to delete the second node from the end which is four, and the result should be one, two, three, five." },
   // Phase 1: Naive approach (naive code active)
-  { stepIndex: 1, text: "The obvious idea? Do it in two passes. First pass, count the length. Second pass, walk to the right spot and splice." },
-  { stepIndex: 2, text: "Pass one. Walk a pointer through the list, bumping a counter. One, two, three, four, five. Length is five." },
-  { stepIndex: 3, text: "Now the target. Length minus n is three. But we count from zero — so index three is actually the fourth node, which holds four. That's what we're removing. We reset curr to head, and walk two steps, landing on node three — the predecessor, at index two." },
-  { stepIndex: 4, text: "And splice. curr dot next equals curr dot next dot next. Four is bypassed. Done. But that was two passes. Can we do better?", rate: "+5%" },
+  { stepIndex: 1, text: "The obvious approach is two passes — a first pass to count the total length, then a second pass to walk to the right spot and splice the node out." },
+  { stepIndex: 2, text: "In the first pass we walk a pointer through the whole list bumping a counter at each step — one, two, three, four, five — so the total length is five." },
+  { stepIndex: 3, text: "Now the target — length minus n is three, but we count from zero, so index three is actually the fourth node which holds four, and that's what we're removing, so we reset curr to head and walk two steps to land on node three, the predecessor." },
+  { stepIndex: 4, text: "Then we splice by setting curr dot next to curr dot next dot next, so four gets bypassed and we're done — but that was two passes, so can we do it in just one?", rate: "+5%" },
   // Phase 2: Optimal (optimal code active)
-  { stepIndex: 5, text: "Enter the two-pointer trick. Step one, we add a dummy node in front of head. This matters — I'll show you why in a minute." },
-  { stepIndex: 6, text: "Now two pointers, fast and slow, both starting at dummy. We move fast forward by n plus one steps. With n equals two, fast advances three times and lands on node three." },
-  { stepIndex: 7, text: "Now the magic. We move fast and slow together, one step at a time. They keep that same gap — always n plus one apart." },
-  { stepIndex: 8, text: "When fast falls off the end and becomes null, slow is sitting right before the node we want to remove. Exactly the predecessor. Every single time." },
-  { stepIndex: 9, text: "One line. slow dot next equals slow dot next dot next. Four is bypassed. Return dummy dot next, and we're done. One pass, no counting." },
+  { stepIndex: 5, text: "Here's the two-pointer trick — we start by adding a dummy node in front of head, and that one small detail is going to matter a lot when we hit edge cases." },
+  { stepIndex: 6, text: "Now two pointers, fast and slow, both starting at dummy — we move fast forward by n plus one steps, and with n equals two, fast advances three times and lands on node three." },
+  { stepIndex: 7, text: "Here's where the magic happens — we move fast and slow together one step at a time, and they maintain that exact gap of n plus one between them the entire way." },
+  { stepIndex: 8, text: "When fast falls off the end and becomes null, slow is sitting right before the node we want to remove — exactly the predecessor, every single time." },
+  { stepIndex: 9, text: "It's a single line — slow dot next equals slow dot next dot next — four is bypassed, we return dummy dot next and we're done in one pass with no counting at all." },
   // Phase 3: Edge case - remove head
-  { stepIndex: 10, text: "Now let me show you why that dummy node matters. What if n equals five? We're removing the head itself — node one." },
-  { stepIndex: 11, text: "Fast advances six steps. It walks through every node and lands on null immediately. Slow never moves, still at dummy." },
-  { stepIndex: 12, text: "slow dot next dot next just skips past the old head. No null checks, no special case. The dummy absorbs what would otherwise be a crash." },
+  { stepIndex: 10, text: "Now let me show you why that dummy node matters — what if n equals five? We're removing the head itself, node one." },
+  { stepIndex: 11, text: "Fast advances six steps, walks right through every node and lands on null, while slow never moves and stays at dummy." },
+  { stepIndex: 12, text: "slow dot next dot next just skips past the old head — no null checks, no special cases needed, because the dummy node absorbs what would otherwise be a crash." },
   // Phase 4: Complexity
-  { stepIndex: 13, text: "Both versions are O of n time and O of one space. But the two-pointer version does it in a single pass, no length counting. Elegant.", rate: "+5%" },
+  { stepIndex: 13, text: "Both versions are O of n time and O of one space, but the two-pointer version does it in a single pass with no length counting, which makes it the cleaner and more elegant solution.", rate: "+5%" },
   // Phase 5: CTA
-  { stepIndex: 14, text: "If this two-pointer trick clicked for you, smash that subscribe. More LeetCode patterns coming up." },
+  { stepIndex: 14, text: "If this two-pointer trick clicked for you, smash that subscribe because more LeetCode patterns are on the way." },
 ];
 
 const reverseLines = [
@@ -135,6 +135,42 @@ const mergeListsLines = [
   { stepIndex: 11, text: "If this merge technique made sense to you, smash that subscribe. More algorithm deep dives are coming." },
 ];
 
+const tlsHandshakeLines = [
+  { stepIndex: 0, text: "Every time you open a website that starts with HTTPS, something invisible happens before a single byte of your data moves. A handshake. Browser and server quietly agree on how to lock the conversation. That agreement is TLS." },
+  { stepIndex: 1, text: "The browser speaks first. It says, here are the encryption methods I know, the TLS versions I support, and a random number I just generated. That random number is called the client random. It's the first ingredient in what becomes your encryption key." },
+  { stepIndex: 2, text: "The server responds. It picks the strongest cipher suite both sides share, generates its own random number, the server random, and sends back a session ID. Two randoms, two sides, neither knows the key yet." },
+  { stepIndex: 3, text: "Now the server proves who it is. It sends its certificate, a document containing its public key, signed by a trusted Certificate Authority. Your browser checks that signature. If it's valid, you're talking to the real server, not an imposter." },
+  { stepIndex: 4, text: "The browser generates one more secret, the pre-master secret. It encrypts it using the server's public key from the certificate and sends it across. Only the server, with its private key, can decrypt this. No one watching the network can read it." },
+  { stepIndex: 5, text: "Here's where the magic happens. Both sides now have all three ingredients: client random, server random, and pre-master secret. Each side independently runs the same calculation and arrives at the exact same session keys. The key was never sent. It was derived." },
+  { stepIndex: 6, text: "The browser switches to encrypted mode and sends the first protected message, a Finished packet. It contains a fingerprint of the entire handshake so far. If anyone tampered with a single message, this check fails." },
+  { stepIndex: 7, text: "The server sends its own Finished message back. Both sides have now verified each other. The handshake is complete. You have a secure, authenticated, encrypted channel, built in milliseconds, before you even saw the page load." },
+  { stepIndex: 8, text: "And now everything flows. Every request, every response, every cookie, every header, all of it encrypted with AES-256-GCM. Symmetric, fast, unreadable to anyone in between. That lock icon in your browser, now you know exactly what it took to put it there." },
+];
+
+const bstInsertLines = [
+  // Hook + intro
+  { stepIndex: 0,  text: "BST insertion feels complicated because of recursion… but the actual algorithm is just repeating one tiny decision again and again — left or right. And once you see the return phase visually, the whole thing finally clicks. Alright, Binary Search Tree. One simple rule — smaller values go left, larger values go right. Right now our root is fifty. Thirty is on the left, seventy on the right, and below thirty we already have twenty and forty. Now let's insert thirty-five." },
+  // Phase 1 – Normal insert
+  { stepIndex: 1,  text: "The public insert function just calls a recursive helper. So we start at node fifty. First question — is this node null? No. So now we compare." },
+  { stepIndex: 2,  text: "Thirty-five is smaller than fifty… so we move left. That means the value belongs somewhere inside the left subtree. Now recursion takes us to thirty." },
+  { stepIndex: 3,  text: "At node thirty now. Thirty-five is greater than thirty… so this time we go right. And we land on forty." },
+  { stepIndex: 4,  text: "Now watch carefully. Thirty-five is smaller than forty… so we try going left. But forty doesn't even have a left child." },
+  { stepIndex: 5,  text: "And there it is — null. That's the base case. This is exactly where the new node should be created. So recursion creates a brand new node containing thirty-five… and returns it." },
+  { stepIndex: 6,  text: "Now comes the important part. That returned node bubbles back up the recursive calls… and gets attached to forty's left pointer automatically. We never manually connected thirty-five ourselves. Recursion handled the insertion during the return phase. And just like that… thirty-five is now part of the BST." },
+  // Phase 2 – Empty tree
+  { stepIndex: 7,  text: "Now let's look at a completely empty tree. No root. Nothing. What happens if we insert ten?" },
+  { stepIndex: 8,  text: "insertRec gets called immediately with null. Same base case as before. But this time it happens at the very top. No comparisons. No moving left or right. Nothing." },
+  { stepIndex: 9,  text: "So recursion creates the new node… returns it… and that returned node becomes the root itself. That's the cool part. The exact same recursive logic handled a deep insertion and a completely empty tree. One base case… covers everything." },
+  // Phase 3 – Duplicate
+  { stepIndex: 10, text: "Alright, last case. What if we try inserting a duplicate? Let's insert forty again." },
+  { stepIndex: 11, text: "Forty starts at the root. Forty is smaller than fifty — so we go left." },
+  { stepIndex: 12, text: "Now at node thirty. Forty is greater than thirty — so this time we go right." },
+  { stepIndex: 13, text: "And we land on node forty. Here's the key moment — forty equals forty. Neither the less-than condition nor the greater-than condition fires." },
+  { stepIndex: 14, text: "So neither branch runs. The recursion simply returns the current node… unchanged. No new node gets created. That means this BST ignores duplicates silently." },
+  // Ending / CTA
+  { stepIndex: 15, text: "And that's BST insertion. At every step, recursion just asks one question: left or right? Eventually it hits null… creates the node… and the return phase reconnects everything automatically. Time complexity is O of h — O of log n in a balanced tree, O of n in the worst case. And honestly… once the return phase clicks, BST insertion suddenly feels way simpler." },
+];
+
 const allNarrations = [
   { sceneId: "insert-head", lines: insertHeadLines },
   { sceneId: "insert-tail", lines: insertTailLines },
@@ -143,6 +179,8 @@ const allNarrations = [
   { sceneId: "reverse", lines: reverseLines },
   { sceneId: "detect-cycle", lines: detectCycleLines },
   { sceneId: "merge-lists", lines: mergeListsLines },
+  { sceneId: "tls-handshake", lines: tlsHandshakeLines },
+  { sceneId: "bst-insert", lines: bstInsertLines },
 ];
 
 function getAudioDuration(filePath) {

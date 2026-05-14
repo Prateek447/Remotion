@@ -29,7 +29,21 @@
       "Bash(Select-Object FullName)",
       "Bash(Format-Table -AutoSize)",
       "Read(//c/c/workspace/Remotion/src/**)",
-      "Bash(xargs sed *)"
+      "Bash(xargs sed *)",
+      "Bash(Remove-Item \"C:\\\\workspace\\\\Remotion\\\\public\\\\narration\\\\detect-cycle\\\\*.mp3\" -Force)",
+      "Bash(Write-Host \"Deleted MP3s\")",
+      "Bash(python3 \"C:\\\\Users\\\\hp\\\\.claude\\\\skills\\\\ai-artist\\\\scripts\\\\search.py\" \"dark tech algorithm neon code DSA programming\")",
+      "Bash(where chrome *)",
+      "Bash(where msedge *)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Bash(\"C:/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --disable-gpu --screenshot=\"C:/workspace/Remotion/assets/thumbnails/detect-cycle-1280x720.png\" --window-size=1280,720 --hide-scrollbars \"C:/workspace/Remotion/assets/thumbnails/detect-cycle-thumb.html\")",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(git log *)",
+      "Bash(npx remotion *)",
+      "Bash(git *)",
+      "Bash(Remove-Item \"C:/workspace/Remotion/public/narration/remove-nth-from-end/step-*.mp3\" -Force)",
+      "Bash(Get-ChildItem \"C:\\\\workspace\\\\Remotion\\\\public\\\\narration\\\\remove-nth-from-end\\\\\" | Select-Object Name, Length, LastWriteTime | Sort-Object Name *)",
+      "PowerShell(Get-Content *)"
     ]
   }
 }

@@ -103,7 +103,7 @@ const steps: ScriptStep[] = [
 
   // ─── Phase 1: Naive (two-pass) ───────────────────────────────────────────
   {
-    startFrame: 486,
+    startFrame: 391,
     phase: "naive",
     highlightLines: { startLine: 0, endLine: 0 },
     naiveHighlight: { startLine: 0, endLine: 0 },
@@ -124,14 +124,15 @@ const steps: ScriptStep[] = [
       ],
     },
   },
-  // Narration 2 runs from frame 725 for ~227 frames:
-  //   "Pass one. Walk a pointer through the list, bumping a counter.
-  //    One, two, three, four, five. Length is five."
+  // Narration 2 runs from frame 641 for ~328 frames:
+  //   "In the first pass we walk a pointer through the whole list bumping
+  //    a counter at each step — one, two, three, four, five — so the
+  //    total length is five."
   //
   // Sub-steps 2..6 animate curr walking n1 -> n5, with a `len` pointer
   // stacked above it showing the counter ticking 1..5 in real time.
   {
-    startFrame: 725,
+    startFrame: 641,
     phase: "naive",
     highlightLines: { startLine: 2, endLine: 2 },
     naiveHighlight: { startLine: 2, endLine: 2 },
@@ -157,7 +158,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 770,
+    startFrame: 706,
     phase: "naive",
     highlightLines: { startLine: 4, endLine: 5 },
     naiveHighlight: { startLine: 4, endLine: 5 },
@@ -183,7 +184,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 815,
+    startFrame: 771,
     phase: "naive",
     highlightLines: { startLine: 4, endLine: 5 },
     naiveHighlight: { startLine: 4, endLine: 5 },
@@ -209,7 +210,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 860,
+    startFrame: 836,
     phase: "naive",
     highlightLines: { startLine: 4, endLine: 5 },
     naiveHighlight: { startLine: 4, endLine: 5 },
@@ -235,7 +236,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 905,
+    startFrame: 901,
     phase: "naive",
     highlightLines: { startLine: 3, endLine: 6 },
     naiveHighlight: { startLine: 3, endLine: 6 },
@@ -261,19 +262,19 @@ const steps: ScriptStep[] = [
       caption: "length = 5",
     },
   },
-  // Narration 3 runs from frame 962 for 453 frames:
-  //   "Now the target. Length minus n is three. But we count from zero —
-  //    so index three is actually the fourth node, which holds four.
-  //    That's what we're removing. We reset curr to head, and walk two
-  //    steps, landing on node three — the predecessor, at index two."
+  // Narration 3 runs from frame 979 for 440 frames:
+  //   "Now the target — length minus n is three, but we count from zero,
+  //    so index three is actually the fourth node which holds four, and
+  //    that's what we're removing, so we reset curr to head and walk two
+  //    steps to land on node three, the predecessor."
   //
   // Three sub-steps map to the narration beats:
-  //   Beat A (~300f): target math + reset curr to head + mark n4 as target.
+  //   Beat A (~291f): target math + reset curr to head + mark n4 as target.
   //                   Caption explicitly shows "index 3 = 4th node".
   //   Beat B (~80f):  curr walks n1 -> n2 ("walk two steps").
-  //   Beat C (~75f):  curr lands on n3 (the predecessor at index 2).
+  //   Beat C (~69f):  curr lands on n3 (the predecessor at index 2).
   {
-    startFrame: 962,
+    startFrame: 979,
     phase: "naive",
     highlightLines: { startLine: 7, endLine: 9 },
     naiveHighlight: { startLine: 7, endLine: 9 },
@@ -299,7 +300,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 1262,
+    startFrame: 1270,
     phase: "naive",
     highlightLines: { startLine: 10, endLine: 12 },
     naiveHighlight: { startLine: 10, endLine: 12 },
@@ -325,7 +326,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 1342,
+    startFrame: 1350,
     phase: "naive",
     highlightLines: { startLine: 10, endLine: 12 },
     naiveHighlight: { startLine: 10, endLine: 12 },
@@ -350,20 +351,21 @@ const steps: ScriptStep[] = [
       caption: "i = 1 · curr at index 2 — predecessor of target",
     },
   },
-  // Narration 4 runs from frame 1425 for 276 frames:
-  //   "And splice. curr dot next equals curr dot next dot next.
-  //    Four is bypassed. Done. But that was two passes. Can we do better?"
+  // Narration 4 runs from frame 1429 for 294 frames:
+  //   "Then we splice by setting curr dot next to curr dot next dot next,
+  //    so four gets bypassed and we're done — but that was two passes,
+  //    so can we do it in just one?"
   //
   // Two beats so the naive phase actually *finishes* before we hand off:
-  //   Beat A (~120f): the dashed bypass arrow appears over n4 — that's
+  //   Beat A (~126f): the dashed bypass arrow appears over n4 — that's
   //                   the "curr dot next = curr dot next dot next" moment.
-  //   Beat B (~160f): n4 is gone from the list entirely, the bypass is
+  //   Beat B (~168f): n4 is gone from the list entirely, the bypass is
   //                   now a solid arrow, and 1->2->3->5 holds clean while
   //                   the narrator says "Done. But that was two passes…"
   //                   This completes the animation before the optimal
   //                   phase restores the full list with a dummy prepended.
   {
-    startFrame: 1425,
+    startFrame: 1429,
     phase: "naive",
     highlightLines: { startLine: 13, endLine: 13 },
     naiveHighlight: { startLine: 13, endLine: 13 },
@@ -388,7 +390,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 1545,
+    startFrame: 1555,
     phase: "naive",
     highlightLines: { startLine: 14, endLine: 14 },
     naiveHighlight: { startLine: 14, endLine: 14 },
@@ -413,7 +415,7 @@ const steps: ScriptStep[] = [
 
   // ─── Phase 2: Optimal two-pointer ────────────────────────────────────────
   {
-    startFrame: 1711,
+    startFrame: 1733,
     phase: "optimal",
     highlightLines: { startLine: 1, endLine: 2 },
     optimalHighlight: { startLine: 1, endLine: 2 },
@@ -436,17 +438,17 @@ const steps: ScriptStep[] = [
       ],
     },
   },
-  // Narration 6 runs from frame 1932 for 324 frames:
-  //   "Now two pointers, fast and slow, both starting at dummy.
-  //    We move fast forward by n plus one steps. With n equals two,
-  //    fast advances three times and lands on node three."
+  // Narration 6 runs from frame 1991 for 336 frames:
+  //   "Now two pointers, fast and slow, both starting at dummy — we move
+  //    fast forward by n plus one steps, and with n equals two, fast
+  //    advances three times and lands on node three."
   //
   // Sub-steps animate fast walking dummy -> n1 -> n2 -> n3 while slow
   // stays parked on dummy. The first sub-step shows both pointers on
   // the dummy node so the viewer sees the initial assignment before
   // fast starts moving.
   {
-    startFrame: 1932,
+    startFrame: 1991,
     phase: "optimal",
     highlightLines: { startLine: 3, endLine: 4 },
     optimalHighlight: { startLine: 3, endLine: 4 },
@@ -475,7 +477,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 2047,
+    startFrame: 2110,
     phase: "optimal",
     highlightLines: { startLine: 5, endLine: 7 },
     optimalHighlight: { startLine: 5, endLine: 7 },
@@ -504,7 +506,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 2107,
+    startFrame: 2172,
     phase: "optimal",
     highlightLines: { startLine: 5, endLine: 7 },
     optimalHighlight: { startLine: 5, endLine: 7 },
@@ -533,7 +535,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 2167,
+    startFrame: 2234,
     phase: "optimal",
     highlightLines: { startLine: 5, endLine: 7 },
     optimalHighlight: { startLine: 5, endLine: 7 },
@@ -561,17 +563,18 @@ const steps: ScriptStep[] = [
       caption: "fast advanced n + 1 = 3 steps",
     },
   },
-  // Narration 7 runs from frame 2266 for 224 frames:
-  //   "Now the magic. We move fast and slow together, one step at a time.
-  //    They keep that same gap — always n plus one apart."
+  // Narration 7 runs from frame 2337 for 268 frames:
+  //   "Here's where the magic happens — we move fast and slow together
+  //    one step at a time, and they maintain that exact gap of n plus one
+  //    between them the entire way."
   //
-  // Sub-steps hold the previous state during "Now the magic." and only start
-  // moving slow/fast when the narrator actually says "we move fast and slow
-  // together". The "one step at a time" line is illustrated by two distinct
-  // hops instead of teleporting directly to n2/n5 — slow and fast advance in
+  // Sub-steps hold the previous state during "Here's where the magic
+  // happens" and only start moving slow/fast when the narrator says
+  // "we move fast and slow together". Illustrated by two distinct hops
+  // instead of teleporting directly to n2/n5 — slow and fast advance in
   // lock-step so the viewer sees the n+1 gap is preserved between hops.
   {
-    startFrame: 2266,
+    startFrame: 2337,
     phase: "optimal",
     highlightLines: { startLine: 8, endLine: 11 },
     optimalHighlight: { startLine: 8, endLine: 11 },
@@ -600,7 +603,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 2322,
+    startFrame: 2404,
     phase: "optimal",
     highlightLines: { startLine: 8, endLine: 11 },
     optimalHighlight: { startLine: 8, endLine: 11 },
@@ -629,7 +632,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 2382,
+    startFrame: 2476,
     phase: "optimal",
     highlightLines: { startLine: 8, endLine: 11 },
     optimalHighlight: { startLine: 8, endLine: 11 },
@@ -658,7 +661,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 2500,
+    startFrame: 2615,
     phase: "optimal",
     highlightLines: { startLine: 8, endLine: 11 },
     optimalHighlight: { startLine: 8, endLine: 11 },
@@ -687,7 +690,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 2773,
+    startFrame: 2871,
     phase: "optimal",
     highlightLines: { startLine: 12, endLine: 13 },
     optimalHighlight: { startLine: 12, endLine: 13 },
@@ -714,7 +717,7 @@ const steps: ScriptStep[] = [
 
   // ─── Phase 3: Edge case — remove head (n = 5) ────────────────────────────
   {
-    startFrame: 3066,
+    startFrame: 3148,
     phase: "optimal",
     highlightLines: { startLine: 1, endLine: 4 },
     optimalHighlight: { startLine: 1, endLine: 4 },
@@ -743,7 +746,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 3282,
+    startFrame: 3368,
     phase: "optimal",
     highlightLines: { startLine: 5, endLine: 7 },
     optimalHighlight: { startLine: 5, endLine: 7 },
@@ -772,7 +775,7 @@ const steps: ScriptStep[] = [
     },
   },
   {
-    startFrame: 3529,
+    startFrame: 3608,
     phase: "optimal",
     highlightLines: { startLine: 12, endLine: 13 },
     optimalHighlight: { startLine: 12, endLine: 13 },
@@ -800,7 +803,7 @@ const steps: ScriptStep[] = [
 
   // ─── Phase 4: Complexity recap ───────────────────────────────────────────
   {
-    startFrame: 3790,
+    startFrame: 3884,
     phase: "optimal",
     highlightLines: { startLine: 0, endLine: 14 },
     optimalHighlight: { startLine: 0, endLine: 14 },
@@ -823,7 +826,7 @@ const steps: ScriptStep[] = [
 
   // ─── Phase 5: Subscribe CTA ──────────────────────────────────────────────
   {
-    startFrame: 4052,
+    startFrame: 4188,
     phase: "optimal",
     highlightLines: { startLine: 0, endLine: 14 },
     optimalHighlight: { startLine: 0, endLine: 14 },
@@ -844,8 +847,8 @@ const steps: ScriptStep[] = [
   },
 ];
 
-// 4052 (CTA start) + 178 (step 14 frames) + 10 buffer = 4240
-export const REMOVE_NTH_SCENE_FRAMES = 4240;
+// 4188 (CTA start) + 160 (step 14 frames) + 10 buffer = 4358
+export const REMOVE_NTH_SCENE_FRAMES = 4358;
 
 const REEL_SAFE: SafeArea = { top: 150, bottom: 380, left: 60, right: 160 };
 const REEL_TOP_RATIO = 0.42;

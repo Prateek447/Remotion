@@ -1,77 +1,77 @@
 [
   {
     "step": 0,
-    "duration": 15.864,
-    "frames": 476
+    "duration": 10.152,
+    "frames": 305
   },
   {
     "step": 1,
-    "duration": 7.632,
-    "frames": 229
+    "duration": 7.248,
+    "frames": 218
   },
   {
     "step": 2,
-    "duration": 7.536,
-    "frames": 227
+    "duration": 7.32,
+    "frames": 220
   },
   {
     "step": 3,
-    "duration": 15.072,
-    "frames": 453
+    "duration": 10.944,
+    "frames": 329
   },
   {
     "step": 4,
-    "duration": 9.168,
-    "frames": 276
+    "duration": 7.944,
+    "frames": 239
   },
   {
     "step": 5,
-    "duration": 7.032,
-    "frames": 211
+    "duration": 7.32,
+    "frames": 220
   },
   {
     "step": 6,
-    "duration": 10.8,
-    "frames": 324
+    "duration": 9.312,
+    "frames": 280
   },
   {
     "step": 7,
-    "duration": 7.44,
-    "frames": 224
+    "duration": 7.944,
+    "frames": 239
   },
   {
     "step": 8,
-    "duration": 8.76,
-    "frames": 263
+    "duration": 7.752,
+    "frames": 233
   },
   {
     "step": 9,
-    "duration": 9.432,
-    "frames": 283
+    "duration": 8.256,
+    "frames": 248
   },
   {
     "step": 10,
-    "duration": 6.864,
-    "frames": 206
+    "duration": 6.264,
+    "frames": 188
   },
   {
     "step": 11,
-    "duration": 7.896,
-    "frames": 237
+    "duration": 6.6,
+    "frames": 198
   },
   {
     "step": 12,
-    "duration": 8.352,
-    "frames": 251
+    "duration": 7.464,
+    "frames": 224
   },
   {
     "step": 13,
-    "duration": 8.4,
-    "frames": 252
+    "duration": 9.36,
+    "frames": 281
   },
   {
     "step": 14,
-    "duration": 5.904,
-    "frames": 178
+    "duration": 5.52,
+    "frames": 166
   }
 ]

@@ -36,7 +36,7 @@ const steps: SceneStep[] = [
 
   // Step 1 — base case: O(1) per leaf
   {
-    startFrame: 416,
+    startFrame: 406,
     highlightLines: { startLine: 1, endLine: 4 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
@@ -47,7 +47,7 @@ const steps: SceneStep[] = [
 
   // Step 2 — level 0: loop runs n times → n recursive calls
   {
-    startFrame: 871,
+    startFrame: 710,
     highlightLines: { startLine: 5, endLine: 5 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
@@ -58,7 +58,7 @@ const steps: SceneStep[] = [
 
   // Step 3 — level 1: each of n calls loops n-1 times → n×(n-1) total
   {
-    startFrame: 1260,
+    startFrame: 1044,
     highlightLines: { startLine: 7, endLine: 7 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
@@ -69,7 +69,7 @@ const steps: SceneStep[] = [
 
   // Step 4 — pattern: multiply all levels down to 1 → n! total leaves
   {
-    startFrame: 1637,
+    startFrame: 1336,
     highlightLines: { startLine: 5, endLine: 9 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
@@ -79,7 +79,7 @@ const steps: SceneStep[] = [
 
   // Step 5 — final: n! leaves × O(1) each = O(n!)
   {
-    startFrame: 2169,
+    startFrame: 1666,
     highlightLines: { startLine: 0, endLine: 10 },
     snapshot: {
       nodes: [], pointers: [], arrows: [],
@@ -89,7 +89,7 @@ const steps: SceneStep[] = [
   },
 ];
 
-export const FACTORIAL_SCENE_FRAMES = 3498;
+export const FACTORIAL_SCENE_FRAMES = 2015;
 
 export interface FactorialProps {
   tokens: ThemedToken[][];

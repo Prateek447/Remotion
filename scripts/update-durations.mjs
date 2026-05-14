@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
 
-const SCENE_ID = "insert-head";
+const SCENE_ID = process.argv[2] ?? "insert-head";
 const NARRATION_DIR = path.join("public", "narration", SCENE_ID);
 const FPS = 30;
 const BUFFER = 10;
@@ -44,19 +44,23 @@ const totalFrames = cumulative;
 console.log(`\n  Total scene frames: ${totalFrames} (~${(totalFrames / FPS).toFixed(1)}s)`);
 
 console.log("\n--- Copy this into src/data/narration-scripts.ts ---\n");
-console.log("export const insertHeadDurations: NarrationDuration[] = [");
+const camel = SCENE_ID.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+console.log(`export const ${camel}Durations: NarrationDuration[] = [`);
 for (const d of durations) {
   console.log(`  { step: ${d.step}, duration: ${d.duration}, frames: ${d.frames} },`);
 }
 console.log("];");
 
-console.log("\n--- Copy these startFrames into src/scenes/InsertHead.tsx ---\n");
+const sceneName = SCENE_ID.replace(/-([a-z])/g, (_, c) => c.toUpperCase().padStart(1));
+const sceneConst = sceneName.replace(/^./, c => c.toUpperCase());
+console.log(`\n--- Copy these startFrames into src/scenes/${sceneConst}.tsx ---\n`);
 let sf = 0;
 for (const d of durations) {
   console.log(`  Step ${d.step}: startFrame: ${sf},`);
   sf += d.frames + BUFFER;
 }
-console.log(`\n  INSERT_HEAD_SCENE_FRAMES = ${sf};`);
+const constName = SCENE_ID.toUpperCase().replace(/-/g, "_");
+console.log(`\n  ${constName}_SCENE_FRAMES = ${sf};`);
 
 const durationsPath = path.join(NARRATION_DIR, "durations.json");
 fs.writeFileSync(durationsPath, JSON.stringify(durations, null, 2));

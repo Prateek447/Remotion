@@ -11,6 +11,16 @@ import { Reverse, REVERSE_SCENE_FRAMES } from "../scenes/Reverse";
 import { DetectCycle, DETECT_CYCLE_SCENE_FRAMES } from "../scenes/DetectCycle";
 import { MergeLists, MERGE_LISTS_SCENE_FRAMES } from "../scenes/MergeLists";
 import { RemoveNthFromEnd, REMOVE_NTH_SCENE_FRAMES } from "../scenes/RemoveNthFromEnd";
+import { ConstantTime, CONSTANT_TIME_SCENE_FRAMES } from "../scenes/ConstantTime";
+import { LinearSearch, LINEAR_SEARCH_SCENE_FRAMES } from "../scenes/LinearSearch";
+import { BinarySearch, BINARY_SEARCH_SCENE_FRAMES } from "../scenes/BinarySearch";
+import { BubbleSort, BUBBLE_SORT_SCENE_FRAMES } from "../scenes/BubbleSort";
+import { MergeSort, MERGE_SORT_SCENE_FRAMES } from "../scenes/MergeSort";
+import { Exponential, EXPONENTIAL_SCENE_FRAMES } from "../scenes/Exponential";
+import { Factorial, FACTORIAL_SCENE_FRAMES } from "../scenes/Factorial";
+import { BSTInsert, BST_INSERT_SCENE_FRAMES } from "../scenes/BSTInsert";
+import { TopViewTraversal, TOP_VIEW_SCENE_FRAMES } from "../scenes/TopViewTraversal";
+import { LeftViewTraversal, LEFT_VIEW_SCENE_FRAMES } from "../scenes/LeftViewTraversal";
 
 interface TokenProps { tokens: ThemedToken[][] }
 interface DualTokenProps {
@@ -70,5 +80,65 @@ export const MergeListsVideo: React.FC<TokenProps> = ({ tokens }) => (
 export const RemoveNthFromEndVideo: React.FC<DualTokenProps> = ({ naiveTokens, optimalTokens, transitionInfo }) => (
   <StandaloneVideo title="Remove Nth From End" complexity="O(n)" subtitle="Two-Pointer Technique" sceneFrames={REMOVE_NTH_SCENE_FRAMES}>
     <RemoveNthFromEnd naiveTokens={naiveTokens} optimalTokens={optimalTokens} transitionInfo={transitionInfo} />
+  </StandaloneVideo>
+);
+
+export const ConstantTimeVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="O(1) — Constant Time" complexity="O(1)" sceneFrames={CONSTANT_TIME_SCENE_FRAMES} nextTopic="O(n) — Linear Time">
+    <ConstantTime tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const LinearSearchVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="O(n) — Linear Time" complexity="O(n)" sceneFrames={LINEAR_SEARCH_SCENE_FRAMES} nextTopic="O(log n) — Logarithmic Time">
+    <LinearSearch tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const BinarySearchVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="O(log n) — Logarithmic Time" complexity="O(log n)" sceneFrames={BINARY_SEARCH_SCENE_FRAMES} nextTopic="O(n²) — Quadratic Time">
+    <BinarySearch tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const BubbleSortVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="O(n²) — Quadratic Time" complexity="O(n²)" sceneFrames={BUBBLE_SORT_SCENE_FRAMES} nextTopic="O(n log n) — Linearithmic Time">
+    <BubbleSort tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const MergeSortVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="O(n log n) — Linearithmic Time" complexity="O(n log n)" sceneFrames={MERGE_SORT_SCENE_FRAMES} nextTopic="O(2ⁿ) — Exponential Time">
+    <MergeSort tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const ExponentialVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="O(2ⁿ) — Exponential Time" complexity="O(2ⁿ)" sceneFrames={EXPONENTIAL_SCENE_FRAMES} nextTopic="O(n!) — Factorial Time">
+    <Exponential tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const FactorialVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="O(n!) — Factorial Time" complexity="O(n!)" sceneFrames={FACTORIAL_SCENE_FRAMES}>
+    <Factorial tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const BSTInsertVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="BST Insert" complexity="O(h)" sceneFrames={BST_INSERT_SCENE_FRAMES} nextTopic="BST Search">
+    <BSTInsert tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const TopViewVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Top View" complexity="O(n)" sceneFrames={TOP_VIEW_SCENE_FRAMES}>
+    <TopViewTraversal tokens={tokens} format="youtube" />
+  </StandaloneVideo>
+);
+
+export const LeftViewVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Left View" complexity="O(n)" sceneFrames={LEFT_VIEW_SCENE_FRAMES}>
+    <LeftViewTraversal tokens={tokens} format="youtube" />
   </StandaloneVideo>
 );

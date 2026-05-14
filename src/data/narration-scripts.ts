@@ -95,26 +95,26 @@ export const removeNthNarration: SceneNarration = {
   sceneId: "remove-nth-from-end",
   lines: [
     // Phase 0: Problem intro
-    { stepIndex: 0, text: "Today's problem. Remove the nth node from the end of a linked list. Here's our list. One, two, three, four, five. And n equals two. So we have to delete the second node counting from the end — which means four. The result should be one, two, three, five." },
+    { stepIndex: 0, text: "The problem is to remove the nth node from the end of a linked list — we have nodes one through five with n equals two, so we need to delete the second node from the end which is four, and the result should be one, two, three, five." },
     // Phase 1: Naive
-    { stepIndex: 1, text: "The obvious idea? Do it in two passes. First pass, count the length. Second pass, walk to the right spot and splice." },
-    { stepIndex: 2, text: "Pass one. Walk a pointer through the list, bumping a counter. One, two, three, four, five. Length is five." },
-    { stepIndex: 3, text: "Now the target. Length minus n is three. But we count from zero — so index three is actually the fourth node, which holds four. That's what we're removing. We reset curr to head, and walk two steps, landing on node three — the predecessor, at index two." },
-    { stepIndex: 4, text: "And splice. curr dot next equals curr dot next dot next. Four is bypassed. Done. But that was two passes. Can we do better?" },
+    { stepIndex: 1, text: "The obvious approach is two passes — a first pass to count the total length, then a second pass to walk to the right spot and splice the node out." },
+    { stepIndex: 2, text: "In the first pass we walk a pointer through the whole list bumping a counter at each step — one, two, three, four, five — so the total length is five." },
+    { stepIndex: 3, text: "Now the target — length minus n is three, but we count from zero, so index three is actually the fourth node which holds four, and that's what we're removing, so we reset curr to head and walk two steps to land on node three, the predecessor." },
+    { stepIndex: 4, text: "Then we splice by setting curr dot next to curr dot next dot next, so four gets bypassed and we're done — but that was two passes, so can we do it in just one?" },
     // Phase 2: Optimal
-    { stepIndex: 5, text: "Enter the two-pointer trick. Step one, we add a dummy node in front of head. This matters — I'll show you why in a minute." },
-    { stepIndex: 6, text: "Now two pointers, fast and slow, both starting at dummy. We move fast forward by n plus one steps. With n equals two, fast advances three times and lands on node three." },
-    { stepIndex: 7, text: "Now the magic. We move fast and slow together, one step at a time. They keep that same gap — always n plus one apart." },
-    { stepIndex: 8, text: "When fast falls off the end and becomes null, slow is sitting right before the node we want to remove. Exactly the predecessor. Every single time." },
-    { stepIndex: 9, text: "One line. slow dot next equals slow dot next dot next. Four is bypassed. Return dummy dot next, and we're done. One pass, no counting." },
+    { stepIndex: 5, text: "Here's the two-pointer trick — we start by adding a dummy node in front of head, and that one small detail is going to matter a lot when we hit edge cases." },
+    { stepIndex: 6, text: "Now two pointers, fast and slow, both starting at dummy — we move fast forward by n plus one steps, and with n equals two, fast advances three times and lands on node three." },
+    { stepIndex: 7, text: "Here's where the magic happens — we move fast and slow together one step at a time, and they maintain that exact gap of n plus one between them the entire way." },
+    { stepIndex: 8, text: "When fast falls off the end and becomes null, slow is sitting right before the node we want to remove — exactly the predecessor, every single time." },
+    { stepIndex: 9, text: "It's a single line — slow dot next equals slow dot next dot next — four is bypassed, we return dummy dot next and we're done in one pass with no counting at all." },
     // Phase 3: Edge case - remove head
-    { stepIndex: 10, text: "Now let me show you why that dummy node matters. What if n equals five? We're removing the head itself — node one." },
-    { stepIndex: 11, text: "Fast advances six steps. It walks through every node and lands on null immediately. Slow never moves, still at dummy." },
-    { stepIndex: 12, text: "slow dot next dot next just skips past the old head. No null checks, no special case. The dummy absorbs what would otherwise be a crash." },
+    { stepIndex: 10, text: "Now let me show you why that dummy node matters — what if n equals five? We're removing the head itself, node one." },
+    { stepIndex: 11, text: "Fast advances six steps, walks right through every node and lands on null, while slow never moves and stays at dummy." },
+    { stepIndex: 12, text: "slow dot next dot next just skips past the old head — no null checks, no special cases needed, because the dummy node absorbs what would otherwise be a crash." },
     // Phase 4: Complexity
-    { stepIndex: 13, text: "Both versions are O of n time and O of one space. But the two-pointer version does it in a single pass, no length counting. Elegant." },
+    { stepIndex: 13, text: "Both versions are O of n time and O of one space, but the two-pointer version does it in a single pass with no length counting, which makes it the cleaner and more elegant solution." },
     // Phase 5: CTA
-    { stepIndex: 14, text: "If this two-pointer trick clicked for you, smash that subscribe. More LeetCode patterns coming up." },
+    { stepIndex: 14, text: "If this two-pointer trick clicked for you, smash that subscribe because more LeetCode patterns are on the way." },
   ],
 };
 
@@ -142,20 +142,20 @@ export const reverseNarration: SceneNarration = {
 export const detectCycleNarration: SceneNarration = {
   sceneId: "detect-cycle",
   lines: [
-    { stepIndex: 0, text: "Here's a tricky one. How do you know if a linked list has a cycle? Meaning, some node's next pointer loops back to an earlier node, creating an infinite loop." },
-    { stepIndex: 1, text: "Here's our list. One, two, three, four, five. But look, five's next doesn't point to null. It points back to three. That's a cycle. If you tried to traverse this list, you'd loop forever." },
-    { stepIndex: 2, text: "The trick is called Floyd's algorithm. Two pointers, slow and fast, both starting at head. Slow moves one step at a time. Fast moves two steps." },
-    { stepIndex: 3, text: "Let's run it. Slow moves to two. Fast jumps to three. They're at different nodes." },
-    { stepIndex: 4, text: "We check. Slow is at two, fast is at three. Not equal. Keep going." },
-    { stepIndex: 5, text: "Slow moves to three. Fast jumps two steps and lands on five." },
-    { stepIndex: 6, text: "Still not equal. Slow is three, fast is five. Continue." },
-    { stepIndex: 7, text: "Now watch the fast pointer carefully. Slow moves to four. Fast follows the cycle arrow from five back to three, then hops one more to four. They're both at four." },
-    { stepIndex: 8, text: "Slow equals fast. Cycle detected. We return true." },
-    { stepIndex: 9, text: "But what if there's no cycle? Say the list is just one through five with null at the end. No loop." },
-    { stepIndex: 10, text: "Fast would reach null before slow catches up. The while condition fails, and we return false. Simple." },
-    { stepIndex: 11, text: "Why does this work? Think of it like two runners on a circular track. The fast one will always lap the slow one. If there's a cycle, they must meet. If not, fast hits the end." },
-    { stepIndex: 12, text: "Time complexity, O of n. Space, O of one. No hash sets, no extra memory. Just two pointers. Elegant." },
-    { stepIndex: 13, text: "If Floyd's algorithm clicked for you, hit that subscribe button. More algorithm breakdowns on the way." },
+    { stepIndex: 0, text: "Here's a tricky problem — how do you even know if a linked list has a cycle, where some node's next pointer loops back to an earlier node and creates an infinite loop?" },
+    { stepIndex: 1, text: "Here's our list, nodes one through five, but five's next doesn't point to null — it points back to three, and if you tried to traverse this list you'd loop forever with no way out." },
+    { stepIndex: 2, text: "The trick is Floyd's algorithm, which uses two pointers called slow and fast, both starting at head — slow moves one step at a time while fast moves two steps at a time." },
+    { stepIndex: 3, text: "Let's run it — slow moves to two and fast jumps ahead to three, so they're already at different nodes after just one iteration." },
+    { stepIndex: 4, text: "We check if slow equals fast — slow is at two and fast is at three, they're not equal so we continue looping." },
+    { stepIndex: 5, text: "Slow moves to three and fast jumps two steps to land on five." },
+    { stepIndex: 6, text: "Still not equal — slow is at three and fast is at five — so we go around one more time." },
+    { stepIndex: 7, text: "Now watch the fast pointer — slow moves to four, and fast follows the cycle arrow from five back to three then hops one more step to four, so now they're both at node four." },
+    { stepIndex: 8, text: "Slow equals fast, which means a cycle was detected and we return true right here." },
+    { stepIndex: 9, text: "But what if there's no cycle? Say the list is just one through five with null at the end and no loop anywhere in it." },
+    { stepIndex: 10, text: "Fast would reach null before slow ever catches up, the while condition fails and we return false — clean and simple." },
+    { stepIndex: 11, text: "Why does this actually work? Think of two runners on a circular track — the fast one will always eventually lap the slow one, so if there's a cycle they must meet, and if there's no cycle fast just falls off the end." },
+    { stepIndex: 12, text: "Time complexity is O of n and space is O of one — no hash sets, no extra memory, just two pointers doing all the work, which makes this one of the most elegant solutions in all of DSA." },
+    { stepIndex: 13, text: "If Floyd's algorithm clicked for you, hit that subscribe button because more algorithm breakdowns are on the way." },
   ],
 };
 
@@ -177,6 +177,33 @@ export const mergeListsNarration: SceneNarration = {
   ],
 };
 
+export const bstInsertNarration: SceneNarration = {
+  sceneId: "bst-insert",
+  lines: [
+    // Hook + intro
+    { stepIndex: 0,  text: "BST insertion feels complicated because of recursion… but the actual algorithm is just repeating one tiny decision again and again — left or right. And once you see the return phase visually, the whole thing finally clicks. Alright, Binary Search Tree. One simple rule — smaller values go left, larger values go right. Right now our root is fifty. Thirty is on the left, seventy on the right, and below thirty we already have twenty and forty. Now let's insert thirty-five." },
+    // Phase 1 – Normal insert
+    { stepIndex: 1,  text: "The public insert function just calls a recursive helper. So we start at node fifty. First question — is this node null? No. So now we compare." },
+    { stepIndex: 2,  text: "Thirty-five is smaller than fifty… so we move left. That means the value belongs somewhere inside the left subtree. Now recursion takes us to thirty." },
+    { stepIndex: 3,  text: "At node thirty now. Thirty-five is greater than thirty… so this time we go right. And we land on forty." },
+    { stepIndex: 4,  text: "Now watch carefully. Thirty-five is smaller than forty… so we try going left. But forty doesn't even have a left child." },
+    { stepIndex: 5,  text: "And there it is — null. That's the base case. This is exactly where the new node should be created. So recursion creates a brand new node containing thirty-five… and returns it." },
+    { stepIndex: 6,  text: "Now comes the important part. That returned node bubbles back up the recursive calls… and gets attached to forty's left pointer automatically. We never manually connected thirty-five ourselves. Recursion handled the insertion during the return phase. And just like that… thirty-five is now part of the BST." },
+    // Phase 2 – Empty tree
+    { stepIndex: 7,  text: "Now let's look at a completely empty tree. No root. Nothing. What happens if we insert ten?" },
+    { stepIndex: 8,  text: "insertRec gets called immediately with null. Same base case as before. But this time it happens at the very top. No comparisons. No moving left or right. Nothing." },
+    { stepIndex: 9,  text: "So recursion creates the new node… returns it… and that returned node becomes the root itself. That's the cool part. The exact same recursive logic handled a deep insertion and a completely empty tree. One base case… covers everything." },
+    // Phase 3 – Duplicate
+    { stepIndex: 10, text: "Alright, last case. What if we try inserting a duplicate? Let's insert forty again." },
+    { stepIndex: 11, text: "Forty starts at the root. Forty is smaller than fifty — so we go left." },
+    { stepIndex: 12, text: "Now at node thirty. Forty is greater than thirty — so this time we go right." },
+    { stepIndex: 13, text: "And we land on node forty. Here's the key moment — forty equals forty. Neither the less-than condition nor the greater-than condition fires." },
+    { stepIndex: 14, text: "So neither branch runs. The recursion simply returns the current node… unchanged. No new node gets created. That means this BST ignores duplicates silently." },
+    // Ending / CTA
+    { stepIndex: 15, text: "And that's BST insertion. At every step, recursion just asks one question: left or right? Eventually it hits null… creates the node… and the return phase reconnects everything automatically. Time complexity is O of h — O of log n in a balanced tree, O of n in the worst case. And honestly… once the return phase clicks, BST insertion suddenly feels way simpler." },
+  ],
+};
+
 export const allNarrations: SceneNarration[] = [
   insertHeadNarration,
   insertTailNarration,
@@ -185,6 +212,7 @@ export const allNarrations: SceneNarration[] = [
   reverseNarration,
   detectCycleNarration,
   mergeListsNarration,
+  bstInsertNarration,
 ];
 
 export interface NarrationDuration {
@@ -286,21 +314,21 @@ export const deleteTailDurations: NarrationDuration[] = [
 // The narration audio files still number 0..14 (one per script line), so we
 // use `audioStep` to decouple them from the expanded scene step indices.
 export const removeNthDurations: NarrationDuration[] = [
-  { step: 0,  audioStep: 0,  duration: 15.86, frames: 476 },
-  { step: 1,  audioStep: 1,  duration: 7.63,  frames: 229 },
-  { step: 2,  audioStep: 2,  duration: 7.54,  frames: 227 },
-  { step: 7,  audioStep: 3,  duration: 15.07, frames: 453 },
-  { step: 10, audioStep: 4,  duration: 9.17,  frames: 276 },
-  { step: 12, audioStep: 5,  duration: 7.03,  frames: 211 },
-  { step: 13, audioStep: 6,  duration: 10.80, frames: 324 },
-  { step: 17, audioStep: 7,  duration: 7.44,  frames: 224 },
-  { step: 20, audioStep: 8,  duration: 8.76,  frames: 263 },
-  { step: 21, audioStep: 9,  duration: 9.43,  frames: 283 },
-  { step: 22, audioStep: 10, duration: 6.86,  frames: 206 },
-  { step: 23, audioStep: 11, duration: 7.90,  frames: 237 },
-  { step: 24, audioStep: 12, duration: 8.35,  frames: 251 },
-  { step: 25, audioStep: 13, duration: 8.40,  frames: 252 },
-  { step: 26, audioStep: 14, duration: 5.90,  frames: 178 },
+  { step: 0,  audioStep: 0,  duration: 12.68, frames: 381 },
+  { step: 1,  audioStep: 1,  duration: 8.00,  frames: 240 },
+  { step: 2,  audioStep: 2,  duration: 10.92, frames: 328 },
+  { step: 7,  audioStep: 3,  duration: 14.64, frames: 440 },
+  { step: 10, audioStep: 4,  duration: 9.80,  frames: 294 },
+  { step: 12, audioStep: 5,  duration: 8.24,  frames: 248 },
+  { step: 13, audioStep: 6,  duration: 11.20, frames: 336 },
+  { step: 17, audioStep: 7,  duration: 8.92,  frames: 268 },
+  { step: 20, audioStep: 8,  duration: 8.20,  frames: 246 },
+  { step: 21, audioStep: 9,  duration: 8.88,  frames: 267 },
+  { step: 22, audioStep: 10, duration: 7.00,  frames: 210 },
+  { step: 23, audioStep: 11, duration: 7.64,  frames: 230 },
+  { step: 24, audioStep: 12, duration: 8.84,  frames: 266 },
+  { step: 25, audioStep: 13, duration: 9.80,  frames: 294 },
+  { step: 26, audioStep: 14, duration: 5.32,  frames: 160 },
 ];
 
 // Scene step 3 (curr = head) is animation-only — no dedicated audio.
@@ -326,20 +354,20 @@ export const reverseDurations: NarrationDuration[] = [
 // Animation-only scene step: Step 8 (7b: fast meets slow at n4)
 // Audio files numbered 0..13; audioStep decouples them from scene step indices.
 export const detectCycleDurations: NarrationDuration[] = [
-  { step: 0,  audioStep: 0,  duration: 8.76,  frames: 263 },
-  { step: 1,  audioStep: 1,  duration: 12.07, frames: 363 },
-  { step: 2,  audioStep: 2,  duration: 9.41,  frames: 283 },
-  { step: 3,  audioStep: 3,  duration: 5.62,  frames: 169 },
-  { step: 4,  audioStep: 4,  duration: 5.54,  frames: 167 },
-  { step: 5,  audioStep: 5,  duration: 4.32,  frames: 130 },
-  { step: 6,  audioStep: 6,  duration: 4.51,  frames: 136 },
-  { step: 7,  audioStep: 7,  duration: 9.98,  frames: 300 },
-  { step: 9,  audioStep: 8,  duration: 4.27,  frames: 129 },
-  { step: 10, audioStep: 9,  duration: 5.93,  frames: 178 },
-  { step: 11, audioStep: 10, duration: 6.67,  frames: 201 },
-  { step: 12, audioStep: 11, duration: 11.69, frames: 351 },
-  { step: 13, audioStep: 12, duration: 8.57,  frames: 258 },
-  { step: 14, audioStep: 13, duration: 6.29,  frames: 189 },
+  { step: 0,  audioStep: 0,  duration: 8.72,  frames: 262 },
+  { step: 1,  audioStep: 1,  duration: 9.92,  frames: 298 },
+  { step: 2,  audioStep: 2,  duration: 9.88,  frames: 297 },
+  { step: 3,  audioStep: 3,  duration: 6.52,  frames: 196 },
+  { step: 4,  audioStep: 4,  duration: 7.36,  frames: 221 },
+  { step: 5,  audioStep: 5,  duration: 3.88,  frames: 117 },
+  { step: 6,  audioStep: 6,  duration: 5.44,  frames: 164 },
+  { step: 7,  audioStep: 7,  duration: 10.60, frames: 318 },
+  { step: 9,  audioStep: 8,  duration: 5.72,  frames: 172 },
+  { step: 10, audioStep: 9,  duration: 8.44,  frames: 254 },
+  { step: 11, audioStep: 10, duration: 6.36,  frames: 191 },
+  { step: 12, audioStep: 11, duration: 11.44, frames: 344 },
+  { step: 13, audioStep: 12, duration: 13.20, frames: 396 },
+  { step: 14, audioStep: 13, duration: 5.56,  frames: 167 },
 ];
 
 export const mergeListsDurations: NarrationDuration[] = [
@@ -357,6 +385,96 @@ export const mergeListsDurations: NarrationDuration[] = [
   { step: 11, duration: 5.95,  frames: 179 },
 ];
 
+export const constantTimeDurations: NarrationDuration[] = [
+  { step: 0, duration: 12.72, frames: 382 },
+  { step: 1, duration: 10.04, frames: 302 },
+  { step: 2, duration: 10.48, frames: 315 },
+  { step: 3, duration:  8.60, frames: 258 },
+  { step: 4, duration:  7.64, frames: 230 },
+  { step: 5, duration: 11.48, frames: 345 },
+];
+
+export const linearSearchDurations: NarrationDuration[] = [
+  { step: 0, duration: 10.76, frames: 323 },
+  { step: 1, duration: 13.16, frames: 395 },
+  { step: 2, duration: 15.44, frames: 464 },
+  { step: 3, duration:  8.24, frames: 248 },
+  { step: 4, duration:  8.36, frames: 251 },
+];
+
+export const binarySearchDurations: NarrationDuration[] = [
+  { step: 0, duration: 13.36, frames: 401 },
+  { step: 1, duration: 11.64, frames: 350 },
+  { step: 2, duration: 14.04, frames: 422 },
+  { step: 3, duration:  9.04, frames: 272 },
+  { step: 4, duration:  9.00, frames: 270 },
+];
+
+export const bubbleSortDurations: NarrationDuration[] = [
+  { step: 0, duration:  7.80, frames: 234 },
+  { step: 1, duration:  6.60, frames: 198 },
+  { step: 2, duration:  6.16, frames: 185 },
+  { step: 3, duration: 11.20, frames: 336 },
+  { step: 4, duration: 12.40, frames: 372 },
+  { step: 5, duration:  9.24, frames: 278 },
+];
+
+export const mergeSortDurations: NarrationDuration[] = [
+  { step: 0, duration:  9.36, frames: 281 },
+  { step: 1, duration: 10.24, frames: 308 },
+  { step: 2, duration:  5.80, frames: 174 },
+  { step: 3, duration: 13.48, frames: 405 },
+  { step: 4, duration: 12.68, frames: 381 },
+  { step: 5, duration:  8.04, frames: 242 },
+];
+
+export const exponentialDurations: NarrationDuration[] = [
+  { step: 0, duration:  9.48, frames: 285 },
+  { step: 1, duration:  8.84, frames: 266 },
+  { step: 2, duration: 11.56, frames: 347 },
+  { step: 3, duration: 14.72, frames: 442 },
+];
+
+export const factorialDurations: NarrationDuration[] = [
+  { step: 0, duration: 13.20, frames: 396 },
+  { step: 1, duration:  9.80, frames: 294 },
+  { step: 2, duration: 10.80, frames: 324 },
+  { step: 3, duration:  9.40, frames: 282 },
+  { step: 4, duration: 10.64, frames: 320 },
+  { step: 5, duration: 11.28, frames: 339 },
+];
+
+export const tlsHandshakeDurations: NarrationDuration[] = [
+  { step: 0, duration: 14.52, frames: 436 },
+  { step: 1, duration: 14.52, frames: 436 },
+  { step: 2, duration: 13.64, frames: 410 },
+  { step: 3, duration: 16.64, frames: 500 },
+  { step: 4, duration: 15.80, frames: 474 },
+  { step: 5, duration: 15.96, frames: 479 },
+  { step: 6, duration: 13.56, frames: 407 },
+  { step: 7, duration: 12.96, frames: 389 },
+  { step: 8, duration: 16.20, frames: 486 },
+];
+
+export const bstInsertDurations: NarrationDuration[] = [
+  { step: 0,  duration: 27.34, frames: 821 },
+  { step: 1,  duration: 9.98,  frames: 300 },
+  { step: 2,  duration: 9.29,  frames: 279 },
+  { step: 3,  duration: 6.82,  frames: 205 },
+  { step: 4,  duration: 7.66,  frames: 230 },
+  { step: 5,  duration: 10.80, frames: 324 },
+  { step: 6,  duration: 18.07, frames: 543 },
+  { step: 7,  duration: 6.26,  frames: 188 },
+  { step: 8,  duration: 11.33, frames: 340 },
+  { step: 9,  duration: 14.16, frames: 425 },
+  { step: 10, duration: 5.62,  frames: 169 },
+  { step: 11, duration: 4.54,  frames: 137 },
+  { step: 12, duration: 4.56,  frames: 137 },
+  { step: 13, duration: 8.50,  frames: 255 },
+  { step: 14, duration: 10.25, frames: 308 },
+  { step: 15, duration: 23.88, frames: 717 },
+];
+
 export const narrationDurationsByScene: Record<string, NarrationDuration[]> = {
   "insert-head": insertHeadDurations,
   "insert-tail": insertTailDurations,
@@ -368,4 +486,13 @@ export const narrationDurationsByScene: Record<string, NarrationDuration[]> = {
   "reverse": reverseDurations,
   "detect-cycle": detectCycleDurations,
   "merge-lists": mergeListsDurations,
+  "o-1":           constantTimeDurations,
+  "o-n":           linearSearchDurations,
+  "o-log-n":       binarySearchDurations,
+  "o-n-squared":   bubbleSortDurations,
+  "o-n-log-n":     mergeSortDurations,
+  "o-2n":          exponentialDurations,
+  "o-n-factorial":  factorialDurations,
+  "tls-handshake":  tlsHandshakeDurations,
+  "bst-insert":     bstInsertDurations,
 };
