@@ -7,3 +7,6 @@ build/
 .venv-tts/
 .venv/
 .cache/
+out/
+**__pycache__**
+.DS_Store
