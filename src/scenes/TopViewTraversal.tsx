@@ -5,6 +5,8 @@ import type { ArrowData, ListNodeData, SceneStep } from "../lib/types";
 import { useStepTransition } from "../lib/useStepTransition";
 import { colors, fonts, springPresets } from "../lib/theme";
 import { AmbientLayer } from "../components/AmbientLayer";
+import { compressStepsForAnim } from "../lib/animSteps";
+import { AnimationOnlyLayout, ANIM_DIAGRAM_HEIGHT } from "../components/AnimationOnlyLayout";
 import { CodeBlock } from "../components/CodeBlock";
 import { CodeWindow } from "../components/CodeWindow";
 import { NarrationLayer } from "../components/NarrationLayer";
@@ -437,8 +439,20 @@ function makeSteps(): SceneStep[] {
   ];
 }
 
-function makePositionMap(isReel: boolean): Record<string, { x: number; y: number }> {
-  return isReel
+function makePositionMap(format: "youtube" | "reel" | "reel-anim"): Record<string, { x: number; y: number }> {
+  if (format === "reel-anim") {
+    return {
+      n1: { x: 0.50, y: 0.14 },
+      n2: { x: 0.32, y: 0.33 },
+      n3: { x: 0.68, y: 0.33 },
+      n4: { x: 0.20, y: 0.52 },
+      n5: { x: 0.40, y: 0.52 },
+      n6: { x: 0.60, y: 0.52 },
+      n7: { x: 0.78, y: 0.52 },
+      n8: { x: 0.12, y: 0.70 },
+    };
+  }
+  return format === "reel"
     ? {
         n1: { x: 0.50, y: 0.18 },
         n2: { x: 0.34, y: 0.36 },
@@ -909,7 +923,7 @@ const ComplexityCard: React.FC<{
 
 export interface TopViewTraversalProps {
   tokens: ThemedToken[][];
-  format?: "youtube" | "reel";
+  format?: "youtube" | "reel" | "reel-anim";
 }
 
 export const TopViewTraversal: React.FC<TopViewTraversalProps> = ({
@@ -917,22 +931,22 @@ export const TopViewTraversal: React.FC<TopViewTraversalProps> = ({
   format = "youtube",
 }) => {
   const { width, height, fps } = useVideoConfig();
-  const isReel = format === "reel";
+  const isReel = format === "reel" || format === "reel-anim";
+  const isAnim = format === "reel-anim";
+  const isReelOnly = format === "reel";
 
   const safeW = width - REEL_SAFE.left - REEL_SAFE.right;
   const safeH = height - REEL_SAFE.top - REEL_SAFE.bottom;
-  const diagramAreaW = isReel ? safeW : width * 0.54;
-  const diagramAreaH = isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
-  // Actual pixel height available for code lines in the reel code panel
-  // = safe area code portion minus 20px top/bottom padding from StackedLayout
+  const diagramAreaW = isAnim ? width : isReel ? safeW : width * 0.54;
+  const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
   const codeViewH = Math.round(safeH * (1 - REEL_TOP_RATIO)) - 40;
-  const nodeScale  = isReel ? 1.1 : 0.72;
+  const nodeScale  = isAnim ? 1.4 : isReel ? 1.1 : 0.72;
   const treeScale  = 1;
 
-  const steps = makeSteps();
+  const steps = isAnim ? compressStepsForAnim(makeSteps()) : makeSteps();
   const { current, localFrame } = useStepTransition(steps);
   const complexityInfo = current.snapshot.complexityInfo;
-  const posMap = makePositionMap(isReel);
+  const posMap = makePositionMap(format);
 
   // Slide animation: when the complexity step hits, tree slides up and out,
   // result panel slides up from below into its place.
@@ -951,10 +965,10 @@ export const TopViewTraversal: React.FC<TopViewTraversalProps> = ({
     <div
       style={{
         width: diagramAreaW,
-        height: isReel ? diagramAreaH : height,
+        height: isAnim ? diagramAreaH : isReelOnly ? diagramAreaH : height,
         position: "relative",
         overflow: "hidden",
-        margin: isReel ? "0 auto" : undefined,
+        margin: isReelOnly ? "0 auto" : undefined,
       }}
     >
       {/* ── Tree + all overlays — slides upward out on step 21 ── */}
@@ -986,10 +1000,10 @@ export const TopViewTraversal: React.FC<TopViewTraversalProps> = ({
         </div>
         <QueueVisualization
           steps={steps}
-          itemSize={isReel ? 44 : 52}
+          itemSize={isAnim ? 54 : isReel ? 50 : 52}
           style={{
             position: "absolute",
-            bottom: isReel ? 20 : 200,
+            bottom: isAnim ? 20 : isReelOnly ? 20 : 200,
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 5,
@@ -1028,21 +1042,25 @@ export const TopViewTraversal: React.FC<TopViewTraversalProps> = ({
 
   return (
     <>
-      {isReel ? (
+      {isAnim ? (
+        <AnimationOnlyLayout>{diagram}</AnimationOnlyLayout>
+      ) : isReelOnly ? (
         <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} contentPaddingTop={16} />
       ) : (
         <SplitLayout left={diagram} right={code} leftWidth="54%" />
       )}
       <AmbientLayer />
-      <SfxLayer steps={steps} duckVolume={0.45} />
-      <NarrationLayer sceneId="top-view" steps={steps} />
+      {!isAnim && <SfxLayer steps={steps} duckVolume={0.45} />}
+      {!isAnim && <NarrationLayer sceneId="top-view" steps={steps} />}
       {complexityInfo && (
         <ComplexityCard
           time={complexityInfo.time}
           space={complexityInfo.space}
           localFrame={Math.max(0, localFrame - 20)}
           style={
-            isReel
+            isAnim
+              ? { position: "absolute", top: 1460, left: "50%", transform: "translateX(-50%)" }
+              : isReelOnly
               ? { position: "absolute", top: reelDividerTop - 160, left: reelCenterLeft, transform: "translateX(-50%)" }
               : { position: "absolute", top: 28, left: 28 }
           }

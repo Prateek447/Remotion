@@ -606,7 +606,14 @@ export const BSTInsert: React.FC<BSTInsertProps> = ({ tokens, format = "youtube"
           space={complexityInfo.space}
           localFrame={Math.max(0, localFrame - 20)}
           style={
-            isReel
+            isAnim
+              ? {
+                  position: "absolute",
+                  top: 1460,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                }
+              : isReel
               ? {
                   position: "absolute",
                   top: reelDividerTop - 160,

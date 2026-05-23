@@ -297,6 +297,25 @@ remove_nth_lines = [
     {"stepIndex": 14, "text": "If this two-pointer trick clicked for you, smash that subscribe because more LeetCode patterns are on the way."},
 ]
 
+level_order_lines = [
+    {"stepIndex": 0,  "text": "Level order traversal is how you read a tree the same way you read a page — left to right, row by row. Every node in level one before any node in level two. Think of it as processing the tree in waves. We have a seven-node complete binary tree here. Node one at the root, two and three one level below, and four through seven at the bottom. Watch how we visit them in that exact order."},
+    {"stepIndex": 1,  "text": "Before anything else, a null check. If the root doesn't exist, there's no tree to traverse. We return an empty result right away. One line, prevents a crash on an empty tree. Always good practice."},
+    {"stepIndex": 2,  "text": "Now, why a queue? Because a queue is first-in, first-out. The node that enters first exits first. That's exactly the behaviour we need — finish processing each level completely before moving to the next. We create the queue and drop in the root. Node one is now waiting in line."},
+    {"stepIndex": 3,  "text": "The while loop is the engine. As long as the queue has something in it, there are nodes left to process. Right now, node one is in the queue. The condition is true — we enter the loop."},
+    {"stepIndex": 4,  "text": "Poll removes the front of the queue and returns it. We get node one. We call result dot add to record its value. Output so far — just one. The queue is now empty, but we're about to refill it."},
+    {"stepIndex": 5,  "text": "Node one has two children. Two on the left, three on the right. We check each child and offer them to the queue. Left before right — always. The queue now holds two and three. We've just seeded the entire second level."},
+    {"stepIndex": 6,  "text": "Back to the top of the while loop. Queue isn't empty — node two is waiting. We poll it. Two exits from the front. We add two to the result. Output: one, two."},
+    {"stepIndex": 7,  "text": "Two's left child is four and its right child is five. Both get offered to the queue. The queue now has three, four, five. Three was already there from before, and four and five just joined the line."},
+    {"stepIndex": 8,  "text": "We poll again. Three comes out next — it was added before four and five, so it exits first. That's the queue enforcing order. We add three to the result. Output: one, two, three. The entire second level is captured."},
+    {"stepIndex": 9,  "text": "Three's children are six and seven. We offer both. Queue now holds four, five, six, seven. That's the complete third level, lined up and ready to go."},
+    {"stepIndex": 10, "text": "Poll gives us four. Four is a leaf — no left child, no right child. Both if checks see null, so nothing gets added to the queue. We add four to the result and move on. Output: one, two, three, four."},
+    {"stepIndex": 11, "text": "Five is next. Also a leaf. Poll, add to result, nothing to enqueue. Output: one, two, three, four, five."},
+    {"stepIndex": 12, "text": "Six comes out of the queue. Another leaf. Poll, add, done. Output: one through six. One node left waiting."},
+    {"stepIndex": 13, "text": "Seven — the last node. We poll it and add it. Queue size drops to zero. Output: one, two, three, four, five, six, seven. Every single node, in exactly the right order."},
+    {"stepIndex": 14, "text": "The while loop checks one more time. Queue is empty — the condition is false. We exit. Nothing more to process."},
+    {"stepIndex": 15, "text": "Time complexity is O of n — we visit every node exactly once. Space is also O of n — at peak, the queue holds an entire level, and in a complete binary tree the bottom level has roughly n over two nodes. This queue-based, wave-by-wave pattern is the foundation of BFS and shows up everywhere in tree problems. Drop a like if this clicked, and subscribe for more."},
+]
+
 ALL_NARRATIONS = [
     {"sceneId": "insert-head",          "lines": insert_head_lines},
     {"sceneId": "insert-tail",          "lines": insert_tail_lines},
@@ -316,6 +335,7 @@ ALL_NARRATIONS = [
     {"sceneId": "reverse",              "lines": reverse_lines},
     {"sceneId": "merge-lists",          "lines": merge_lists_lines},
     {"sceneId": "tls-handshake",        "lines": tls_handshake_lines},
+    {"sceneId": "level-order",          "lines": level_order_lines},
 ]
 
 # ---------------------------------------------------------------------------

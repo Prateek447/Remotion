@@ -14,6 +14,8 @@ interface CodeBlockProps {
   centered?: boolean;
   centerWidth?: number;
   bold?: boolean;
+  autoScroll?: boolean;
+  containerHeight?: number;
 }
 
 // JetBrains Mono character width ratio (width / fontSize)
@@ -39,11 +41,13 @@ function remapTokenColor(hex: string): string {
   return hex;
 }
 
-// Keywords → node blue, functions/methods → purple, everything else → white
-function getTokenColor(shikiColor: string): string {
+// Keywords → blue, functions → purple, comments → gray (italic in One Dark Pro), else → white
+function getTokenColor(shikiColor: string, fontStyle?: number): string {
   const normalized = shikiColor.toUpperCase();
-  if (normalized === "#C678DD") return "#0096FF";           // keywords
-  if (normalized === "#61AFEF") return "#B07EFF";           // functions / method names
+  if (normalized === "#C678DD") return "#0096FF";
+  if (normalized === "#61AFEF") return "#B07EFF";
+  // Comments: italic flag (One Dark Pro) OR explicit gray color match
+  if (((fontStyle ?? 0) & 1) !== 0 || normalized.startsWith("#5C6370")) return "#7C8396";
   return "#ffffff";
 }
 
@@ -52,11 +56,13 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   tokens,
   steps,
   fontSize = 24,
-  lineHeight = 2.1,
+  lineHeight = 1.85,
   padding = 40,
   centered = false,
   centerWidth,
   bold = false,
+  autoScroll = false,
+  containerHeight,
 }) => {
   const frame = useCurrentFrame();
   const { fps, width: canvasWidth } = useVideoConfig();
@@ -73,7 +79,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   const centeredLeft = Math.max(padding, (referenceWidth - contentWidth) / 2);
   const pLeft = centered ? centeredLeft : padding;
 
-  const { current, previous, localFrame } = useStepTransition(steps);
+  const { current, previous, t, localFrame, stepIndex } = useStepTransition(steps);
 
   const currStart = current.highlightLines.startLine;
   const currEnd = current.highlightLines.endLine;
@@ -89,96 +95,254 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
     return lineChars * charW + PILL_PAD * 2;
   };
 
-  return (
-    <div
-      style={{
-        fontFamily: fonts.mono,
-        fontSize,
-        background: "transparent",
-        padding,
-        paddingLeft: pLeft,
-        height: "100%",
-        position: "relative",
-        boxSizing: "border-box",
-        overflow: "hidden",
-      }}
-    >
-      {/* Per-line highlighter strips — each line gets its own band */}
-      {currStart >= 0 &&
-        Array.from({ length: currEnd - currStart + 1 }, (_, idx) => {
-          const lineIndex = currStart + idx;
-          const targetW = getLineWidthPx(lineIndex);
-          const stripW  = targetW * wipeProgress;
-          return (
-            <div
-              key={lineIndex}
-              style={{
-                position: "absolute",
-                left: pLeft,
-                width: stripW,
-                top: padding + lineIndex * lineH + lineH * 0.12,
-                height: lineH * 0.76,
-                borderRadius: 6,
-                background: "#0096FF",
-                pointerEvents: "none",
-              }}
-            />
-          );
-        })}
+  // ── Auto-scroll: keep highlighted line(s) in the upper-center of visible area ──
+  // Scrolling is active whenever containerHeight is provided (both reel and youtube).
+  const totalH   = padding * 2 + tokens.length * lineH;
+  const maxScroll = containerHeight != null ? Math.max(0, totalH - containerHeight) : 0;
+  let scrollY = 0;
+  if (containerHeight != null) {
+    const scrollFor = (step: SceneStep) => {
+      const midLine = (step.highlightLines.startLine + step.highlightLines.endLine) / 2;
+      const target = padding + midLine * lineH - containerHeight * 0.38;
+      return Math.max(0, Math.min(maxScroll, target));
+    };
+    scrollY = interpolate(t, [0, 1], [scrollFor(previous), scrollFor(current)]);
+  }
 
-      {tokens.map((lineTokens, i) => {
-        const currVisible = current.visibleLines;
-        const prevVisible = previous.visibleLines;
-        const hasRevealControl = currVisible !== undefined;
+  // ── Shared highlight border ───────────────────────────────────────────────────
+  const prevStart = previous.highlightLines.startLine;
+  const prevEnd   = previous.highlightLines.endLine;
+  const hasPrev   = prevStart >= 0;
 
-        const isVisible = !hasRevealControl || i < currVisible;
-        const wasVisible = !hasRevealControl || prevVisible === undefined || i < prevVisible;
-        const isNewlyRevealed = hasRevealControl && isVisible && !wasVisible;
-
-        if (!isVisible) {
-          return (
-            <div key={i} style={{ whiteSpace: "pre", lineHeight: `${lineHeight}`, opacity: 0, height: lineH }}>
-              {"\u200b"}
-            </div>
-          );
+  const highlightStrips = currStart >= 0
+    ? (() => {
+        let maxW = 0;
+        for (let i = currStart; i <= currEnd; i++) {
+          maxW = Math.max(maxW, getLineWidthPx(i));
+        }
+        let prevMaxW = maxW;
+        if (hasPrev) {
+          prevMaxW = 0;
+          for (let i = prevStart; i <= prevEnd; i++) {
+            prevMaxW = Math.max(prevMaxW, getLineWidthPx(i));
+          }
         }
 
-        const revealProgress = isNewlyRevealed
-          ? spring({ frame: localFrame, fps, delay: (i - (prevVisible ?? 0)) * 3, config: springPresets.enter })
-          : spring({ frame, fps, delay: i * 2, config: springPresets.enter });
-        const revealOpacity = interpolate(revealProgress, [0, 1], [0, 1]);
-        const revealX = interpolate(revealProgress, [0, 1], [24, 0]);
+        const currTop    = padding + currStart * lineH;
+        const currHeight = (currEnd - currStart + 1) * lineH;
+        const prevTop    = hasPrev ? padding + prevStart * lineH : currTop;
+        const prevHeight = hasPrev ? (prevEnd - prevStart + 1) * lineH : currHeight;
+
+        const animTop    = interpolate(t, [0, 1], [prevTop,    currTop]);
+        const animHeight = interpolate(t, [0, 1], [prevHeight, currHeight]);
+        const animWidth  = interpolate(t, [0, 1], [prevMaxW,   maxW]) + 16;
+        const animOpacity = hasPrev ? 1 : wipeProgress;
 
         return (
           <div
-            key={i}
             style={{
-              whiteSpace: "pre",
-              height: lineH,
-              lineHeight: `${lineH}px`,
-              opacity: revealOpacity,
-              transform: `translateX(${revealX}px)`,
-              display: "flex",
-              alignItems: "center",
-              position: "relative",
-              zIndex: 1,
+              position:      "absolute",
+              left:          pLeft - 8,
+              top:           animTop,
+              width:         animWidth,
+              height:        animHeight,
+              border:        `2px solid rgba(0, 150, 255, ${0.8 * animOpacity})`,
+              borderRadius:  "6px",
+              boxShadow:     `0 0 12px rgba(0, 150, 255, ${0.22 * animOpacity})`,
+              pointerEvents: "none",
+              opacity:       animOpacity,
+              zIndex:        0,
             }}
-          >
-            <span>
-              {lineTokens.map((tok, j) => {
-                const isHighlightedLine = i >= currStart && i <= currEnd;
-                const tokenColor = isHighlightedLine ? "#0a0a18" : getTokenColor(tok.color ?? "");
-
-                return (
-                  <span key={j} style={{ color: tokenColor, fontWeight: bold ? 700 : 400 }}>
-                    {tok.content}
-                  </span>
-                );
-              })}
-            </span>
-          </div>
+          />
         );
-      })}
+      })()
+    : null;
+
+  // ── Lines ────────────────────────────────────────────────────────────────────
+  const renderedLines = tokens.map((lineTokens, i) => {
+    const isHighlightedLine = i >= currStart && i <= currEnd;
+
+    if (autoScroll) {
+      // All lines visible from frame 0 — no progressive reveal
+      return (
+        <div
+          key={i}
+          style={{
+            whiteSpace:  "pre",
+            height:      lineH,
+            lineHeight:  `${lineH}px`,
+            display:     "flex",
+            alignItems:  "center",
+            position:    "relative",
+            zIndex:      1,
+          }}
+        >
+          <span>
+            {lineTokens.map((tok, j) => (
+              <span
+                key={j}
+                style={{
+                  color:      getTokenColor(tok.color ?? "", tok.fontStyle),
+                  fontWeight: isHighlightedLine ? 800 : (bold ? 700 : 400),
+                }}
+              >
+                {tok.content}
+              </span>
+            ))}
+          </span>
+        </div>
+      );
+    }
+
+    // ── Original progressive-reveal mode ──
+    const currVisible = current.visibleLines;
+    const hasRevealControl = currVisible !== undefined;
+
+    // High-water mark: max visibleLines across all steps seen so far.
+    // Lines never disappear once shown — only the highlight box moves.
+    const highWaterVisible = steps
+      .slice(0, stepIndex + 1)
+      .reduce((max, s) => Math.max(max, s.visibleLines ?? tokens.length), 0);
+    const prevHighWaterVisible = stepIndex > 0
+      ? steps.slice(0, stepIndex).reduce((max, s) => Math.max(max, s.visibleLines ?? tokens.length), 0)
+      : 0;
+
+    const isVisible = !hasRevealControl || i < highWaterVisible;
+    // Only animate lines revealed for the first time in this step
+    const isNewlyRevealed = hasRevealControl
+      && isVisible
+      && currVisible !== undefined
+      && i >= prevHighWaterVisible
+      && i < currVisible
+      && currVisible > prevHighWaterVisible;
+
+    if (!isVisible) {
+      return (
+        <div key={i} style={{ whiteSpace: "pre", lineHeight: `${lineHeight}`, opacity: 0, height: lineH }}>
+          {"​"}
+        </div>
+      );
+    }
+
+    const revealProgress = isNewlyRevealed
+      ? spring({ frame: localFrame, fps, delay: (i - prevHighWaterVisible) * 3, config: springPresets.enter })
+      : spring({ frame, fps, delay: i * 2, config: springPresets.enter });
+    const revealOpacity = interpolate(revealProgress, [0, 1], [0, 1]);
+    const revealX       = interpolate(revealProgress, [0, 1], [24, 0]);
+
+    return (
+      <div
+        key={i}
+        style={{
+          whiteSpace:  "pre",
+          height:      lineH,
+          lineHeight:  `${lineH}px`,
+          opacity:     revealOpacity,
+          transform:   `translateX(${revealX}px)`,
+          display:     "flex",
+          alignItems:  "center",
+          position:    "relative",
+          zIndex:      1,
+        }}
+      >
+        <span>
+          {lineTokens.map((tok, j) => (
+            <span
+              key={j}
+              style={{
+                color:      getTokenColor(tok.color ?? "", tok.fontStyle),
+                fontWeight: isHighlightedLine ? 800 : (bold ? 700 : 400),
+              }}
+            >
+              {tok.content}
+            </span>
+          ))}
+        </span>
+      </div>
+    );
+  });
+
+  // ── Scrolling layout: clip outer, translate inner, fade top/bottom ──────────
+  // Used for both reel (autoScroll) and youtube (containerHeight provided).
+  if (containerHeight != null) {
+    const FADE_H     = 64;
+    const topOpacity = interpolate(scrollY, [0, 40], [0, 1], { extrapolateRight: "clamp" });
+    const botOpacity = maxScroll > 0
+      ? interpolate(scrollY, [maxScroll - 40, maxScroll], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
+      : 0;
+
+    return (
+      <div
+        style={{
+          fontFamily:  fonts.mono,
+          fontSize,
+          background:  "transparent",
+          height:      "100%",
+          position:    "relative",
+          boxSizing:   "border-box",
+          overflow:    "hidden",
+        }}
+      >
+        <div
+          style={{
+            transform:   `translateY(${-scrollY}px)`,
+            padding,
+            paddingLeft: pLeft,
+            position:    "relative",
+          }}
+        >
+          {highlightStrips}
+          {renderedLines}
+        </div>
+        {/* Top fade — visible only when content is scrolled */}
+        <div
+          style={{
+            position:      "absolute",
+            top:           0,
+            left:          0,
+            right:         0,
+            height:        FADE_H,
+            background:    `linear-gradient(to bottom, ${colors.base} 0%, transparent 100%)`,
+            opacity:       topOpacity,
+            pointerEvents: "none",
+            zIndex:        5,
+          }}
+        />
+        {/* Bottom fade — visible when more content remains below */}
+        <div
+          style={{
+            position:      "absolute",
+            bottom:        0,
+            left:          0,
+            right:         0,
+            height:        FADE_H,
+            background:    `linear-gradient(to top, ${colors.base} 0%, transparent 100%)`,
+            opacity:       botOpacity,
+            pointerEvents: "none",
+            zIndex:        5,
+          }}
+        />
+      </div>
+    );
+  }
+
+  // ── Original layout ───────────────────────────────────────────────────────────
+  return (
+    <div
+      style={{
+        fontFamily:  fonts.mono,
+        fontSize,
+        background:  "transparent",
+        padding,
+        paddingLeft: pLeft,
+        height:      "100%",
+        position:    "relative",
+        boxSizing:   "border-box",
+        overflow:    "hidden",
+      }}
+    >
+      {highlightStrips}
+      {renderedLines}
     </div>
   );
 };

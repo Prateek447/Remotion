@@ -45,8 +45,8 @@ function isEmphasizedHighlight(h: NodeHighlight): boolean {
 }
 
 // ─── ring helpers ────────────────────────────────────────────────────────────
-function ringColorFor(_h: NodeHighlight): string {
-  return "#0096FF";
+function ringColorFor(h: NodeHighlight): string {
+  return h === "found" ? "#40c057" : "#0096FF";
 }
 function ringOpacityFor(h: NodeHighlight): number {
   if (h === "found")   return 0.92;

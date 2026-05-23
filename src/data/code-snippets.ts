@@ -225,6 +225,59 @@ export const leftViewCode = `public List<Integer> leftView(TreeNode root) {
     return res;
 }`;
 
+export const rightViewCode = `public List<Integer> rightView(TreeNode root) {
+    if (root == null) return List.of();
+    List<Integer> res = new ArrayList<>();
+    Queue<TreeNode> q = new LinkedList<>(); q.add(root);
+    while (!q.isEmpty()) {
+        int size = q.size();
+        for (int i = 0; i < size; i++) {
+            TreeNode node = q.poll();
+            if (i == size - 1) res.add(node.val);
+            if (node.left  != null) q.add(node.left);
+            if (node.right != null) q.add(node.right);
+        }
+    }
+    return res;
+}`;
+
+export const boundaryCode = `List<Integer> boundary(TreeNode root) {
+    if (root == null) return List.of();
+    List<Integer> res = new ArrayList<>();
+    if (root.left != null || root.right != null)
+        res.add(root.val);
+    addLeft(root.left, res);
+    addLeaves(root, res);
+    addRight(root.right, res);
+    return res;
+}
+
+// left boundary (top-down, skip leaves)
+void addLeft(TreeNode n, List<Integer> res) {
+    if (n == null ||
+        (n.left == null && n.right == null)) return;
+    res.add(n.val);
+    addLeft(n.left != null ? n.left : n.right, res);
+}
+
+// collect all leaves (DFS)
+void addLeaves(TreeNode n, List<Integer> res) {
+    if (n == null) return;
+    if (n.left == null && n.right == null) {
+        res.add(n.val); return;
+    }
+    addLeaves(n.left, res);
+    addLeaves(n.right, res);
+}
+
+// right boundary (bottom-up, post-order)
+void addRight(TreeNode n, List<Integer> res) {
+    if (n == null ||
+        (n.left == null && n.right == null)) return;
+    addRight(n.right != null ? n.right : n.left, res);
+    res.add(n.val);
+}`;
+
 export const bstInsertCode = `public void insert(int val) {
     root = insertRec(root, val);
 }
@@ -237,4 +290,80 @@ Node insertRec(Node node, int val) {
     else if (val > node.val)
         node.right = insertRec(node.right, val);
     return node;
+}`;
+
+
+export const towerOfHanoiCode = `void hanoi(int n, char src, char dst, char via) {
+    if (n == 0) return;
+    hanoi(n - 1, src, via, dst);
+    System.out.println(src + " → " + dst);
+    hanoi(n - 1, via, dst, src);
+}`;
+
+export const diagonalCode = `public List<List<Integer>> diagonal(TreeNode root) {
+    if (root == null) return List.of();
+    List<List<Integer>> result = new ArrayList<>();
+    Queue<TreeNode> q = new LinkedList<>();
+    q.add(root);
+    // one pass = one diagonal
+    while (!q.isEmpty()) {
+        List<Integer> row = new ArrayList<>();
+        List<TreeNode> nextQ = new ArrayList<>();
+        while (!q.isEmpty()) {
+            TreeNode node = q.poll();
+            while (node != null) {
+                row.add(node.val);
+                // left child = start of next diagonal
+                if (node.left != null)
+                    nextQ.add(node.left);
+                // right child = stay on same diagonal
+                node = node.right;
+            }
+        }
+        result.add(row);
+        // promote nextQ → next queue
+        q.addAll(nextQ);
+    }
+    return result;
+}`;
+
+export const rtlDiagonalCode = `public List<List<Integer>> diagonalRL(TreeNode root) {
+    if (root == null) return List.of();
+    List<List<Integer>> result = new ArrayList<>();
+    Queue<TreeNode> q = new LinkedList<>();
+    q.add(root);
+    // one pass = one diagonal
+    while (!q.isEmpty()) {
+        List<Integer> row = new ArrayList<>();
+        List<TreeNode> nextQ = new ArrayList<>();
+        while (!q.isEmpty()) {
+            TreeNode node = q.poll();
+            while (node != null) {
+                row.add(node.val);
+                // right child = start of next diagonal
+                if (node.right != null)
+                    nextQ.add(node.right);
+                // left child = stay on same diagonal
+                node = node.left;
+            }
+        }
+        result.add(row);
+        // promote nextQ → next queue
+        q.addAll(nextQ);
+    }
+    return result;
+}`;
+
+export const levelOrderCode = `public List<Integer> levelOrder(TreeNode root) {
+  List<Integer> result = new ArrayList<>();
+  if (root == null) return result;
+  Queue<TreeNode> queue = new LinkedList<>();
+  queue.offer(root);
+  while (!queue.isEmpty()) {
+    TreeNode node = queue.poll();
+    result.add(node.val);
+    if (node.left != null) queue.offer(node.left);
+    if (node.right != null) queue.offer(node.right);
+  }
+  return result;
 }`;

@@ -45,6 +45,8 @@ export const Arrow: React.FC<ArrowProps> = ({
     ? `drop-shadow(0 0 3px ${glowColor}) drop-shadow(0 0 8px ${glowColor}cc) drop-shadow(0 0 22px ${glowColor}55)`
     : `drop-shadow(0 0 2px ${glowColor}) drop-shadow(0 0 6px ${glowColor}55)`;
   const dashCrawl = dashed ? -(frame * 0.5) % 13 : 0;
+  // Normalized crawl for pathLength=1 paths (straight/bezier). Period = 0.12+0.08 = 0.20.
+  const dashCrawlNorm = dashed ? -((frame * 0.006) % 0.20) : 0;
 
   const strokeW = 3;
 
@@ -211,7 +213,7 @@ export const Arrow: React.FC<ArrowProps> = ({
         fill="none"
         pathLength={1}
         strokeDasharray={dashed ? "0.12 0.08" : "1"}
-        strokeDashoffset={dashed ? dashCrawl / len : dashOffset}
+        strokeDashoffset={dashed ? dashCrawlNorm : dashOffset}
         strokeLinecap="round"
         strokeLinejoin="round"
         opacity={dashed ? drawProgress : 1}

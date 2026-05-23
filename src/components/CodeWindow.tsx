@@ -4,12 +4,14 @@ import { colors, fonts } from "../lib/theme";
 interface CodeWindowProps {
   title?: string;
   hideTitle?: boolean;
+  noHeader?: boolean;
   children: React.ReactNode;
 }
 
 export const CodeWindow: React.FC<CodeWindowProps> = ({
   title = "LinkedList.java",
   hideTitle = false,
+  noHeader = false,
   children,
 }) => {
   return (
@@ -23,7 +25,7 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({
         background: "transparent",
       }}
     >
-      {hideTitle ? (
+      {!noHeader && hideTitle ? (
         /* Reel — minimal header: glowing dot + filename */
         <div
           style={{
@@ -56,7 +58,7 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({
             {title}
           </span>
         </div>
-      ) : (
+      ) : !noHeader ? (
         /* YouTube — Mac-style traffic-light header */
         <div
           style={{
@@ -83,7 +85,7 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({
             {title}
           </span>
         </div>
-      )}
+      ) : null}
       <div style={{ flex: 1, overflow: "hidden" }}>{children}</div>
     </div>
   );

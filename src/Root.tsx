@@ -24,8 +24,14 @@ import {
   fibonacciCode,
   permutationsCode,
   bstInsertCode,
+  towerOfHanoiCode,
   topViewCode,
   leftViewCode,
+  levelOrderCode,
+  rightViewCode,
+  boundaryCode,
+  diagonalCode,
+  rtlDiagonalCode,
 } from "./data/code-snippets";
 
 import { InsertHead } from "./scenes/InsertHead";
@@ -48,10 +54,17 @@ import { TLSHandshake, TLS_HANDSHAKE_SCENE_FRAMES } from "./scenes/TLSHandshake"
 import { BSTInsert, BST_INSERT_SCENE_FRAMES } from "./scenes/BSTInsert";
 import { TopViewTraversal, TOP_VIEW_SCENE_FRAMES } from "./scenes/TopViewTraversal";
 import { LeftViewTraversal, LEFT_VIEW_SCENE_FRAMES } from "./scenes/LeftViewTraversal";
+import { LevelOrder, LEVEL_ORDER_SCENE_FRAMES } from "./scenes/LevelOrder";
+import { RightViewTraversal, RIGHT_VIEW_SCENE_FRAMES } from "./scenes/RightViewTraversal";
+import { BoundaryTraversal, BOUNDARY_SCENE_FRAMES } from "./scenes/BoundaryTraversal";
+import { TowerOfHanoi, TOWER_OF_HANOI_SCENE_FRAMES } from "./scenes/TowerOfHanoi";
+import { DiagonalTraversal, DIAGONAL_SCENE_FRAMES } from "./scenes/DiagonalTraversal";
+import { RightToLeftDiagonal, RTL_DIAGONAL_SCENE_FRAMES } from "./scenes/RightToLeftDiagonal";
 import { TLSThumbnail } from "./thumbnails/TLSThumbnail";
 import { FactorialThumbnail } from "./thumbnails/FactorialThumbnail";
 import { DetectCycleThumbnail } from "./thumbnails/DetectCycleThumbnail";
 import { RemoveNthThumbnail } from "./thumbnails/RemoveNthThumbnail";
+import { BinaryTreeThumbnail } from "./thumbnails/BinaryTreeThumbnail";
 import { FullVideo, FULL_VIDEO_DURATION } from "./FullVideo";
 import { TitleCard } from "./components/TitleCard";
 import { standaloneDuration } from "./StandaloneVideo";
@@ -62,17 +75,26 @@ import {
   TraverseVideo, ReverseVideo, DetectCycleVideo, MergeListsVideo, RemoveNthFromEndVideo,
   ConstantTimeVideo, LinearSearchVideo, BinarySearchVideo, BubbleSortVideo,
   MergeSortVideo, ExponentialVideo, FactorialVideo, BSTInsertVideo,
-  TopViewVideo, LeftViewVideo,
+  TopViewVideo, LeftViewVideo, LevelOrderVideo, RightViewVideo, BoundaryVideo,
+  TowerOfHanoiVideo,
+  DiagonalVideo,
+  DiagonalRLVideo,
   // Reels with code
   InsertHeadReel, InsertTailReel, DeleteNodeReel, SearchNodeReel,
   DeleteHeadReel, DeleteMiddleReel, DeleteTailReel,
   ReverseReel, DetectCycleReel, MergeListsReel, RemoveNthFromEndReel, BSTInsertReel,
-  TopViewReel, LeftViewReel,
+  TopViewReel, LeftViewReel, LevelOrderReel, RightViewReel, BoundaryReel,
+  TowerOfHanoiReel,
+  DiagonalReel,
+  DiagonalRLReel,
   // Reels animation only
   InsertHeadReelAnim, InsertTailReelAnim, DeleteNodeReelAnim, SearchNodeReelAnim,
   DeleteHeadReelAnim, DeleteMiddleReelAnim, DeleteTailReelAnim,
   ReverseReelAnim, DetectCycleReelAnim, MergeListsReelAnim, RemoveNthFromEndReelAnim,
-  BSTInsertReelAnim,
+  BSTInsertReelAnim, TopViewReelAnim, LeftViewReelAnim, LevelOrderReelAnim, RightViewReelAnim, BoundaryReelAnim,
+  TowerOfHanoiReelAnim,
+  DiagonalReelAnim,
+  DiagonalRLReelAnim,
 } from "./compositions";
 
 const WIDTH = 1920;
@@ -190,6 +212,15 @@ const emptyDualTransition = { from: emptyKeyedTokens, to: emptyKeyedTokens };
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      <Composition
+        id="BinaryTree-Thumbnail"
+        component={BinaryTreeThumbnail}
+        durationInFrames={1}
+        fps={FPS}
+        width={1080}
+        height={1920}
+      />
+
       <Composition
         id="TLS-Thumbnail"
         component={TLSThumbnail}
@@ -343,319 +374,90 @@ export const RemotionRoot: React.FC = () => {
         calculateMetadata={calcFullVideoMetadata}
       />
 
-      <Folder name="YouTube">
-        <Composition
-          id="Video-InsertHead"
-          component={InsertHeadVideo}
-          durationInFrames={standaloneDuration(2756)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(insertAtHeadCode)}
-        />
-        <Composition
-          id="Video-InsertTail"
-          component={InsertTailVideo}
-          durationInFrames={standaloneDuration(2911)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(insertAtTailCode)}
-        />
-        <Composition
-          id="Video-DeleteNode"
-          component={DeleteNodeVideo}
-          durationInFrames={standaloneDuration(3822)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(deleteNodeCode)}
-        />
-        <Composition
-          id="Video-SearchNode"
-          component={SearchNodeVideo}
-          durationInFrames={standaloneDuration(2622)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(searchNodeCode)}
-        />
-        <Composition
-          id="Video-Traverse"
-          component={TraverseVideo}
-          durationInFrames={standaloneDuration(280)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(traverseCode)}
-        />
-        <Composition
-          id="Video-Reverse"
-          component={ReverseVideo}
-          durationInFrames={standaloneDuration(REVERSE_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(reverseCode)}
-        />
-        <Composition
-          id="Video-DetectCycle"
-          component={DetectCycleVideo}
-          durationInFrames={standaloneDuration(DETECT_CYCLE_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(detectCycleCode)}
-        />
-        <Composition
-          id="Video-MergeLists"
-          component={MergeListsVideo}
-          durationInFrames={standaloneDuration(MERGE_LISTS_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(mergeSortedCode)}
-        />
-      </Folder>
-
-      <Folder name="Reels-With-Code">
-        <Composition
-          id="Reel-InsertHead"
-          component={InsertHeadReel}
-          durationInFrames={standaloneDuration(2756)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(insertAtHeadCode)}
-        />
-        <Composition
-          id="Reel-InsertTail"
-          component={InsertTailReel}
-          durationInFrames={standaloneDuration(2911)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(insertAtTailCode)}
-        />
-        <Composition
-          id="Reel-SearchNode"
-          component={SearchNodeReel}
-          durationInFrames={standaloneDuration(2622)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(searchNodeCode)}
-        />
-        <Composition
-          id="Reel-DeleteNode"
-          component={DeleteNodeReel}
-          durationInFrames={standaloneDuration(3822)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(deleteNodeCode)}
-        />
-        <Composition
-          id="Reel-DeleteHead"
-          component={DeleteHeadReel}
-          durationInFrames={standaloneDuration(1245)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(deleteNodeCode)}
-        />
-        <Composition
-          id="Reel-DeleteMiddle"
-          component={DeleteMiddleReel}
-          durationInFrames={standaloneDuration(1425)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(deleteNodeCode)}
-        />
-        <Composition
-          id="Reel-DeleteTail"
-          component={DeleteTailReel}
-          durationInFrames={standaloneDuration(1185)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(deleteNodeCode)}
-        />
-        <Composition
-          id="Reel-Reverse"
-          component={ReverseReel}
-          durationInFrames={standaloneDuration(REVERSE_SCENE_FRAMES)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(reverseCode)}
-        />
-        <Composition
-          id="Reel-DetectCycle"
-          component={DetectCycleReel}
-          durationInFrames={standaloneDuration(DETECT_CYCLE_SCENE_FRAMES)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(detectCycleCode)}
-        />
-        <Composition
-          id="Reel-MergeLists"
-          component={MergeListsReel}
-          durationInFrames={standaloneDuration(MERGE_LISTS_SCENE_FRAMES)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(mergeSortedCode)}
-        />
-      </Folder>
-
-      <Folder name="Reels-Animation-Only">
-        <Composition id="Anim-InsertHead"   component={InsertHeadReelAnim}   durationInFrames={standaloneDuration(14 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtHeadCode)} />
-        <Composition id="Anim-InsertTail"   component={InsertTailReelAnim}   durationInFrames={standaloneDuration(15 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtTailCode)} />
-        <Composition id="Anim-DeleteNode"   component={DeleteNodeReelAnim}   durationInFrames={standaloneDuration(17 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
-        <Composition id="Anim-DeleteHead"   component={DeleteHeadReelAnim}   durationInFrames={standaloneDuration( 5 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
-        <Composition id="Anim-DeleteMiddle" component={DeleteMiddleReelAnim} durationInFrames={standaloneDuration( 6 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
-        <Composition id="Anim-DeleteTail"   component={DeleteTailReelAnim}   durationInFrames={standaloneDuration( 6 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
-        <Composition id="Anim-SearchNode"   component={SearchNodeReelAnim}   durationInFrames={standaloneDuration(18 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(searchNodeCode)} />
-        <Composition id="Anim-Reverse"      component={ReverseReelAnim}      durationInFrames={standaloneDuration(20 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(reverseCode)} />
-        <Composition id="Anim-DetectCycle"  component={DetectCycleReelAnim}  durationInFrames={standaloneDuration(15 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(detectCycleCode)} />
-        <Composition id="Anim-MergeLists"   component={MergeListsReelAnim}   durationInFrames={standaloneDuration(12 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(mergeSortedCode)} />
+      <Folder name="LinkedList">
+        <Folder name="InsertHead">
+          <Composition id="Video-InsertHead" component={InsertHeadVideo} durationInFrames={standaloneDuration(2756)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtHeadCode)} />
+          <Composition id="Reel-InsertHead" component={InsertHeadReel} durationInFrames={standaloneDuration(2756)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtHeadCode)} />
+          <Composition id="Anim-InsertHead" component={InsertHeadReelAnim} durationInFrames={standaloneDuration(14 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtHeadCode)} />
+        </Folder>
+        <Folder name="InsertTail">
+          <Composition id="Video-InsertTail" component={InsertTailVideo} durationInFrames={standaloneDuration(2911)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtTailCode)} />
+          <Composition id="Reel-InsertTail" component={InsertTailReel} durationInFrames={standaloneDuration(2911)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtTailCode)} />
+          <Composition id="Anim-InsertTail" component={InsertTailReelAnim} durationInFrames={standaloneDuration(15 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtTailCode)} />
+        </Folder>
+        <Folder name="DeleteNode">
+          <Composition id="Video-DeleteNode" component={DeleteNodeVideo} durationInFrames={standaloneDuration(3822)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+          <Composition id="Reel-DeleteNode" component={DeleteNodeReel} durationInFrames={standaloneDuration(3822)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+          <Composition id="Anim-DeleteNode" component={DeleteNodeReelAnim} durationInFrames={standaloneDuration(17 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+        </Folder>
+        <Folder name="DeleteHead">
+          <Composition id="Reel-DeleteHead" component={DeleteHeadReel} durationInFrames={standaloneDuration(1245)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+          <Composition id="Anim-DeleteHead" component={DeleteHeadReelAnim} durationInFrames={standaloneDuration(5 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+        </Folder>
+        <Folder name="DeleteMiddle">
+          <Composition id="Reel-DeleteMiddle" component={DeleteMiddleReel} durationInFrames={standaloneDuration(1425)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+          <Composition id="Anim-DeleteMiddle" component={DeleteMiddleReelAnim} durationInFrames={standaloneDuration(6 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+        </Folder>
+        <Folder name="DeleteTail">
+          <Composition id="Reel-DeleteTail" component={DeleteTailReel} durationInFrames={standaloneDuration(1185)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+          <Composition id="Anim-DeleteTail" component={DeleteTailReelAnim} durationInFrames={standaloneDuration(6 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(deleteNodeCode)} />
+        </Folder>
+        <Folder name="SearchNode">
+          <Composition id="Video-SearchNode" component={SearchNodeVideo} durationInFrames={standaloneDuration(2622)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(searchNodeCode)} />
+          <Composition id="Reel-SearchNode" component={SearchNodeReel} durationInFrames={standaloneDuration(2622)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(searchNodeCode)} />
+          <Composition id="Anim-SearchNode" component={SearchNodeReelAnim} durationInFrames={standaloneDuration(18 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(searchNodeCode)} />
+        </Folder>
+        <Folder name="Traverse">
+          <Composition id="Video-Traverse" component={TraverseVideo} durationInFrames={standaloneDuration(280)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(traverseCode)} />
+        </Folder>
+        <Folder name="Reverse">
+          <Composition id="Video-Reverse" component={ReverseVideo} durationInFrames={standaloneDuration(REVERSE_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(reverseCode)} />
+          <Composition id="Reel-Reverse" component={ReverseReel} durationInFrames={standaloneDuration(REVERSE_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(reverseCode)} />
+          <Composition id="Anim-Reverse" component={ReverseReelAnim} durationInFrames={standaloneDuration(20 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(reverseCode)} />
+        </Folder>
+        <Folder name="DetectCycle">
+          <Composition id="Video-DetectCycle" component={DetectCycleVideo} durationInFrames={standaloneDuration(DETECT_CYCLE_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(detectCycleCode)} />
+          <Composition id="Reel-DetectCycle" component={DetectCycleReel} durationInFrames={standaloneDuration(DETECT_CYCLE_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(detectCycleCode)} />
+          <Composition id="Anim-DetectCycle" component={DetectCycleReelAnim} durationInFrames={standaloneDuration(15 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(detectCycleCode)} />
+        </Folder>
+        <Folder name="MergeLists">
+          <Composition id="Video-MergeLists" component={MergeListsVideo} durationInFrames={standaloneDuration(MERGE_LISTS_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(mergeSortedCode)} />
+          <Composition id="Reel-MergeLists" component={MergeListsReel} durationInFrames={standaloneDuration(MERGE_LISTS_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(mergeSortedCode)} />
+          <Composition id="Anim-MergeLists" component={MergeListsReelAnim} durationInFrames={standaloneDuration(12 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(mergeSortedCode)} />
+        </Folder>
       </Folder>
 
       <Folder name="LeetCode">
-        <Composition
-          id="RemoveNthFromEnd"
-          component={RemoveNthFromEnd}
-          durationInFrames={REMOVE_NTH_SCENE_FRAMES}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }}
-          calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)}
-        />
-        <Composition
-          id="Video-RemoveNthFromEnd"
-          component={RemoveNthFromEndVideo}
-          durationInFrames={standaloneDuration(REMOVE_NTH_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }}
-          calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)}
-        />
-        <Composition
-          id="Reel-RemoveNthFromEnd"
-          component={RemoveNthFromEndReel}
-          durationInFrames={standaloneDuration(REMOVE_NTH_SCENE_FRAMES)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }}
-          calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)}
-        />
-        <Composition
-          id="Anim-RemoveNthFromEnd"
-          component={RemoveNthFromEndReelAnim}
-          durationInFrames={standaloneDuration(30 * ANIM_FRAMES_PER_STEP)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }}
-          calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)}
-        />
+        <Folder name="RemoveNthFromEnd">
+          <Composition id="RemoveNthFromEnd" component={RemoveNthFromEnd} durationInFrames={REMOVE_NTH_SCENE_FRAMES} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }} calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)} />
+          <Composition id="Video-RemoveNthFromEnd" component={RemoveNthFromEndVideo} durationInFrames={standaloneDuration(REMOVE_NTH_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }} calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)} />
+          <Composition id="Reel-RemoveNthFromEnd" component={RemoveNthFromEndReel} durationInFrames={standaloneDuration(REMOVE_NTH_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }} calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)} />
+          <Composition id="Anim-RemoveNthFromEnd" component={RemoveNthFromEndReelAnim} durationInFrames={standaloneDuration(30 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ naiveTokens: emptyTokens, optimalTokens: emptyTokens, transitionInfo: emptyDualTransition }} calculateMetadata={makeDualCalcMetadata(removeNthNaiveCode, removeNthOptimalCode)} />
+        </Folder>
       </Folder>
 
       <Folder name="TimeComplexity">
-        <Composition
-          id="Video-ConstantTime"
-          component={ConstantTimeVideo}
-          durationInFrames={standaloneDuration(CONSTANT_TIME_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(insertAtHeadCode)}
-        />
-        <Composition
-          id="Video-LinearSearch"
-          component={LinearSearchVideo}
-          durationInFrames={standaloneDuration(LINEAR_SEARCH_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(linearSearchCode)}
-        />
-        <Composition
-          id="Video-BinarySearch"
-          component={BinarySearchVideo}
-          durationInFrames={standaloneDuration(BINARY_SEARCH_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(binarySearchCode)}
-        />
-        <Composition
-          id="Video-BubbleSort"
-          component={BubbleSortVideo}
-          durationInFrames={standaloneDuration(BUBBLE_SORT_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(bubbleSortCode)}
-        />
-        <Composition
-          id="Video-MergeSort"
-          component={MergeSortVideo}
-          durationInFrames={standaloneDuration(MERGE_SORT_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(mergeSortCode)}
-        />
-        <Composition
-          id="Video-Exponential"
-          component={ExponentialVideo}
-          durationInFrames={standaloneDuration(EXPONENTIAL_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(fibonacciCode)}
-        />
-        <Composition
-          id="Video-Factorial"
-          component={FactorialVideo}
-          durationInFrames={standaloneDuration(FACTORIAL_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(permutationsCode)}
-        />
+        <Folder name="ConstantTime">
+          <Composition id="Video-ConstantTime" component={ConstantTimeVideo} durationInFrames={standaloneDuration(CONSTANT_TIME_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(insertAtHeadCode)} />
+        </Folder>
+        <Folder name="LinearSearch">
+          <Composition id="Video-LinearSearch" component={LinearSearchVideo} durationInFrames={standaloneDuration(LINEAR_SEARCH_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(linearSearchCode)} />
+        </Folder>
+        <Folder name="BinarySearch">
+          <Composition id="Video-BinarySearch" component={BinarySearchVideo} durationInFrames={standaloneDuration(BINARY_SEARCH_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(binarySearchCode)} />
+        </Folder>
+        <Folder name="BubbleSort">
+          <Composition id="Video-BubbleSort" component={BubbleSortVideo} durationInFrames={standaloneDuration(BUBBLE_SORT_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(bubbleSortCode)} />
+        </Folder>
+        <Folder name="MergeSort">
+          <Composition id="Video-MergeSort" component={MergeSortVideo} durationInFrames={standaloneDuration(MERGE_SORT_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(mergeSortCode)} />
+        </Folder>
+        <Folder name="Exponential">
+          <Composition id="Video-Exponential" component={ExponentialVideo} durationInFrames={standaloneDuration(EXPONENTIAL_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(fibonacciCode)} />
+        </Folder>
+        <Folder name="Factorial">
+          <Composition id="Video-Factorial" component={FactorialVideo} durationInFrames={standaloneDuration(FACTORIAL_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(permutationsCode)} />
+        </Folder>
       </Folder>
 
       <Folder name="Diagrams">
@@ -671,76 +473,55 @@ export const RemotionRoot: React.FC = () => {
       </Folder>
 
       <Folder name="Trees">
-        <Composition
-          id="Video-BSTInsert"
-          component={BSTInsertVideo}
-          durationInFrames={standaloneDuration(BST_INSERT_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(bstInsertCode)}
-        />
-        <Composition
-          id="Reel-BSTInsert"
-          component={BSTInsertReel}
-          durationInFrames={standaloneDuration(BST_INSERT_SCENE_FRAMES)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(bstInsertCode)}
-        />
-        <Composition
-          id="Anim-BSTInsert"
-          component={BSTInsertReelAnim}
-          durationInFrames={standaloneDuration(16 * ANIM_FRAMES_PER_STEP)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(bstInsertCode)}
-        />
-        <Composition
-          id="Video-TopView"
-          component={TopViewVideo}
-          durationInFrames={standaloneDuration(TOP_VIEW_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(topViewCode)}
-        />
-        <Composition
-          id="Reel-TopView"
-          component={TopViewReel}
-          durationInFrames={standaloneDuration(TOP_VIEW_SCENE_FRAMES)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(topViewCode)}
-        />
-        <Composition
-          id="Video-LeftView"
-          component={LeftViewVideo}
-          durationInFrames={standaloneDuration(LEFT_VIEW_SCENE_FRAMES)}
-          fps={FPS}
-          width={WIDTH}
-          height={HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(leftViewCode)}
-        />
-        <Composition
-          id="Reel-LeftView"
-          component={LeftViewReel}
-          durationInFrames={standaloneDuration(LEFT_VIEW_SCENE_FRAMES)}
-          fps={FPS}
-          width={REEL_WIDTH}
-          height={REEL_HEIGHT}
-          defaultProps={{ tokens: emptyTokens }}
-          calculateMetadata={makeCalcMetadata(leftViewCode)}
-        />
+        <Folder name="BSTInsert">
+          <Composition id="Video-BSTInsert" component={BSTInsertVideo} durationInFrames={standaloneDuration(BST_INSERT_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(bstInsertCode)} />
+          <Composition id="Reel-BSTInsert" component={BSTInsertReel} durationInFrames={standaloneDuration(BST_INSERT_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(bstInsertCode)} />
+          <Composition id="Anim-BSTInsert" component={BSTInsertReelAnim} durationInFrames={standaloneDuration(16 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(bstInsertCode)} />
+        </Folder>
+        <Folder name="TopView">
+          <Composition id="Video-TopView" component={TopViewVideo} durationInFrames={standaloneDuration(TOP_VIEW_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(topViewCode)} />
+          <Composition id="Reel-TopView" component={TopViewReel} durationInFrames={standaloneDuration(TOP_VIEW_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(topViewCode)} />
+          <Composition id="Anim-TopView" component={TopViewReelAnim} durationInFrames={standaloneDuration(22 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(topViewCode)} />
+        </Folder>
+        <Folder name="LeftView">
+          <Composition id="Video-LeftView" component={LeftViewVideo} durationInFrames={standaloneDuration(LEFT_VIEW_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(leftViewCode)} />
+          <Composition id="Reel-LeftView" component={LeftViewReel} durationInFrames={standaloneDuration(LEFT_VIEW_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(leftViewCode)} />
+          <Composition id="Anim-LeftView" component={LeftViewReelAnim} durationInFrames={standaloneDuration(22 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(leftViewCode)} />
+        </Folder>
+        <Folder name="LevelOrder">
+          <Composition id="Video-LevelOrder" component={LevelOrderVideo} durationInFrames={standaloneDuration(LEVEL_ORDER_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(levelOrderCode)} />
+          <Composition id="Reel-LevelOrder" component={LevelOrderReel} durationInFrames={standaloneDuration(LEVEL_ORDER_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(levelOrderCode)} />
+          <Composition id="Anim-LevelOrder" component={LevelOrderReelAnim} durationInFrames={standaloneDuration(16 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(levelOrderCode)} />
+        </Folder>
+        <Folder name="RightView">
+          <Composition id="Video-RightView" component={RightViewVideo} durationInFrames={standaloneDuration(RIGHT_VIEW_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(rightViewCode)} />
+          <Composition id="Reel-RightView" component={RightViewReel} durationInFrames={standaloneDuration(RIGHT_VIEW_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(rightViewCode)} />
+          <Composition id="Anim-RightView" component={RightViewReelAnim} durationInFrames={standaloneDuration(22 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(rightViewCode)} />
+        </Folder>
+        <Folder name="Boundary">
+          <Composition id="Video-Boundary" component={BoundaryVideo} durationInFrames={standaloneDuration(BOUNDARY_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(boundaryCode)} />
+          <Composition id="Reel-Boundary" component={BoundaryReel} durationInFrames={standaloneDuration(BOUNDARY_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(boundaryCode)} />
+          <Composition id="Anim-Boundary" component={BoundaryReelAnim} durationInFrames={standaloneDuration(17 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(boundaryCode)} />
+        </Folder>
+        <Folder name="Diagonal">
+          <Composition id="Video-Diagonal" component={DiagonalVideo} durationInFrames={standaloneDuration(DIAGONAL_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(diagonalCode)} />
+          <Composition id="Reel-Diagonal" component={DiagonalReel} durationInFrames={standaloneDuration(DIAGONAL_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(diagonalCode)} />
+          <Composition id="Anim-Diagonal" component={DiagonalReelAnim} durationInFrames={standaloneDuration(18 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(diagonalCode)} />
+        </Folder>
+        <Folder name="DiagonalRL">
+          <Composition id="Video-DiagonalRL" component={DiagonalRLVideo} durationInFrames={standaloneDuration(RTL_DIAGONAL_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(rtlDiagonalCode)} />
+          <Composition id="Reel-DiagonalRL" component={DiagonalRLReel} durationInFrames={standaloneDuration(RTL_DIAGONAL_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(rtlDiagonalCode)} />
+          <Composition id="Anim-DiagonalRL" component={DiagonalRLReelAnim} durationInFrames={standaloneDuration(18 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(rtlDiagonalCode)} />
+        </Folder>
+      </Folder>
+
+      <Folder name="Recursion">
+        <Folder name="TowerOfHanoi">
+          <Composition id="TowerOfHanoi" component={TowerOfHanoi} durationInFrames={TOWER_OF_HANOI_SCENE_FRAMES} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(towerOfHanoiCode)} />
+          <Composition id="Video-TowerOfHanoi" component={TowerOfHanoiVideo} durationInFrames={standaloneDuration(TOWER_OF_HANOI_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(towerOfHanoiCode)} />
+          <Composition id="Reel-TowerOfHanoi" component={TowerOfHanoiReel} durationInFrames={standaloneDuration(TOWER_OF_HANOI_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(towerOfHanoiCode)} />
+          <Composition id="ReelAnim-TowerOfHanoi" component={TowerOfHanoiReelAnim} durationInFrames={standaloneDuration(TOWER_OF_HANOI_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(towerOfHanoiCode)} />
+        </Folder>
       </Folder>
     </>
   );

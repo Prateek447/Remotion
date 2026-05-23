@@ -43,7 +43,15 @@
       "Bash(git *)",
       "Bash(Remove-Item \"C:/workspace/Remotion/public/narration/remove-nth-from-end/step-*.mp3\" -Force)",
       "Bash(Get-ChildItem \"C:\\\\workspace\\\\Remotion\\\\public\\\\narration\\\\remove-nth-from-end\\\\\" | Select-Object Name, Length, LastWriteTime | Sort-Object Name *)",
-      "PowerShell(Get-Content *)"
+      "PowerShell(Get-Content *)",
+      "Skill(yt-dsa-creator)",
+      "Bash(SCENE_ID=diagonal-traversal node scripts/generate-narration.mjs)",
+      "PowerShell($env:SCENE_ID=\"diagonal-traversal\"; node scripts/generate-narration.mjs)",
+      "Bash(dir C:\\\\workspace\\\\Remotion\\\\src\\\\compositions\\\\ *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(taskkill /F /IM node.exe /T)",
+      "Bash(taskkill *)",
+      "PowerShell(Stop-Process *)"
     ]
   }
 }

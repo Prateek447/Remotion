@@ -16,6 +16,12 @@ import { RemoveNthFromEnd, REMOVE_NTH_SCENE_FRAMES } from "../scenes/RemoveNthFr
 import { BSTInsert, BST_INSERT_SCENE_FRAMES } from "../scenes/BSTInsert";
 import { TopViewTraversal, TOP_VIEW_SCENE_FRAMES } from "../scenes/TopViewTraversal";
 import { LeftViewTraversal, LEFT_VIEW_SCENE_FRAMES } from "../scenes/LeftViewTraversal";
+import { LevelOrder, LEVEL_ORDER_SCENE_FRAMES } from "../scenes/LevelOrder";
+import { RightViewTraversal, RIGHT_VIEW_SCENE_FRAMES } from "../scenes/RightViewTraversal";
+import { BoundaryTraversal, BOUNDARY_SCENE_FRAMES } from "../scenes/BoundaryTraversal";
+import { TowerOfHanoi, TOWER_OF_HANOI_SCENE_FRAMES } from "../scenes/TowerOfHanoi";
+import { DiagonalTraversal, DIAGONAL_SCENE_FRAMES } from "../scenes/DiagonalTraversal";
+import { RightToLeftDiagonal, RTL_DIAGONAL_SCENE_FRAMES } from "../scenes/RightToLeftDiagonal";
 
 interface TokenProps { tokens: ThemedToken[][] }
 interface DualTokenProps {
@@ -105,5 +111,41 @@ export const TopViewReel: React.FC<TokenProps> = ({ tokens }) => (
 export const LeftViewReel: React.FC<TokenProps> = ({ tokens }) => (
   <StandaloneVideo title="Binary Tree — Left View" complexity="O(n)" sceneFrames={LEFT_VIEW_SCENE_FRAMES}>
     <LeftViewTraversal tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const LevelOrderReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Level Order" complexity="O(n)" sceneFrames={LEVEL_ORDER_SCENE_FRAMES}>
+    <LevelOrder tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const RightViewReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Right View" complexity="O(n)" sceneFrames={RIGHT_VIEW_SCENE_FRAMES}>
+    <RightViewTraversal tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const BoundaryReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Boundary" complexity="O(n)" sceneFrames={BOUNDARY_SCENE_FRAMES}>
+    <BoundaryTraversal tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const TowerOfHanoiReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Tower of Hanoi" complexity="O(2ⁿ)" subtitle="Recursion Visualized" sceneFrames={TOWER_OF_HANOI_SCENE_FRAMES}>
+    <TowerOfHanoi tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const DiagonalReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Diagonal" complexity="O(n)" sceneFrames={DIAGONAL_SCENE_FRAMES}>
+    <DiagonalTraversal tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const DiagonalRLReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Diagonal RL" complexity="O(n)" sceneFrames={RTL_DIAGONAL_SCENE_FRAMES}>
+    <RightToLeftDiagonal tokens={tokens} format="reel" />
   </StandaloneVideo>
 );

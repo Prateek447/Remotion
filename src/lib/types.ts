@@ -28,6 +28,7 @@ export interface ArrowData {
   dashed?: boolean;
   highlight?: boolean;
   curved?: boolean;
+  color?: string;
 }
 
 export interface ListSnapshot {
@@ -38,6 +39,11 @@ export interface ListSnapshot {
   caption?: string;
   hideEndNull?: boolean;
   complexityInfo?: { time: string; space: string };
+  queueItems?: Array<{ value: number; highlight?: "active" | "new" | "visited" | "none" }>;
+  nextQItems?: Array<{ value: number; highlight?: "active" | "new" | "visited" | "none" }>;
+  stackItems?: number[];
+  outputValues?: number[];
+  outputLabel?: string;
 }
 
 export interface HighlightStep {

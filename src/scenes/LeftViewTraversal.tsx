@@ -5,6 +5,8 @@ import type { ArrowData, ListNodeData, SceneStep } from "../lib/types";
 import { useStepTransition } from "../lib/useStepTransition";
 import { colors, fonts, springPresets } from "../lib/theme";
 import { AmbientLayer } from "../components/AmbientLayer";
+import { compressStepsForAnim } from "../lib/animSteps";
+import { AnimationOnlyLayout, ANIM_DIAGRAM_HEIGHT } from "../components/AnimationOnlyLayout";
 import { CodeBlock } from "../components/CodeBlock";
 import { CodeWindow } from "../components/CodeWindow";
 import { NarrationLayer } from "../components/NarrationLayer";
@@ -440,8 +442,20 @@ function makeSteps(): SceneStep[] {
   ];
 }
 
-function makePositionMap(isReel: boolean): Record<string, { x: number; y: number }> {
-  return isReel
+function makePositionMap(format: "youtube" | "reel" | "reel-anim"): Record<string, { x: number; y: number }> {
+  if (format === "reel-anim") {
+    return {
+      n1: { x: 0.50, y: 0.16 },
+      n2: { x: 0.32, y: 0.33 },
+      n3: { x: 0.68, y: 0.33 },
+      n4: { x: 0.20, y: 0.50 },
+      n5: { x: 0.40, y: 0.50 },
+      n6: { x: 0.60, y: 0.50 },
+      n7: { x: 0.78, y: 0.50 },
+      n8: { x: 0.12, y: 0.67 },
+    };
+  }
+  return format === "reel"
     ? {
         n1: { x: 0.50, y: 0.23 },
         n2: { x: 0.34, y: 0.37 },
@@ -466,7 +480,7 @@ function makePositionMap(isReel: boolean): Record<string, { x: number; y: number
 
 export interface LeftViewTraversalProps {
   tokens: ThemedToken[][];
-  format?: "youtube" | "reel";
+  format?: "youtube" | "reel" | "reel-anim";
 }
 
 const ComplexityCard: React.FC<{
@@ -531,14 +545,16 @@ export const LeftViewTraversal: React.FC<LeftViewTraversalProps> = ({
   format = "youtube",
 }) => {
   const { width, height } = useVideoConfig();
-  const isReel = format === "reel";
+  const isReel = format === "reel" || format === "reel-anim";
+  const isAnim = format === "reel-anim";
+  const isReelOnly = format === "reel";
 
   const safeW = width - REEL_SAFE.left - REEL_SAFE.right;
   const safeH = height - REEL_SAFE.top - REEL_SAFE.bottom;
-  const diagramAreaW = isReel ? safeW : width * 0.62;
-  const diagramAreaH = isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
-  const nodeScale = isReel ? 0.82 : 1;
-  const steps = makeSteps();
+  const diagramAreaW = isAnim ? width : isReel ? safeW : width * 0.62;
+  const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
+  const nodeScale = isAnim ? 1.4 : isReel ? 0.82 : 1;
+  const steps = isAnim ? compressStepsForAnim(makeSteps()) : makeSteps();
   const { current, localFrame } = useStepTransition(steps);
   const complexityInfo = current.snapshot.complexityInfo;
 
@@ -546,15 +562,15 @@ export const LeftViewTraversal: React.FC<LeftViewTraversalProps> = ({
     <div
       style={{
         width: diagramAreaW,
-        height: isReel ? diagramAreaH : height,
+        height: isAnim ? diagramAreaH : isReelOnly ? diagramAreaH : height,
         position: "relative",
         overflow: "hidden",
-        margin: isReel ? "0 auto" : undefined,
+        margin: isReelOnly ? "0 auto" : undefined,
       }}
     >
       <TreeDiagram
         steps={steps}
-        positionMap={makePositionMap(isReel)}
+        positionMap={makePositionMap(format)}
         areaWidth={diagramAreaW}
         areaHeight={diagramAreaH}
         nodeScale={nodeScale}
@@ -562,10 +578,10 @@ export const LeftViewTraversal: React.FC<LeftViewTraversalProps> = ({
       />
       <QueueVisualization
         steps={steps}
-        itemSize={isReel ? 44 : 52}
+        itemSize={isAnim ? 54 : isReel ? 50 : 52}
         style={{
           position: "absolute",
-          bottom: isReel ? 24 : 110,
+          bottom: isAnim ? 24 : isReelOnly ? 24 : 110,
           left: "50%",
           transform: "translateX(-50%)",
           zIndex: 5,
@@ -592,21 +608,25 @@ export const LeftViewTraversal: React.FC<LeftViewTraversalProps> = ({
 
   return (
     <>
-      {isReel ? (
+      {isAnim ? (
+        <AnimationOnlyLayout>{diagram}</AnimationOnlyLayout>
+      ) : isReelOnly ? (
         <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} />
       ) : (
         <SplitLayout left={diagram} right={code} leftWidth="54%" />
       )}
       <AmbientLayer />
-      <SfxLayer steps={steps} duckVolume={0.45} />
-      <NarrationLayer sceneId="left-view" steps={steps} />
+      {!isAnim && <SfxLayer steps={steps} duckVolume={0.45} />}
+      {!isAnim && <NarrationLayer sceneId="left-view" steps={steps} />}
       {complexityInfo && (
         <ComplexityCard
           time={complexityInfo.time}
           space={complexityInfo.space}
           localFrame={Math.max(0, localFrame - 20)}
           style={
-            isReel
+            isAnim
+              ? { position: "absolute", top: 1460, left: "50%", transform: "translateX(-50%)" }
+              : isReelOnly
               ? { position: "absolute", top: reelDividerTop - 160, left: reelCenterLeft, transform: "translateX(-50%)" }
               : { position: "absolute", top: 28, left: 28 }
           }

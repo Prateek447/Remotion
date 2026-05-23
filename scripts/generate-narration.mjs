@@ -171,6 +171,134 @@ const bstInsertLines = [
   { stepIndex: 15, text: "And that's BST insertion. At every step, recursion just asks one question: left or right? Eventually it hits null… creates the node… and the return phase reconnects everything automatically. Time complexity is O of h — O of log n in a balanced tree, O of n in the worst case. And honestly… once the return phase clicks, BST insertion suddenly feels way simpler." },
 ];
 
+const levelOrderLines = [
+  { stepIndex: 0,  text: "Level order traversal is how you read a tree the same way you read a page — left to right, row by row. Every node in level one before any node in level two. Think of it as processing the tree in waves. We have a seven-node complete binary tree here. Node one at the root, two and three one level below, and four through seven at the bottom. Watch how we visit them in that exact order." },
+  { stepIndex: 1,  text: "Before anything else, a null check. If the root doesn't exist, there's no tree to traverse. We return an empty result right away. One line, prevents a crash on an empty tree. Always good practice." },
+  { stepIndex: 2,  text: "Now, why a queue? Because a queue is first-in, first-out. The node that enters first exits first. That's exactly the behaviour we need — finish processing each level completely before moving to the next. We create the queue and drop in the root. Node one is now waiting in line." },
+  { stepIndex: 3,  text: "The while loop is the engine. As long as the queue has something in it, there are nodes left to process. Right now, node one is in the queue. The condition is true — we enter the loop." },
+  { stepIndex: 4,  text: "Poll removes the front of the queue and returns it. We get node one. We call result dot add to record its value. Output so far — just one. The queue is now empty, but we're about to refill it." },
+  { stepIndex: 5,  text: "Node one has two children. Two on the left, three on the right. We check each child and offer them to the queue. Left before right — always. The queue now holds two and three. We've just seeded the entire second level." },
+  { stepIndex: 6,  text: "Back to the top of the while loop. Queue isn't empty — node two is waiting. We poll it. Two exits from the front. We add two to the result. Output: one, two." },
+  { stepIndex: 7,  text: "Two's left child is four and its right child is five. Both get offered to the queue. The queue now has three, four, five. Three was already there from before, and four and five just joined the line." },
+  { stepIndex: 8,  text: "We poll again. Three comes out next — it was added before four and five, so it exits first. That's the queue enforcing order. We add three to the result. Output: one, two, three. The entire second level is captured." },
+  { stepIndex: 9,  text: "Three's children are six and seven. We offer both. Queue now holds four, five, six, seven. That's the complete third level, lined up and ready to go." },
+  { stepIndex: 10, text: "Poll gives us four. Four is a leaf — no left child, no right child. Both if checks see null, so nothing gets added to the queue. We add four to the result and move on. Output: one, two, three, four." },
+  { stepIndex: 11, text: "Five is next. Also a leaf. Poll, add to result, nothing to enqueue. Output: one, two, three, four, five." },
+  { stepIndex: 12, text: "Six comes out of the queue. Another leaf. Poll, add, done. Output: one through six. One node left waiting." },
+  { stepIndex: 13, text: "Seven — the last node. We poll it and add it. Queue size drops to zero. Output: one, two, three, four, five, six, seven. Every single node, in exactly the right order." },
+  { stepIndex: 14, text: "The while loop checks one more time. Queue is empty — the condition is false. We exit. Nothing more to process." },
+  { stepIndex: 15, text: "Time complexity is O of n — we visit every node exactly once. Space is also O of n — at peak, the queue holds an entire level, and in a complete binary tree the bottom level has roughly n over two nodes. This queue-based, wave-by-wave pattern is the foundation of BFS and shows up everywhere in tree problems. Drop a like if this clicked, and subscribe for more." },
+];
+
+const rightViewLines = [
+  { stepIndex: 0,  text: "The right view of a binary tree shows the last node visible at each level — what you'd see looking from the right side." },
+  { stepIndex: 1,  text: "Edge case: if the tree is empty, we return an empty list." },
+  { stepIndex: 2,  text: "We create a result list and a queue, then add the root to start BFS." },
+  { stepIndex: 3,  text: "We loop while the queue is not empty." },
+  { stepIndex: 4,  text: "Capture the current level size — this tells us when the level ends." },
+  { stepIndex: 5,  text: "We poll node one. Since i equals size minus one, this is the last node in the level — add it to the result." },
+  { stepIndex: 6,  text: "Push its left child, two, and right child, three, into the queue." },
+  { stepIndex: 7,  text: "Level one has two nodes. We grab the size." },
+  { stepIndex: 8,  text: "Poll node two. i is zero, not size minus one, so we skip it." },
+  { stepIndex: 9,  text: "Push node two's children — four and five — into the queue." },
+  { stepIndex: 10, text: "Poll node three. i equals one, which is size minus one — add three to the result." },
+  { stepIndex: 11, text: "Push node three's children — six and seven." },
+  { stepIndex: 12, text: "Level two has four nodes. We grab the size." },
+  { stepIndex: 13, text: "Poll node four. i is zero out of three — skip it." },
+  { stepIndex: 14, text: "Push node four's only child — eight." },
+  { stepIndex: 15, text: "Poll node five. i is one out of three — skip it. No children." },
+  { stepIndex: 16, text: "Poll node six. i is two out of three — skip it. No children." },
+  { stepIndex: 17, text: "Poll node seven. i equals three, size minus one — add seven to the result." },
+  { stepIndex: 18, text: "Level three has just one node. Size is one." },
+  { stepIndex: 19, text: "Poll node eight. i is zero, size minus one — it's the only node on this level, so add it to the result." },
+  { stepIndex: 20, text: "Queue is empty, the while loop exits." },
+  { stepIndex: 21, text: "We return the right view: one, three, seven, eight. Time and space complexity are both O of n. Follow for more tree algorithms!" },
+];
+
+const boundaryLines = [
+  { stepIndex: 0,  text: "Boundary traversal collects every node visible from outside the tree. Three recursive helpers do the work: addLeft, addLeaves, and addRight. Nine nodes get a dashed ring — node five has no ring because it's the only interior node." },
+  { stepIndex: 1,  text: "Handle the edge case first: empty tree returns an empty list." },
+  { stepIndex: 2,  text: "The root always goes in first — unless it's a leaf. Node one has children, so we add it. Output: one." },
+  { stepIndex: 3,  text: "Now call addLeft with the root's left child — node two." },
+  { stepIndex: 4,  text: "Inside addLeft: node two is not a leaf — it has children — so we add it and recurse into node four. Output: one, two." },
+  { stepIndex: 5,  text: "addLeft recurses again. Node four is not a leaf either — add it and recurse into node eight. Output: one, two, four." },
+  { stepIndex: 6,  text: "addLeft reaches node eight. Node eight IS a leaf — both children are null — so the base case fires and we return without adding. Leaves are handled separately by addLeaves." },
+  { stepIndex: 7,  text: "Now call addLeaves. It performs a full DFS and collects every leaf node in the tree." },
+  { stepIndex: 8,  text: "Node eight — no children, it's a leaf. Add it. Output: one, two, four, eight." },
+  { stepIndex: 9,  text: "Node nine — also a leaf under node four. Add it. Output: one, two, four, eight, nine." },
+  { stepIndex: 10, text: "Node five has a child — node ten — so it is NOT a leaf. addLeaves recurses through node five without collecting it." },
+  { stepIndex: 11, text: "Node ten IS a leaf. Add it. Node five was visited but never collected — that's exactly why it's excluded from the boundary. Output: one, two, four, eight, nine, ten." },
+  { stepIndex: 12, text: "DFS moves to node three's subtree. Node six is a leaf. Add it. Output: one, two, four, eight, nine, ten, six." },
+  { stepIndex: 13, text: "Node seven — leaf. Add it. addLeaves is complete. Output: one, two, four, eight, nine, ten, six, seven." },
+  { stepIndex: 14, text: "Call addRight on the root's right child — node three. addRight recurses deeper first, before adding anything. It goes to node seven, which is a leaf, and returns immediately." },
+  { stepIndex: 15, text: "Back in addRight for node three: the recursive call already returned, so NOW we add node three. Adding AFTER the recursion gives bottom-up order automatically — no explicit stack needed. Output: one, two, four, eight, nine, ten, six, seven, three." },
+  { stepIndex: 16, text: "Nine boundary nodes in correct order. Node five was the only interior node — correctly excluded by all three helpers. Time and space: both O of n. Follow for more tree algorithms!" },
+];
+
+const towerOfHanoiLines = [
+  { stepIndex: 0,  text: "Tower of Hanoi. Four disks on peg A, biggest at the bottom. The goal — move all four to peg C, using B as a helper. The only rule: a bigger disk can never sit on top of a smaller one." },
+  { stepIndex: 1,  text: "The function is recursive. If n equals zero, there is nothing to move — that is the base case. Just return." },
+  { stepIndex: 2,  text: "Before moving disk n, we clear the path. Recursively move n minus one disks from src to via, with dst as the helper. This exposes the biggest disk." },
+  { stepIndex: 3,  text: "Move one. Disk one goes from A to B." },
+  { stepIndex: 4,  text: "Move two. Disk two goes from A to C." },
+  { stepIndex: 5,  text: "Move three. Disk one goes from B to C." },
+  { stepIndex: 6,  text: "Move four. Disk three goes from A to B." },
+  { stepIndex: 7,  text: "Move five. Disk one goes from C to A." },
+  { stepIndex: 8,  text: "Move six. Disk two goes from C to B." },
+  { stepIndex: 9,  text: "Move seven. Disk one goes from A to B. The top three disks are now stacked on B, clearing the path for the biggest." },
+  { stepIndex: 10, text: "Move eight. Disk four — the heaviest — crosses all the way from A to C." },
+  { stepIndex: 11, text: "Move nine. Disk one goes from B to C." },
+  { stepIndex: 12, text: "Move ten. Disk two goes from B to A." },
+  { stepIndex: 13, text: "Move eleven. Disk one goes from C to A." },
+  { stepIndex: 14, text: "Move twelve. Disk three goes from B to C." },
+  { stepIndex: 15, text: "Move thirteen. Disk one goes from A to B." },
+  { stepIndex: 16, text: "Move fourteen. Disk two goes from A to C." },
+  { stepIndex: 17, text: "Move fifteen. Disk one goes from B to C. All four disks on peg C — solved!" },
+  { stepIndex: 18, text: "Four disks needed exactly fifteen moves. The pattern is two to the power n, minus one. Time complexity O of two to the n — exponential. Space is O of n for the call stack. Follow for more algorithm breakdowns!" },
+];
+
+const diagonalLines = [
+  { stepIndex: 0,  text: "Here's what we're building. Take this tree and group every node by diagonal — nodes reachable from each other by only moving right end up in the same group. This tree gives three groups: one, three, six on the first diagonal; two, five, eight on the second; four, seven on the third. By the end of this video, you'll code this in O of n." },
+  { stepIndex: 1,  text: "Look at this tree. Every node you reach by only moving right belongs to the same diagonal. The second you go left, you drop to the next one. That's the entire algorithm — remember that, because at the end I'll show you why this same rule solves vertical order traversal too." },
+  { stepIndex: 2,  text: "Null root, empty result. One-line guard — if you've written any tree problem before, this is automatic." },
+  { stepIndex: 3,  text: "Initialize result and a queue, then seed the queue with node one. This queue is not for level-order traversal — it tracks the starting node of each new diagonal." },
+  { stepIndex: 4,  text: "Outer while loop — one iteration per diagonal. Here's what trips most people up: this is not BFS. Level-order processes row by row. This processes diagonal by diagonal. Same queue structure, completely different purpose." },
+  { stepIndex: 5,  text: "Top of each pass — row for this diagonal's output, nextQ to collect every left child we encounter. Left children are the entry points of future diagonals. We bank them now, process them later. If this is already clearer than other explanations, this is what I post every week." },
+  { stepIndex: 6,  text: "Poll node one. Enter the right-chain while loop. Add one to the row. Node one has a left child — two — and left means new diagonal, so two banks into nextQ. We don't follow it yet. We follow the right pointer instead." },
+  { stepIndex: 7,  text: "Right to node three. Moving right keeps us on diagonal zero — the rule holds. Three has no left child, so nextQ is untouched. Row is now one, three." },
+  { stepIndex: 8,  text: "Right of three leads to six. Add six. No children at all — right of six is null, the inner while exits. Diagonal zero is done: one, three, six. Now watch how the handoff works." },
+  { stepIndex: 9,  text: "Row gets added to result. Queue absorbs nextQ — which held just node two. Two becomes the starting node of diagonal one. That's the handoff: every left child collected during the right-chain seeds the next diagonal's traversal." },
+  { stepIndex: 10, text: "Outer loop fires again — queue has two. Poll it and enter the exact same right-chain logic. New diagonal, identical pattern." },
+  { stepIndex: 11, text: "Add two, then five, then eight — following right pointers. Left children four and seven bank into nextQ along the way. Diagonal one: two, five, eight. Same right-chain logic, different diagonal." },
+  { stepIndex: 12, text: "Queue absorbs nextQ: four and seven. Here's the part that confused me the first time — four arrives before seven because we added it to nextQ first, from node two's left child, before we even reached node five. BFS insertion order, not tree depth. For a completely right-skewed tree, how many diagonals would you get? Drop it below." },
+  { stepIndex: 13, text: "Diagonal two. Poll four — no right child, chain ends immediately. Just four." },
+  { stepIndex: 14, text: "Poll seven. Also no right child. Add seven. Queue empty — outer loop exits. Diagonal two: four, seven." },
+  { stepIndex: 15, text: "Return the result. Three diagonals — exactly what the mental model predicted before we touched a single line of code." },
+  { stepIndex: 16, text: "Every right move stayed on a diagonal. Every left move opened the next one. The code never broke that rule once — it just made it mechanical. That's what good algorithms do." },
+  { stepIndex: 17, text: "Time: O of n — every node visited exactly once. Space: O of n for queue and output. Here's the callback from the start: vertical order traversal uses this exact same right-stays, left-shifts model, just with column indices instead of diagonal indices. Subscribe so you catch that one — it's the next video." },
+];
+
+const rtlDiagonalLines = [
+  { stepIndex: 0,  text: "Let's look at right-to-left diagonal traversal — the mirror of what we saw before. Three diagonals: one, two, four — three, five, seven — and six, eight." },
+  { stepIndex: 1,  text: "In left-to-right diagonal, going right kept you on the same diagonal. Here it's flipped — going left keeps you on the diagonal, going right moves you to the next one." },
+  { stepIndex: 2,  text: "Null root returns an empty list. Same guard as always." },
+  { stepIndex: 3,  text: "Initialize result and a queue. Seed with root — node one. The queue tracks the entry node of each diagonal." },
+  { stepIndex: 4,  text: "Outer while loop: queue not empty means more diagonals remain." },
+  { stepIndex: 5,  text: "Start each diagonal with a fresh row and an empty nextQ. Row collects output; nextQ collects right children — the entry nodes for the next diagonal." },
+  { stepIndex: 6,  text: "Poll node one. Enter the left-chain while loop. Add one to row. Right child three goes to nextQ — it starts the next diagonal." },
+  { stepIndex: 7,  text: "Move left to node two. Left movement keeps us on diagonal zero." },
+  { stepIndex: 8,  text: "Add two to row. Right child five goes to nextQ. Move left to four." },
+  { stepIndex: 9,  text: "Add four. No right child. Left is null — inner while exits. Diagonal zero: one, two, four." },
+  { stepIndex: 10, text: "Push row to result. Refill queue from nextQ — now three and five, entry nodes of diagonal one." },
+  { stepIndex: 11, text: "Diagonal one begins. Poll node three." },
+  { stepIndex: 12, text: "Add three. Right child six goes to nextQ. No left child — done with three. Poll five." },
+  { stepIndex: 13, text: "Add five. Right child eight to nextQ. Move left to seven. Add seven. No right, no left — inner while exits. Diagonal one: three, five, seven." },
+  { stepIndex: 14, text: "Push to result. Queue refills with six and eight — entry nodes of diagonal two." },
+  { stepIndex: 15, text: "Diagonal two: poll six, no left. Poll eight, no left. Diagonal two: six, eight. Queue empty — outer loop exits." },
+  { stepIndex: 16, text: "Return the result. Diagonal zero: one, two, four. One: three, five, seven. Two: six, eight." },
+  { stepIndex: 17, text: "Time O of n — every node visited exactly once. Space O of n. The only change from left-to-right diagonal: swap left and right in the inner loop. Subscribe for more tree patterns." },
+];
+
 const allNarrations = [
   { sceneId: "insert-head", lines: insertHeadLines },
   { sceneId: "insert-tail", lines: insertTailLines },
@@ -181,6 +309,12 @@ const allNarrations = [
   { sceneId: "merge-lists", lines: mergeListsLines },
   { sceneId: "tls-handshake", lines: tlsHandshakeLines },
   { sceneId: "bst-insert", lines: bstInsertLines },
+  { sceneId: "tower-of-hanoi", lines: towerOfHanoiLines },
+  { sceneId: "level-order", lines: levelOrderLines },
+  { sceneId: "right-view", lines: rightViewLines },
+  { sceneId: "boundary", lines: boundaryLines },
+  { sceneId: "diagonal-traversal", lines: diagonalLines },
+  { sceneId: "diagonal-rl", lines: rtlDiagonalLines },
 ];
 
 function getAudioDuration(filePath) {
@@ -218,17 +352,7 @@ function main() {
 
   console.log("Generating narration audio files...\n");
 
-  const onlyScene = process.env.SCENE_ID;
-  const target = onlyScene
-    ? allNarrations.filter((n) => n.sceneId === onlyScene)
-    : allNarrations;
-
-  if (onlyScene && target.length === 0) {
-    console.error(`No narration found for scene id: ${onlyScene}`);
-    process.exit(1);
-  }
-
-  for (const narration of target) {
+  for (const narration of scenes) {
     const outDir = path.join("public", "narration", narration.sceneId);
     fs.mkdirSync(outDir, { recursive: true });
 
