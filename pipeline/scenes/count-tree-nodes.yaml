@@ -10,13 +10,15 @@
 # Algorithm: countNodes(node) = node ? 1 + countNodes(left) + countNodes(right) : 0
 # Result: 7 nodes, O(n) time, O(h) space.
 #
-# Scene structure (17 steps) follows pipeline/design-system/teaching.md:
-#   - One step per recursive frame entered on the left side (n2, n4).
-#   - Both null base cases of n4 shown as separate steps (return value visible).
-#   - n4 / n5 / n2 each get their own return step.
-#   - Right subtree (n3) compressed to ~half the step count after the pattern
-#     has been demonstrated on the left.
-#   - No "same thing" / "by symmetry" shortcuts.
+# Scene structure (26 steps) follows pipeline/design-system/teaching.md at
+# strict density — every recursive frame is its own step:
+#   - Each of the 7 internal nodes has its own entry step (n1..n7).
+#   - Each of the 8 null base cases has its own step with return value visible.
+#   - Each internal combine (n4, n5, n2, n6, n7, n3, n1) has its own step.
+#   - n5, n6, n7 are NOT compressed via "by-symmetry" — each gets the full
+#     entry / null-left / null-right / combine breakdown like n4 does.
+#   - No "same thing" / "mirrors" language anywhere — every node speaks for
+#     itself with concrete numbers.
 
 sceneId: count-tree-nodes
 title: "Count Tree Nodes"
@@ -32,19 +34,19 @@ complexity:
 approach: algorithm-walkthrough
 approachNotes: |
   Full recursion-frame trace on a 7-node balanced tree. Every call entered,
-  every base case shown, return values bubbled up visibly before parents
-  combine. Codebase default — matches all existing tree scenes; no custom
-  scaffolder template needed.
+  every base case shown, every return value bubbles up visibly before the
+  parent combines. No "by-symmetry" shortcut on n5 / n6 / n7 — each gets
+  its own entry, two base-case nulls, and combine step.
 
-  Community sources surveyed:
-  - MIT 6.006 lecture on tree traversals (algorithm-walkthrough)
-  - NeetCode "Count Good Nodes" video (algorithm-walkthrough, smaller tree)
-  - GeeksforGeeks "Size of Binary Tree" article (algorithm-walkthrough)
-  - 3Blue1Brown does not cover this specific topic (recursion is covered at the
-    paradigm level — out of scope for a single-algorithm scene)
-
-  All three reference sources use the algorithm-walkthrough archetype.
-  Picked the default for consistency.
+  Community sources surveyed (7): algomaster.io, GeeksforGeeks (complete
+  tree + iterative), takeuforward, algo.monster, martinbroadhurst,
+  Javanotes 5.0, Medium (Saha). Three distinct community archetypes
+  identified and presented to the user: structural-induction (Javanotes
+  derives count from the recursive definition of trees themselves),
+  iterative-bfs-contrast (level-order with explicit queue),
+  brute-force-to-optimal (O(n) → O(log²n) via complete-tree height —
+  algomaster.io and algo.monster). User picked algorithm-walkthrough
+  for codebase compatibility and full-density teaching value.
 
 voice:
   persona: teacher-energetic
@@ -115,7 +117,7 @@ steps:
         - { from: "n3", to: "n7" }
       caption: "Count every node in this tree"
 
-  # ── Step 1: explain the recursive idea (concept-first) ───────────────────
+  # ── Step 1: explain the recursive idea ───────────────────────────────────
   - stepIndex: 1
     arc: methodical
     intent: "Name recursion as the mechanism"
@@ -149,7 +151,7 @@ steps:
     intent: "Show the formula in code"
     caption: "Three rules: null, recurse, return"
     narration: "Look at the code. If null, return zero. Otherwise — recurse left, recurse right, return one plus those."
-    targetFrames: 90
+    targetFrames: 95
     visibleLines: 6
     highlight: { startLine: 1, endLine: 4 }
     snapshot:
@@ -177,7 +179,7 @@ steps:
     intent: "Enter the recursion at the root"
     caption: "Call countNodes on the root"
     narration: "We start at the root. Call countNodes on node one."
-    targetFrames: 70
+    targetFrames: 65
     visibleLines: 6
     highlight: { startLine: 0, endLine: 0 }
     snapshot:
@@ -202,10 +204,10 @@ steps:
   # ── Step 4: recurse left from root to n2 ─────────────────────────────────
   - stepIndex: 4
     arc: methodical
-    intent: "Recurse into the left child"
+    intent: "Recurse into the left child of root"
     caption: "Recurse left — call on node 2"
     narration: "Node one is not null. So we recurse left. Call countNodes on node two."
-    targetFrames: 70
+    targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 2, endLine: 2 }
     snapshot:
@@ -227,10 +229,10 @@ steps:
         - { from: "n3", to: "n7" }
       caption: "Frame 2: countNodes(node 2)"
 
-  # ── Step 5: keep recursing left to n4 ────────────────────────────────────
+  # ── Step 5: keep recursing left from n2 to n4 ────────────────────────────
   - stepIndex: 5
     arc: methodical
-    intent: "Descend further to the leaf"
+    intent: "Descend further to the leaf n4"
     caption: "Keep going — call on node 4"
     narration: "At node two. Recurse left again. Call countNodes on node four."
     targetFrames: 70
@@ -255,13 +257,13 @@ steps:
         - { from: "n3", to: "n7" }
       caption: "Frame 3: countNodes(node 4)"
 
-  # ── Step 6: BASE CASE demo — node 4's left child is null ─────────────────
+  # ── Step 6: n4.left is null → base case, returns 0 ───────────────────────
   - stepIndex: 6
     arc: methodical
-    intent: "Demonstrate the base case — null child"
-    caption: "Node 4's left child is null"
-    narration: "Node four. Recurse left — but there is no left child. The argument is null."
-    targetFrames: 75
+    intent: "First base case — n4's left child is null"
+    caption: "n4.left is null → 0"
+    narration: "Node four. Recurse left — but there is no left child. Null hits the base case. Return zero."
+    targetFrames: 85
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
     snapshot:
@@ -281,14 +283,14 @@ steps:
         - { from: "n2", to: "n5" }
         - { from: "n3", to: "n6" }
         - { from: "n3", to: "n7" }
-      caption: "Recursive call on a null pointer"
+      caption: "Left of node 4: returned 0"
 
-  # ── Step 7: base case fires — null returns 0 ─────────────────────────────
+  # ── Step 7: n4.right is null → base case, returns 0 ──────────────────────
   - stepIndex: 7
     arc: methodical
-    intent: "Base case returns zero"
-    caption: "Null hits base case → returns 0"
-    narration: "Null hits the base case. Return zero. Pop back to node four."
+    intent: "Second base case — n4's right child is null"
+    caption: "n4.right is null → 0"
+    narration: "Now recurse right from node four. Right child also null. Return zero again."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
@@ -309,43 +311,15 @@ steps:
         - { from: "n2", to: "n5" }
         - { from: "n3", to: "n6" }
         - { from: "n3", to: "n7" }
-      caption: "Left subtree of node 4: returned 0"
+      caption: "Right of node 4: returned 0"
 
-  # ── Step 8: node 4 recurses right — also null, also 0 ────────────────────
+  # ── Step 8: n4 combines — returns 1 ──────────────────────────────────────
   - stepIndex: 8
-    arc: methodical
-    intent: "Same base case for the right child"
-    caption: "Right child also null → 0"
-    narration: "Now node four recurses right. Also null. Also returns zero."
-    targetFrames: 70
-    visibleLines: 6
-    highlight: { startLine: 3, endLine: 3 }
-    snapshot:
-      nodes:
-        - { id: "n1", value: 1, highlight: none }
-        - { id: "n2", value: 2, highlight: none }
-        - { id: "n3", value: 3, highlight: none }
-        - { id: "n4", value: 4, highlight: active }
-        - { id: "n5", value: 5, highlight: none }
-        - { id: "n6", value: 6, highlight: none }
-        - { id: "n7", value: 7, highlight: none }
-      pointers: []
-      arrows:
-        - { from: "n1", to: "n2", highlight: true }
-        - { from: "n1", to: "n3" }
-        - { from: "n2", to: "n4", highlight: true }
-        - { from: "n2", to: "n5" }
-        - { from: "n3", to: "n6" }
-        - { from: "n3", to: "n7" }
-      caption: "Right subtree of node 4: returned 0"
-
-  # ── Step 9: node 4 combines — returns 1 ──────────────────────────────────
-  - stepIndex: 9
     arc: methodical
     intent: "Node 4 combines its children's returns"
     caption: "Node 4: 1 + 0 + 0 = 1"
-    narration: "Node four computes — one plus zero plus zero. Returns one."
-    targetFrames: 85
+    narration: "Node four combines. One plus zero plus zero. Returns one."
+    targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
     snapshot:
@@ -367,15 +341,99 @@ steps:
         - { from: "n3", to: "n7" }
       caption: "Node 4 returned 1"
 
-  # ── Step 10: node 5 — pattern repeats, compressed to one step ────────────
-  - stepIndex: 10
+  # ── Step 9: pop to n2, recurse right to n5 ───────────────────────────────
+  - stepIndex: 9
     arc: methodical
-    intent: "Right child of n2 (n5) mirrors n4; pattern shown once already"
-    caption: "Node 5 mirrors node 4 → 1"
-    narration: "Pop back to node two. Now recurse right. Node five mirrors node four. Returns one."
-    targetFrames: 80
+    intent: "Enter the call on n5"
+    caption: "Pop up. Now call on node 5"
+    narration: "Pop back to node two. Recurse right. Call countNodes on node five."
+    targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 3, endLine: 3 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: none }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: active }
+        - { id: "n6", value: 6, highlight: none }
+        - { id: "n7", value: 7, highlight: none }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2", highlight: true }
+        - { from: "n1", to: "n3" }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5", highlight: true }
+        - { from: "n3", to: "n6" }
+        - { from: "n3", to: "n7" }
+      caption: "Frame: countNodes(node 5)"
+
+  # ── Step 10: n5.left is null → returns 0 ─────────────────────────────────
+  - stepIndex: 10
+    arc: methodical
+    intent: "n5's left child is null — base case"
+    caption: "n5.left is null → 0"
+    narration: "Node five. Recurse left. No left child. Null. Return zero."
+    targetFrames: 70
+    visibleLines: 6
+    highlight: { startLine: 1, endLine: 1 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: none }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: active }
+        - { id: "n6", value: 6, highlight: none }
+        - { id: "n7", value: 7, highlight: none }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2", highlight: true }
+        - { from: "n1", to: "n3" }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5", highlight: true }
+        - { from: "n3", to: "n6" }
+        - { from: "n3", to: "n7" }
+      caption: "Left of node 5: returned 0"
+
+  # ── Step 11: n5.right is null → returns 0 ────────────────────────────────
+  - stepIndex: 11
+    arc: methodical
+    intent: "n5's right child is null — base case"
+    caption: "n5.right is null → 0"
+    narration: "Recurse right from node five. Right child also null. Return zero."
+    targetFrames: 70
+    visibleLines: 6
+    highlight: { startLine: 1, endLine: 1 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: none }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: active }
+        - { id: "n6", value: 6, highlight: none }
+        - { id: "n7", value: 7, highlight: none }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2", highlight: true }
+        - { from: "n1", to: "n3" }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5", highlight: true }
+        - { from: "n3", to: "n6" }
+        - { from: "n3", to: "n7" }
+      caption: "Right of node 5: returned 0"
+
+  # ── Step 12: n5 combines — returns 1 ─────────────────────────────────────
+  - stepIndex: 12
+    arc: methodical
+    intent: "Node 5 combines its children's returns"
+    caption: "Node 5: 1 + 0 + 0 = 1"
+    narration: "Node five combines. One plus zero plus zero. Returns one."
+    targetFrames: 75
+    visibleLines: 6
+    highlight: { startLine: 4, endLine: 4 }
     snapshot:
       nodes:
         - { id: "n1", value: 1, highlight: none }
@@ -395,13 +453,13 @@ steps:
         - { from: "n3", to: "n7" }
       caption: "Node 5 returned 1"
 
-  # ── Step 11: node 2 combines its children — returns 3 ────────────────────
-  - stepIndex: 11
+  # ── Step 13: n2 combines — returns 3 ─────────────────────────────────────
+  - stepIndex: 13
     arc: methodical
     intent: "Node 2 combines child returns"
     caption: "Node 2: 1 + 1 + 1 = 3"
-    narration: "Node two now sees — left returned one, right returned one. Plus itself. Returns three."
-    targetFrames: 90
+    narration: "Back at node two. Left returned one. Right returned one. Plus one for itself. Returns three."
+    targetFrames: 95
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
     snapshot:
@@ -423,13 +481,13 @@ steps:
         - { from: "n3", to: "n7" }
       caption: "Node 2 returned 3"
 
-  # ── Step 12: pop to root, recurse right to n3 ────────────────────────────
-  - stepIndex: 12
+  # ── Step 14: pop to root, recurse right to n3 ────────────────────────────
+  - stepIndex: 14
     arc: methodical
-    intent: "Now the right subtree from the root"
-    caption: "Pop up. Now recurse right"
-    narration: "Pop back to the root. Now we recurse right. Call countNodes on node three."
-    targetFrames: 70
+    intent: "Enter the call on n3"
+    caption: "Now recurse right from root"
+    narration: "Pop back to the root. Now recurse right. Call countNodes on node three."
+    targetFrames: 80
     visibleLines: 6
     highlight: { startLine: 3, endLine: 3 }
     snapshot:
@@ -451,20 +509,216 @@ steps:
         - { from: "n3", to: "n7" }
       caption: "Frame: countNodes(node 3)"
 
-  # ── Step 13: node 3's children — pattern shown, fast ─────────────────────
-  - stepIndex: 13
+  # ── Step 15: recurse left from n3 to n6 ──────────────────────────────────
+  - stepIndex: 15
     arc: methodical
-    intent: "Right side mirrors left; show both leaves at compressed pace"
-    caption: "Node 6 → 1, Node 7 → 1"
-    narration: "Same exact pattern. Node six returns one. Node seven returns one."
-    targetFrames: 80
+    intent: "Descend left from n3 to n6"
+    caption: "Call countNodes on node 6"
+    narration: "At node three. Recurse left. Call countNodes on node six."
+    targetFrames: 70
     visibleLines: 6
-    highlight: { startLine: 2, endLine: 3 }
+    highlight: { startLine: 2, endLine: 2 }
     snapshot:
       nodes:
         - { id: "n1", value: 1, highlight: none }
         - { id: "n2", value: 2, highlight: found }
-        - { id: "n3", value: 3, highlight: active }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: found }
+        - { id: "n6", value: 6, highlight: active }
+        - { id: "n7", value: 7, highlight: none }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3", highlight: true }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5" }
+        - { from: "n3", to: "n6", highlight: true }
+        - { from: "n3", to: "n7" }
+      caption: "Frame: countNodes(node 6)"
+
+  # ── Step 16: n6.left is null → returns 0 ─────────────────────────────────
+  - stepIndex: 16
+    arc: methodical
+    intent: "n6's left child is null — base case"
+    caption: "n6.left is null → 0"
+    narration: "Node six. Recurse left. No left child. Null. Return zero."
+    targetFrames: 70
+    visibleLines: 6
+    highlight: { startLine: 1, endLine: 1 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: found }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: found }
+        - { id: "n6", value: 6, highlight: active }
+        - { id: "n7", value: 7, highlight: none }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3", highlight: true }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5" }
+        - { from: "n3", to: "n6", highlight: true }
+        - { from: "n3", to: "n7" }
+      caption: "Left of node 6: returned 0"
+
+  # ── Step 17: n6.right is null → returns 0 ────────────────────────────────
+  - stepIndex: 17
+    arc: methodical
+    intent: "n6's right child is null — base case"
+    caption: "n6.right is null → 0"
+    narration: "Recurse right from node six. Right child also null. Return zero."
+    targetFrames: 70
+    visibleLines: 6
+    highlight: { startLine: 1, endLine: 1 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: found }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: found }
+        - { id: "n6", value: 6, highlight: active }
+        - { id: "n7", value: 7, highlight: none }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3", highlight: true }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5" }
+        - { from: "n3", to: "n6", highlight: true }
+        - { from: "n3", to: "n7" }
+      caption: "Right of node 6: returned 0"
+
+  # ── Step 18: n6 combines — returns 1 ─────────────────────────────────────
+  - stepIndex: 18
+    arc: methodical
+    intent: "Node 6 combines its children's returns"
+    caption: "Node 6: 1 + 0 + 0 = 1"
+    narration: "Node six combines. One plus zero plus zero. Returns one."
+    targetFrames: 75
+    visibleLines: 6
+    highlight: { startLine: 4, endLine: 4 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: found }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: found }
+        - { id: "n6", value: 6, highlight: found }
+        - { id: "n7", value: 7, highlight: none }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3", highlight: true }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5" }
+        - { from: "n3", to: "n6", highlight: true }
+        - { from: "n3", to: "n7" }
+      caption: "Node 6 returned 1"
+
+  # ── Step 19: pop to n3, recurse right to n7 ──────────────────────────────
+  - stepIndex: 19
+    arc: methodical
+    intent: "Enter the call on n7"
+    caption: "Now call on node 7"
+    narration: "Pop back to node three. Recurse right. Call countNodes on node seven."
+    targetFrames: 75
+    visibleLines: 6
+    highlight: { startLine: 3, endLine: 3 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: found }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: found }
+        - { id: "n6", value: 6, highlight: found }
+        - { id: "n7", value: 7, highlight: active }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3", highlight: true }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5" }
+        - { from: "n3", to: "n6" }
+        - { from: "n3", to: "n7", highlight: true }
+      caption: "Frame: countNodes(node 7)"
+
+  # ── Step 20: n7.left is null → returns 0 ─────────────────────────────────
+  - stepIndex: 20
+    arc: methodical
+    intent: "n7's left child is null — base case"
+    caption: "n7.left is null → 0"
+    narration: "Node seven. Recurse left. No left child. Null. Return zero."
+    targetFrames: 70
+    visibleLines: 6
+    highlight: { startLine: 1, endLine: 1 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: found }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: found }
+        - { id: "n6", value: 6, highlight: found }
+        - { id: "n7", value: 7, highlight: active }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3", highlight: true }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5" }
+        - { from: "n3", to: "n6" }
+        - { from: "n3", to: "n7", highlight: true }
+      caption: "Left of node 7: returned 0"
+
+  # ── Step 21: n7.right is null → returns 0 ────────────────────────────────
+  - stepIndex: 21
+    arc: methodical
+    intent: "n7's right child is null — base case"
+    caption: "n7.right is null → 0"
+    narration: "Recurse right from node seven. Right child also null. Return zero."
+    targetFrames: 70
+    visibleLines: 6
+    highlight: { startLine: 1, endLine: 1 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: found }
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n4", value: 4, highlight: found }
+        - { id: "n5", value: 5, highlight: found }
+        - { id: "n6", value: 6, highlight: found }
+        - { id: "n7", value: 7, highlight: active }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3", highlight: true }
+        - { from: "n2", to: "n4" }
+        - { from: "n2", to: "n5" }
+        - { from: "n3", to: "n6" }
+        - { from: "n3", to: "n7", highlight: true }
+      caption: "Right of node 7: returned 0"
+
+  # ── Step 22: n7 combines — returns 1 ─────────────────────────────────────
+  - stepIndex: 22
+    arc: methodical
+    intent: "Node 7 combines its children's returns"
+    caption: "Node 7: 1 + 0 + 0 = 1"
+    narration: "Node seven combines. One plus zero plus zero. Returns one."
+    targetFrames: 75
+    visibleLines: 6
+    highlight: { startLine: 4, endLine: 4 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: none }
+        - { id: "n2", value: 2, highlight: found }
+        - { id: "n3", value: 3, highlight: none }
         - { id: "n4", value: 4, highlight: found }
         - { id: "n5", value: 5, highlight: found }
         - { id: "n6", value: 6, highlight: found }
@@ -475,17 +729,17 @@ steps:
         - { from: "n1", to: "n3", highlight: true }
         - { from: "n2", to: "n4" }
         - { from: "n2", to: "n5" }
-        - { from: "n3", to: "n6", highlight: true }
+        - { from: "n3", to: "n6" }
         - { from: "n3", to: "n7", highlight: true }
-      caption: "Both leaves returned 1"
+      caption: "Node 7 returned 1"
 
-  # ── Step 14: node 3 combines — returns 3 ─────────────────────────────────
-  - stepIndex: 14
+  # ── Step 23: n3 combines — returns 3 ─────────────────────────────────────
+  - stepIndex: 23
     arc: methodical
-    intent: "Node 3 combines child returns"
+    intent: "Node 3 combines its children's returns"
     caption: "Node 3: 1 + 1 + 1 = 3"
-    narration: "Node three computes — one plus one plus one. Returns three."
-    targetFrames: 80
+    narration: "Back at node three. Left gave one. Right gave one. Plus one for itself. Returns three."
+    targetFrames: 90
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
     snapshot:
@@ -507,13 +761,13 @@ steps:
         - { from: "n3", to: "n7" }
       caption: "Node 3 returned 3"
 
-  # ── Step 15: PEAK — root combines, total is 7 ────────────────────────────
-  - stepIndex: 15
+  # ── Step 24: PEAK — root combines, total is 7 ────────────────────────────
+  - stepIndex: 24
     arc: peak
     intent: "Root combines — one plus three plus three is seven"
     caption: "Root: 1 + 3 + 3 = 7 — done!"
     narration: "Back at the root. Left gave us three. Right gave us three. Plus one for itself. Seven!"
-    targetFrames: 95
+    targetFrames: 100
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
     snapshot:
@@ -535,13 +789,13 @@ steps:
         - { from: "n3", to: "n7" }
       caption: "Total: 7 nodes"
 
-  # ── Step 16: closing — complexity wrap ───────────────────────────────────
-  - stepIndex: 16
+  # ── Step 25: closing — complexity wrap ───────────────────────────────────
+  - stepIndex: 25
     arc: closing
     intent: "Wrap up with complexity"
     caption: "Seven nodes — O(n) time"
     narration: "Every node visited once. O of n time. That is recursion counting a tree."
-    targetFrames: 70
+    targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 0, endLine: 5 }
     snapshot:
@@ -569,9 +823,10 @@ outputs:
 
 publish:
   description: |
-    Count every node in a binary tree using recursion, step by step. Watch each
-    recursive call enter, hit its base case, and return back up the tree.
-    One plus the left count plus the right count — O(n) time, O(h) space.
+    Count every node in a binary tree using recursion — step by step, with
+    every recursive call entered and every base case shown. Watch each
+    subtree return its size before its parent combines: one plus left plus
+    right. Twenty-six steps, full teaching density. O(n) time, O(h) space.
   tags: ["binary tree", "recursion", "data structures", "DSA", "tree traversal"]
   hashtags: ["#dsa", "#binarytree", "#recursion", "#coding"]
   thumbnail:

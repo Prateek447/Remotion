@@ -367,3 +367,10 @@ export const levelOrderCode = `public List<Integer> levelOrder(TreeNode root) {
   }
   return result;
 }`;
+
+export const countTreeNodesCode = `int countNodes(Node node) {
+    if (node == null) return 0;
+    int left = countNodes(node.left);
+    int right = countNodes(node.right);
+    return 1 + left + right;
+}`;

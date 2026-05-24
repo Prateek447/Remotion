@@ -27,6 +27,7 @@ import { BoundaryTraversal, BOUNDARY_SCENE_FRAMES } from "../scenes/BoundaryTrav
 import { TowerOfHanoi, TOWER_OF_HANOI_SCENE_FRAMES } from "../scenes/TowerOfHanoi";
 import { DiagonalTraversal, DIAGONAL_SCENE_FRAMES } from "../scenes/DiagonalTraversal";
 import { RightToLeftDiagonal, RTL_DIAGONAL_SCENE_FRAMES } from "../scenes/RightToLeftDiagonal";
+import { CountTreeNodes, COUNT_TREE_NODES_SCENE_FRAMES } from "../scenes/CountTreeNodes";
 
 interface TokenProps { tokens: ThemedToken[][] }
 interface DualTokenProps {
@@ -182,5 +183,11 @@ export const DiagonalVideo: React.FC<TokenProps> = ({ tokens }) => (
 export const DiagonalRLVideo: React.FC<TokenProps> = ({ tokens }) => (
   <StandaloneVideo title="Binary Tree — Diagonal RL" complexity="O(n)" sceneFrames={RTL_DIAGONAL_SCENE_FRAMES}>
     <RightToLeftDiagonal tokens={tokens} format="youtube" />
+  </StandaloneVideo>
+);
+
+export const CountTreeNodesVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Count Tree Nodes" complexity="O(n)" subtitle="Recursive size of a binary tree" sceneFrames={COUNT_TREE_NODES_SCENE_FRAMES}>
+    <CountTreeNodes tokens={tokens} format="youtube" />
   </StandaloneVideo>
 );

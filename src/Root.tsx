@@ -32,6 +32,7 @@ import {
   boundaryCode,
   diagonalCode,
   rtlDiagonalCode,
+  countTreeNodesCode,
 } from "./data/code-snippets";
 
 import { InsertHead } from "./scenes/InsertHead";
@@ -60,6 +61,7 @@ import { BoundaryTraversal, BOUNDARY_SCENE_FRAMES } from "./scenes/BoundaryTrave
 import { TowerOfHanoi, TOWER_OF_HANOI_SCENE_FRAMES } from "./scenes/TowerOfHanoi";
 import { DiagonalTraversal, DIAGONAL_SCENE_FRAMES } from "./scenes/DiagonalTraversal";
 import { RightToLeftDiagonal, RTL_DIAGONAL_SCENE_FRAMES } from "./scenes/RightToLeftDiagonal";
+import { CountTreeNodes, COUNT_TREE_NODES_SCENE_FRAMES } from "./scenes/CountTreeNodes";
 import { TLSThumbnail } from "./thumbnails/TLSThumbnail";
 import { FactorialThumbnail } from "./thumbnails/FactorialThumbnail";
 import { DetectCycleThumbnail } from "./thumbnails/DetectCycleThumbnail";
@@ -95,6 +97,9 @@ import {
   TowerOfHanoiReelAnim,
   DiagonalReelAnim,
   DiagonalRLReelAnim,
+  CountTreeNodesVideo,
+  CountTreeNodesReel,
+  CountTreeNodesReelAnim,
 } from "./compositions";
 
 const WIDTH = 1920;
@@ -351,6 +356,16 @@ export const RemotionRoot: React.FC = () => {
           defaultProps={{ tokens: emptyTokens }}
           calculateMetadata={makeCalcMetadata(mergeSortedCode)}
         />
+        <Composition
+          id="CountTreeNodes"
+          component={CountTreeNodes}
+          durationInFrames={COUNT_TREE_NODES_SCENE_FRAMES}
+          fps={FPS}
+          width={WIDTH}
+          height={HEIGHT}
+          defaultProps={{ tokens: emptyTokens }}
+          calculateMetadata={makeCalcMetadata(countTreeNodesCode)}
+        />
       </Folder>
 
       <Composition
@@ -512,6 +527,11 @@ export const RemotionRoot: React.FC = () => {
           <Composition id="Video-DiagonalRL" component={DiagonalRLVideo} durationInFrames={standaloneDuration(RTL_DIAGONAL_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(rtlDiagonalCode)} />
           <Composition id="Reel-DiagonalRL" component={DiagonalRLReel} durationInFrames={standaloneDuration(RTL_DIAGONAL_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(rtlDiagonalCode)} />
           <Composition id="Anim-DiagonalRL" component={DiagonalRLReelAnim} durationInFrames={standaloneDuration(18 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(rtlDiagonalCode)} />
+        </Folder>
+        <Folder name="CountTreeNodes">
+          <Composition id="Video-CountTreeNodes" component={CountTreeNodesVideo} durationInFrames={standaloneDuration(COUNT_TREE_NODES_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(countTreeNodesCode)} />
+          <Composition id="Reel-CountTreeNodes" component={CountTreeNodesReel} durationInFrames={standaloneDuration(COUNT_TREE_NODES_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(countTreeNodesCode)} />
+          <Composition id="Anim-CountTreeNodes" component={CountTreeNodesReelAnim} durationInFrames={standaloneDuration(26 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(countTreeNodesCode)} />
         </Folder>
       </Folder>
 

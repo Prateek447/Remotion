@@ -14,6 +14,7 @@ import { Reverse, REVERSE_SCENE_FRAMES } from "../scenes/Reverse";
 import { DetectCycle, DETECT_CYCLE_SCENE_FRAMES } from "../scenes/DetectCycle";
 import { MergeLists, MERGE_LISTS_SCENE_FRAMES } from "../scenes/MergeLists";
 import { RemoveNthFromEnd, REMOVE_NTH_SCENE_FRAMES } from "../scenes/RemoveNthFromEnd";
+import { CountTreeNodes, COUNT_TREE_NODES_SCENE_FRAMES } from "../scenes/CountTreeNodes";
 
 interface TokenProps {
   tokens: ThemedToken[][];
@@ -262,5 +263,38 @@ export const RemoveNthFromEndReel: React.FC<DualTokenProps> = ({
       transitionInfo={transitionInfo}
       format="reel"
     />
+  </StandaloneVideo>
+);
+
+export const CountTreeNodesVideo: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo
+    title="Count Tree Nodes"
+    complexity="O(n)"
+    subtitle="Recursive size of a binary tree"
+    sceneFrames={COUNT_TREE_NODES_SCENE_FRAMES}
+  >
+    <CountTreeNodes tokens={tokens} />
+  </StandaloneVideo>
+);
+
+export const CountTreeNodesReel: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo
+    title="Count Tree Nodes"
+    complexity="O(n)"
+    subtitle="Recursive size of a binary tree"
+    sceneFrames={COUNT_TREE_NODES_SCENE_FRAMES}
+  >
+    <CountTreeNodes tokens={tokens} format="reel" />
+  </StandaloneVideo>
+);
+
+export const CountTreeNodesReelAnim: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo
+    title="Count Tree Nodes"
+    complexity="O(n)"
+    subtitle="Recursive size of a binary tree"
+    sceneFrames={COUNT_TREE_NODES_SCENE_FRAMES}
+  >
+    <CountTreeNodes tokens={tokens} format="reel-anim" />
   </StandaloneVideo>
 );
