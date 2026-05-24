@@ -288,36 +288,195 @@ The review gates after Prompts 1 and 3 are the only places human judgment is req
 
 ---
 
-## Detailed command reference (advanced / manual override)
+## Commands
 
-Use these only when bypassing Claude — debugging a specific tool, batch-running, etc.
+Cheat sheet for pipeline tools, experiments, audio generation, applying updates, and
+final render. The five-prompt flow above is the primary interface; everything here is
+the granular toolbox for manual override, debugging, and experimentation.
 
-### Stage 2 commands
+### Stage 2 — Visual (validate, scaffold, narration preview)
+
 ```bash
-python3 pipeline/stages/01-validate/validate.py   pipeline/scenes/<sid>.yaml
-python3 pipeline/stages/02-scaffold/scaffold.py   pipeline/scenes/<sid>.yaml
-python3 pipeline/stages/03-narration/preview.py   pipeline/scenes/<sid>.yaml
+# Validate scene.yaml against design-system contracts (schema, approach, tts hazards)
+python3 pipeline/stages/01-validate/validate.py pipeline/scenes/<sid>.yaml
+
+# Scaffold src/scenes/<Name>.tsx + print paste snippets for Root.tsx etc.
+python3 pipeline/stages/02-scaffold/scaffold.py pipeline/scenes/<sid>.yaml
+
+# Read-only narration preview: TTS lint + per-step (persona × arc) presets + prosody summary
+python3 pipeline/stages/03-narration/preview.py pipeline/scenes/<sid>.yaml
 ```
 
-### Stage 3 commands
+### Stage 3 — Audio generation & apply
+
 ```bash
-python3 pipeline/stages/05-audio/generate.py      pipeline/scenes/<sid>.yaml
-python3 pipeline/stages/05-audio/generate.py      pipeline/scenes/<sid>.yaml --step N --force
-python3 pipeline/stages/06-apply/apply.py         pipeline/scenes/<sid>.yaml [--dry-run]
+# Generate audio for full scene (~5–15 min on GPU, longer on CPU)
+python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml
+
+# Regenerate one step only — for misfires or after a voiceOverride change
+python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml --step 3 --force
+
+# Force-regenerate full scene — after narration rewrite or preset retune
+python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml --force
+
+# Override reference voice for a single run (default lives in scene.yaml.voice.reference)
+python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml --reference scripts/<other>.wav
+
+# Apply audio durations to scene.tsx + narration-scripts.ts (pipeline-native, no scripts/ dep)
+python3 pipeline/stages/06-apply/apply.py pipeline/scenes/<sid>.yaml
+
+# Dry-run apply — print intended edits without writing
+python3 pipeline/stages/06-apply/apply.py pipeline/scenes/<sid>.yaml --dry-run
 ```
 
-### Stage 4 commands
+### Stage 4 — Final render
+
+The render preset is high-quality: `--crf=1` near-lossless, `--x264-preset=veryslow` for
+best compression efficiency, `--scale=2` super-samples then downscales (sharper text and
+SVG edges), `--gl=angle` for the most reliable Remotion renderer across platforms.
+
+Use `--frames=0-380` to render only a frame range — invaluable for iterating on a single
+moment without paying the full encode cost.
+
+#### macOS / Linux — full render (multi-line)
+
 ```bash
-npx remotion render src/index.ts Video-<TitleCase> out/<TitleCase>.mp4
-npx remotion render src/index.ts Reel-<TitleCase>  out/<TitleCase>-Reel.mp4
+time npx remotion render Video-BSTInsert out/output.mp4 \
+  --codec=h264 \
+  --crf=1 \
+  --x264-preset=veryslow \
+  --image-format=png \
+  --scale=2 \
+  --color-space=bt709 \
+  --gl=angle \
+  --concurrency=10
 ```
+
+#### macOS / Linux — partial-frame render (multi-line)
+
+```bash
+time npx remotion render Video-BSTInsert out/output.mp4 \
+  --frames=0-380 \
+  --codec=h264 \
+  --crf=1 \
+  --x264-preset=veryslow \
+  --image-format=png \
+  --scale=2 \
+  --color-space=bt709 \
+  --gl=angle \
+  --concurrency=10
+```
+
+#### Windows — single-line variant
+
+PowerShell and cmd.exe don't parse the `\` line-continuation. Use the single-line form:
+
+```bash
+time npx remotion render Video-BSTInsert out/output.mp4 --frames=0-380 --codec=h264 --crf=1 --x264-preset=veryslow --image-format=png --scale=2 --color-space=bt709 --gl=angle --concurrency=10
+```
+
+Drop `--frames=0-380` for a full render; everything else is identical.
+
+#### Render flags — what each does
+
+| Flag | Effect |
+|---|---|
+| `--codec=h264` | Standard H.264 — broad playback support, YouTube/Instagram compatible |
+| `--crf=1` | Constant Rate Factor 1 — near-lossless (range 0–51, lower = higher quality). For drafts, use `--crf=18`. |
+| `--x264-preset=veryslow` | Best compression efficiency at the cost of encode time. For drafts, `--x264-preset=medium`. |
+| `--image-format=png` | Uncompressed intermediate frames — no JPEG artifacts feeding into encode |
+| `--scale=2` | 2× super-sample then downscale — sharper text & SVG line art |
+| `--color-space=bt709` | Standard HD/SDR color space — what YouTube expects |
+| `--gl=angle` | ANGLE WebGL renderer — most reliable across platforms |
+| `--concurrency=10` | Parallel frame rendering — set to your CPU core count |
+| `--frames=A-B` | Render only the given frame range — fast iteration on a specific moment |
+
+**Composition IDs:** swap `Video-BSTInsert` for your scene's composition. Examples:
+`Video-CountTreeNodes` / `Reel-CountTreeNodes`, `Video-LeftViewTraversal` / `Reel-LeftViewTraversal`.
+See `src/Root.tsx` for the full registered list.
+
+#### Draft render (~10× faster, for iteration)
+
+```bash
+time npx remotion render Video-<TitleCase> out/<TitleCase>-draft.mp4
+```
+
+Uses Remotion defaults (`crf=18`, `preset=medium`, no scaling) — fine for sync-check and
+visual-review passes; not the final-quality preset.
 
 ### Orchestrator shortcuts (`pipeline/run.sh`)
+
+Bundles the per-stage Python commands behind named stages. Useful when running
+end-to-end without Claude in the loop.
+
 ```bash
-bash pipeline/run.sh <yaml> prefix         # validate + scaffold + narration-preview
-bash pipeline/run.sh <yaml> audio-stage    # audio (no apply yet)
-bash pipeline/run.sh <yaml> apply          # apply timings
-bash pipeline/run.sh <yaml> render         # final render (both formats)
+bash pipeline/run.sh <yaml> validate            # validator only
+bash pipeline/run.sh <yaml> scaffold            # validate + scaffold
+bash pipeline/run.sh <yaml> narration-preview   # TTS lint + prosody summary
+bash pipeline/run.sh <yaml> prefix              # validate + scaffold + narration-preview (default)
+bash pipeline/run.sh <yaml> audio               # generate audio for full scene
+bash pipeline/run.sh <yaml> audio-stage         # audio + review-audio template
+bash pipeline/run.sh <yaml> apply               # apply timings to scene.tsx + narration-scripts.ts
+bash pipeline/run.sh <yaml> render              # final render (Video + Reel formats)
+bash pipeline/run.sh <yaml> finalize            # apply + render
 ```
 
-The five-prompt flow above is the primary interface. These exist for Claude-less operation.
+### Experiments — filler lab
+
+Empirical proving ground for prosody techniques. See
+`pipeline/experiments/filler-lab/README.md` for the full history (Um / Ah / Hmm all
+dropped — the connector-pause pattern is what shipped).
+
+```bash
+# Initial 34-variant discovery (~10–15 min on GPU, 1 take per variant)
+python3 pipeline/experiments/filler-lab/lab.py
+
+# Run a single category
+python3 pipeline/experiments/filler-lab/lab.py --only um
+python3 pipeline/experiments/filler-lab/lab.py --only hmm
+python3 pipeline/experiments/filler-lab/lab.py --only pause
+
+# Test under a different persona/arc's knobs
+python3 pipeline/experiments/filler-lab/lab.py --persona measured --arc methodical
+
+# Force-regenerate (default skips existing files)
+python3 pipeline/experiments/filler-lab/lab.py --force
+
+# Reliability gate — N takes at random seeds for shortlisted variants
+python3 pipeline/experiments/filler-lab/repro.py
+python3 pipeline/experiments/filler-lab/repro.py --takes 10
+python3 pipeline/experiments/filler-lab/repro.py --temperature 0.85   # stabilization test
+```
+
+### Inspection & debugging
+
+```bash
+# List all scene definitions
+ls -1 pipeline/scenes/*.yaml
+
+# Prosody summary across every scene
+for s in pipeline/scenes/*.yaml; do
+  echo "=== $s ==="
+  python3 pipeline/stages/03-narration/preview.py "$s" 2>&1 | grep "Prosody markers"
+done
+
+# Audio files for a scene
+ls -la public/narration/<sid>/*.mp3
+
+# One-off audio duration check
+ffprobe -v error -show_entries format=duration -of csv=p=0 public/narration/<sid>/step-0.mp3
+
+# Compare durations.json against actual MP3 lengths
+cat public/narration/<sid>/durations.json
+```
+
+### Remotion Studio (live preview)
+
+```bash
+# Scrub through compositions live, no render required
+npm run studio
+# → http://localhost:3000
+```
+
+Use Studio for visual review (Stage 2 gate) and audio-sync review (Stage 3 gate). It's
+the listening surface for `apply.py` output — far better than playing MP4s.

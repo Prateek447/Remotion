@@ -32,6 +32,12 @@ ALLOWED_ARCS = {"opening", "methodical", "peak", "closing"}
 ALLOWED_FORMATS = {"youtube", "reel", "reel-anim"}
 # Note: "pinned" deliberately excluded — would crash on tree nodes per audit
 # (TreeNodeCircle.highlightColorMap has no entry for it).
+# Pause marker syntax used in narration: [pause:0.5] inserts 500ms of silence
+# via splicing in pipeline/stages/05-audio/generate.py. Stripped before the
+# digit/bracket TTS-readiness checks below — these markers are intentional,
+# not literal text Chatterbox will read.
+PAUSE_PATTERN = re.compile(r"\[pause:(\d+(?:\.\d+)?)\]")
+
 ALLOWED_NODE_HIGHLIGHTS = {
     "none", "active", "found", "new", "removing", "error", "visited",
 }
@@ -170,19 +176,26 @@ def validate(scene: dict) -> list[str]:
         # narration TTS-readiness (hard)
         narration = step.get("narration", "")
         if isinstance(narration, str):
-            if re.search(r"\b\d+\b", narration):
+            # Strip [pause:Xs] markers before digit/bracket checks — they're
+            # intentional prosody markers handled by silence-splicing in
+            # generate.py, not literal text Chatterbox reads.
+            text_no_pauses = PAUSE_PATTERN.sub("", narration)
+            if re.search(r"\b\d+\b", text_no_pauses):
                 errors.append(
                     f"{prefix}: narration contains digits — spell as words. "
                     f"Got: {narration!r}"
                 )
-            if "[" in narration or "]" in narration:
+            if "[" in text_no_pauses or "]" in text_no_pauses:
                 errors.append(
                     f"{prefix}: narration contains [brackets] — base Chatterbox "
                     f"reads them as English. Got: {narration!r}"
                 )
-            # breath-group word count (em-dashes count as boundaries)
+            # breath-group word count (em-dashes, ellipses, AND [pause:Xs]
+            # markers all count as breath boundaries — they each insert
+            # audible silence at the audio level).
+            bg_split_re = r"—|--|…|\.\.\.|\[pause:\d+(?:\.\d+)?\]"
             for sentence in re.split(r"[.!?]", narration):
-                for bg in re.split(r"—|--", sentence):
+                for bg in re.split(bg_split_re, sentence):
                     word_count = len(bg.strip().split())
                     if word_count > 12:
                         errors.append(

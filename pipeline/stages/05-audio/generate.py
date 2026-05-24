@@ -24,6 +24,7 @@ import argparse
 import json
 import math
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -38,16 +39,16 @@ except ImportError:
 # Source of truth: pipeline/design-system/voice/two-axis-model.md
 PRESET_MATRIX: dict[str, dict[str, dict[str, float]]] = {
     "teacher-energetic": {
-        "opening":    {"exaggeration": 0.60, "cfg_weight": 0.45, "temperature": 0.85},
-        "methodical": {"exaggeration": 0.55, "cfg_weight": 0.50, "temperature": 0.83},
-        "peak":       {"exaggeration": 0.80, "cfg_weight": 0.30, "temperature": 0.93},
-        "closing":    {"exaggeration": 0.70, "cfg_weight": 0.40, "temperature": 0.90},
+        "opening":    {"exaggeration": 0.60, "cfg_weight": 0.55, "temperature": 0.90},
+        "methodical": {"exaggeration": 0.55, "cfg_weight": 0.60, "temperature": 0.88},
+        "peak":       {"exaggeration": 0.80, "cfg_weight": 0.40, "temperature": 0.95},
+        "closing":    {"exaggeration": 0.70, "cfg_weight": 0.50, "temperature": 0.92},
     },
     "measured": {
-        "opening":    {"exaggeration": 0.50, "cfg_weight": 0.50, "temperature": 0.80},
-        "methodical": {"exaggeration": 0.35, "cfg_weight": 0.60, "temperature": 0.75},
-        "peak":       {"exaggeration": 0.65, "cfg_weight": 0.40, "temperature": 0.90},
-        "closing":    {"exaggeration": 0.55, "cfg_weight": 0.45, "temperature": 0.85},
+        "opening":    {"exaggeration": 0.50, "cfg_weight": 0.60, "temperature": 0.85},
+        "methodical": {"exaggeration": 0.35, "cfg_weight": 0.65, "temperature": 0.80},
+        "peak":       {"exaggeration": 0.65, "cfg_weight": 0.50, "temperature": 0.92},
+        "closing":    {"exaggeration": 0.55, "cfg_weight": 0.55, "temperature": 0.88},
     },
     "casual": {
         "opening":    {"exaggeration": 0.55, "cfg_weight": 0.45, "temperature": 0.85},
@@ -59,6 +60,18 @@ PRESET_MATRIX: dict[str, dict[str, dict[str, float]]] = {
 
 DEFAULT_REFERENCE_WAV = "scripts/my-voice.wav"
 FPS = 30
+
+# Pause marker syntax: [pause:0.5] inserts 500ms of digital silence at that
+# position. The generator splits text on this marker, runs Chatterbox per
+# text chunk, and splices silence tensors between chunks.
+#
+# Why splice silence at the Python level rather than relying on the model to
+# honor pause tokens: base Chatterbox reads [PAUSE] tokens literally
+# (resemble-ai/chatterbox issue #210). The community-validated pattern
+# (PR #164, psdwizzard/chatterbox-Audiobook fork) is to splice WAV silence
+# between separately-generated chunks. Deterministic, millisecond-precise,
+# model-agnostic.
+PAUSE_PATTERN = re.compile(r"\[pause:(\d+(?:\.\d+)?)\]")
 
 
 def resolve_preset(persona: str, step: dict) -> dict:
@@ -99,18 +112,77 @@ def generate_speech(
     cfg_weight: float,
     temperature: float,
 ) -> None:
+    """Synthesize text → MP3, honoring [pause:Xs] markers as exact silence inserts.
+
+    The text is split on [pause:Xs] markers (e.g. [pause:0.5] = 500ms). Each
+    non-empty text chunk is sent to Chatterbox; each marker produces silence
+    of the exact requested duration. Chunks and silences are concatenated in
+    order, then the combined WAV is converted to MP3.
+
+    Text without any [pause:Xs] markers is generated in a single Chatterbox
+    call (no concatenation overhead) — backward compatible with existing
+    scenes.
+    """
+    import torch
     import torchaudio
-    wav = model.generate(
-        text=text,
-        audio_prompt_path=reference_wav if reference_wav else None,
-        exaggeration=exaggeration,
-        cfg_weight=cfg_weight,
-        temperature=temperature,
-    )
+
+    pieces = PAUSE_PATTERN.split(text)
+    # re.split with a capturing group returns alternating chunks:
+    #   [text0, captured_pause1, text1, captured_pause2, text2, ...]
+    # Even indices are text; odd indices are pause durations (as strings).
+
+    audio_segments: list = []
+    ref_segment = None  # first generated wav — dtype/device reference for silence
+
+    for i, piece in enumerate(pieces):
+        if i % 2 == 0:
+            # Text chunk — synthesize if non-empty
+            stripped = piece.strip()
+            if not stripped:
+                continue
+            wav = model.generate(
+                text=stripped,
+                audio_prompt_path=reference_wav if reference_wav else None,
+                exaggeration=exaggeration,
+                cfg_weight=cfg_weight,
+                temperature=temperature,
+            )
+            if ref_segment is None:
+                ref_segment = wav
+            audio_segments.append(wav)
+        else:
+            # Pause marker — synthesize silence of exact duration
+            seconds = float(piece)
+            n_samples = int(seconds * model.sr)
+            if n_samples <= 0:
+                continue
+            if ref_segment is not None:
+                silence = torch.zeros(
+                    *ref_segment.shape[:-1], n_samples,
+                    dtype=ref_segment.dtype, device=ref_segment.device,
+                )
+            else:
+                # No model output yet (text starts with a pause marker) — assume
+                # mono float32 on CPU. Will be moved to model's device before cat.
+                silence = torch.zeros(1, n_samples, dtype=torch.float32)
+            audio_segments.append(silence)
+
+    if not audio_segments:
+        raise ValueError(
+            f"No audio produced from text (all chunks empty?): {text!r}"
+        )
+
+    # Ensure all segments share the same device. Silence created before any
+    # model output landed on CPU; align it with the model's device now.
+    if ref_segment is not None:
+        audio_segments = [s.to(ref_segment.device) for s in audio_segments]
+
+    final_wav = torch.cat(audio_segments, dim=-1).cpu()
+
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
         tmp_wav = tmp.name
     try:
-        torchaudio.save(tmp_wav, wav, model.sr)
+        torchaudio.save(tmp_wav, final_wav, model.sr)
         wav_to_mp3(tmp_wav, output_mp3)
     finally:
         os.unlink(tmp_wav)

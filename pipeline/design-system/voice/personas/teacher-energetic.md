@@ -73,18 +73,45 @@ A teacher-energetic scene has **more steps than a measured scene, not fewer**. T
 
 If you find yourself shortening a teacher-energetic scene to "punch it up," you're doing it wrong. The persona is about *how* lines sound, not about how many lines exist. See `../../teaching.md` for the explanation-density doctrine that applies regardless of persona.
 
+## Prosody vocabulary
+
+This persona snaps into things — energy comes from rhythm and concreteness, not from hesitation. The vocabulary is **real-English connectors paired with `[pause:Xs]`**. See `../../teaching.md` "Natural prosody — the connector-pause pattern" for cross-persona rules and rejection history.
+
+| Marker | When teacher-energetic uses it |
+|---|---|
+| `[pause:Xs]` | **Primary tool.** Deterministic silence. teacher-energetic durations: 0.4–0.6s standard, 0.7–0.9s at peak (pre-reveal). Pair with a connector word for max effect. |
+| `So, [pause:0.6]` | Pre-arithmetic / pre-consequence ("Node four combines. So, [pause:0.6] one plus zero plus zero.") — the most common pattern |
+| `And [pause:0.5]` | Additive continuation ("Plus one for itself. And [pause:0.5] returns three.") |
+| `But [pause:0.6]` | Contrast / base-case surprise ("Recurse left. But [pause:0.6] there is no left child.") — replaces what `Hmm` used to do |
+| `Now, [pause:0.5]` | Phase transition ("Pop back. Now, [pause:0.5] recurse right.") |
+| `Then [pause:0.5]` / `And then, [pause:0.5]` | Sequence ("Each node asks. And then, [pause:0.5] adds one for itself.") |
+| `Okay.` / `Alright.` | Step opener after a real shift. Used standalone (no pause attached) — the period creates the breath. |
+| `Right.` | Quick re-anchor mid-scene ("Right. Back at the root."). Standalone. |
+
+**Rejected** — do not use as fillers:
+- `Um` — read literally by Chatterbox
+- `Ah` — same
+- `Hmm` / `Hmmm` — initially LOCKED at 4/5 lab reliability; **dropped after real-world listening showed inconsistent rendering** ("sometimes works, sometimes doesn't"). Replace base-case surprises with `But [pause:0.6]` — the contrast word does the same work reliably.
+- Repeated-letter elongation (`Ummmm`, `Mmmmm`) — 0/5 reliability
+
+The persona's energy comes from delivery rhythm and concrete values, NOT from non-word fillers. If a previous draft used `Um —`, replace with `So, [pause:0.6]`. If it used `hmm —`, replace with `But [pause:0.6]`.
+
+Ellipses (`…`) appear sparingly within sentences for sub-second breaths. For any pause that matters to the listener's understanding, use `[pause:Xs]` instead — it's deterministic.
+
 ## Knob values
 
 From `../two-axis-model.md`:
 
 | Arc | exaggeration | cfg_weight | temperature |
 |---|---|---|---|
-| `opening` | 0.60 | 0.45 | 0.85 |
-| `methodical` | 0.55 | 0.50 | 0.83 |
-| `peak` | 0.80 | 0.30 | 0.93 |
-| `closing` | 0.70 | 0.40 | 0.90 |
+| `opening` | 0.60 | 0.55 | 0.90 |
+| `methodical` | 0.55 | 0.60 | 0.88 |
+| `peak` | 0.80 | 0.40 | 0.95 |
+| `closing` | 0.70 | 0.50 | 0.92 |
 
-If a clip lands flat, raise exaggeration by 0.1 *and* drop cfg_weight by 0.1 (paired). If a clip lands rushed, do the opposite.
+`cfg_weight ≥ 0.50` across non-peak arcs is **load-bearing for prosody** — at lower values, Chatterbox smooths over ellipses and mispronounces fillers. The peak is the documented exception (lower cfg_weight is what gives the peak its energy).
+
+If a clip lands flat, raise exaggeration by 0.1 *and* drop cfg_weight by 0.1 (paired) — but **do not drop cfg_weight below 0.50** on non-peak arcs, or your prosody markers stop rendering. If a clip lands rushed, do the opposite.
 
 ## Worked example — Search Node
 
@@ -137,8 +164,10 @@ The two-axis model handles emotion; TTS-readiness rules from the legacy `tts-nar
 - Numbers as words: "three" not "3", "thirty-five" not "35".
 - Code as speech: "head dot next", "O of n", "n plus one", "curr dot val".
 - No `[bracket tags]` — base Chatterbox reads them as literal English.
-- ≤12 words per breath group (em-dashes count as breath boundaries).
+- ≤12 words per breath group (em-dashes **and ellipses** count as breath boundaries).
 - Present tense throughout.
 - Name concrete values, not variable names: "Point next to three" beats "Point next to head."
+
+Ellipses (`…`) and fillers from the vocabulary above are explicitly **not** TTS hazards — they're encouraged for prosody. See `../../teaching.md` "Natural prosody" for placement rules.
 
 These rules apply regardless of persona — they're about TTS fluency, not voice character.

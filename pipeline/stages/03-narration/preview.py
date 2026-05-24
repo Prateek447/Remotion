@@ -25,16 +25,16 @@ except ImportError:
 # Source of truth: pipeline/design-system/voice/two-axis-model.md
 PRESET_MATRIX: dict[str, dict[str, dict[str, float]]] = {
     "teacher-energetic": {
-        "opening":    {"exaggeration": 0.60, "cfg_weight": 0.45, "temperature": 0.85},
-        "methodical": {"exaggeration": 0.55, "cfg_weight": 0.50, "temperature": 0.83},
-        "peak":       {"exaggeration": 0.80, "cfg_weight": 0.30, "temperature": 0.93},
-        "closing":    {"exaggeration": 0.70, "cfg_weight": 0.40, "temperature": 0.90},
+        "opening":    {"exaggeration": 0.60, "cfg_weight": 0.55, "temperature": 0.90},
+        "methodical": {"exaggeration": 0.55, "cfg_weight": 0.60, "temperature": 0.88},
+        "peak":       {"exaggeration": 0.80, "cfg_weight": 0.40, "temperature": 0.95},
+        "closing":    {"exaggeration": 0.70, "cfg_weight": 0.50, "temperature": 0.92},
     },
     "measured": {
-        "opening":    {"exaggeration": 0.50, "cfg_weight": 0.50, "temperature": 0.80},
-        "methodical": {"exaggeration": 0.35, "cfg_weight": 0.60, "temperature": 0.75},
-        "peak":       {"exaggeration": 0.65, "cfg_weight": 0.40, "temperature": 0.90},
-        "closing":    {"exaggeration": 0.55, "cfg_weight": 0.45, "temperature": 0.85},
+        "opening":    {"exaggeration": 0.50, "cfg_weight": 0.60, "temperature": 0.85},
+        "methodical": {"exaggeration": 0.35, "cfg_weight": 0.65, "temperature": 0.80},
+        "peak":       {"exaggeration": 0.65, "cfg_weight": 0.50, "temperature": 0.92},
+        "closing":    {"exaggeration": 0.55, "cfg_weight": 0.55, "temperature": 0.88},
     },
     "casual": {
         "opening":    {"exaggeration": 0.55, "cfg_weight": 0.45, "temperature": 0.85},
@@ -61,6 +61,29 @@ TTS_HAZARDS = [
     (">=",       "greater than or equal to"),
 ]
 
+# Connector vocabulary — the production prosody mechanism is the connector-pause
+# pattern: a real-English connector word followed by [pause:Xs] (see
+# teaching.md "Natural prosody — the connector-pause pattern" and
+# pipeline/experiments/filler-lab/README.md for empirical rejection of non-word
+# fillers). These connectors render fine in Chatterbox because they're normal
+# English words, not the short-segment failure mode that killed Um/Ah/Hmm.
+#
+# Counted in the prosody summary so authors can see how many connector beats
+# the scene contains. Matched too loosely to gate the warning on (so/now/right
+# also appear as regular content words) — the warning gates on [pause:Xs] and
+# ellipsis count only.
+CONNECTORS = {"so", "and", "but", "now", "then", "okay", "right", "well"}
+CONNECTOR_RE = re.compile(
+    r"\b(" + "|".join(sorted(CONNECTORS, key=len, reverse=True)) + r")\b",
+    re.IGNORECASE,
+)
+
+# Pause marker syntax: [pause:0.5] inserts 500ms of digital silence at that
+# position via silence-splicing in pipeline/stages/05-audio/generate.py.
+# These markers are NOT TTS hazards (they're stripped before the digit/bracket
+# checks below). See teaching.md "Natural prosody" for placement rules.
+PAUSE_PATTERN = re.compile(r"\[pause:(\d+(?:\.\d+)?)\]")
+
 
 def resolve_preset(persona: str, step: dict) -> dict:
     arc = step["arc"]
@@ -74,19 +97,55 @@ def lint_tts(narration: str) -> list[str]:
     issues: list[str] = []
     if not isinstance(narration, str):
         return issues
-    if re.search(r"\b\d+\b", narration):
+    # Strip [pause:Xs] markers before the digit/bracket checks — they're
+    # intentional prosody markers handled by silence-splicing, not literal
+    # text Chatterbox will read.
+    text_without_pauses = PAUSE_PATTERN.sub("", narration)
+    if re.search(r"\b\d+\b", text_without_pauses):
         issues.append("contains digits — spell as words")
-    if "[" in narration or "]" in narration:
+    if "[" in text_without_pauses or "]" in text_without_pauses:
         issues.append("contains [brackets] — Chatterbox reads them literally")
     for hazard, fix in TTS_HAZARDS:
-        if hazard in narration:
+        if hazard in text_without_pauses:
             issues.append(f"{hazard!r} → say {fix!r}")
+    # Breath-group boundaries: period/!/?, em-dash, ellipsis (… or ...),
+    # and [pause:Xs] markers (which inject silence at the audio level).
+    # All of these reset the breath count.
+    bg_split_re = r"—|--|…|\.\.\.|\[pause:\d+(?:\.\d+)?\]"
     for sentence in re.split(r"[.!?]", narration):
-        for bg in re.split(r"—|--", sentence):
+        for bg in re.split(bg_split_re, sentence):
             wc = len(bg.strip().split())
             if wc > 12:
                 issues.append(f"breath group of {wc} words > 12: {bg.strip()!r}")
     return issues
+
+
+def count_prosody_markers(scene: dict) -> tuple[int, int, int, float]:
+    """Return (ellipses, connectors, pause_markers, pause_seconds_total)
+    across all step narrations.
+
+    Used for the scene-level zero-prosody warning. Connectors (So/And/But/
+    Now/Then/Okay/Right/Well) are matched case-insensitively — they're the
+    real-English vocabulary that pairs with [pause:Xs] in the production
+    prosody pattern. Pause markers (`[pause:Xs]`) are counted alongside
+    their total injected silence duration for visibility — they're the
+    strongest prosody signal because they render as exact silence regardless
+    of model behavior.
+    """
+    total_ellipses = 0
+    total_connectors = 0
+    total_pauses = 0
+    total_pause_seconds = 0.0
+    for step in scene.get("steps", []) or []:
+        text = step.get("narration", "")
+        if not isinstance(text, str):
+            continue
+        total_ellipses += text.count("…") + text.count("...")
+        total_connectors += len(CONNECTOR_RE.findall(text))
+        for dur in PAUSE_PATTERN.findall(text):
+            total_pauses += 1
+            total_pause_seconds += float(dur)
+    return total_ellipses, total_connectors, total_pauses, total_pause_seconds
 
 
 def main() -> None:
@@ -139,6 +198,29 @@ def main() -> None:
         print("⚠  TTS-readiness warnings above — fix narration in scene.yaml before audio gen.")
     else:
         print("✅ No TTS-readiness issues detected.")
+
+    # Scene-level prosody heuristic. `[pause:Xs]` markers are the strongest
+    # signal — they render as deterministic silence at exact durations via
+    # silence-splicing in generate.py. Ellipses (…) are softer (Chatterbox-
+    # honored at high cfg_weight, ~500-700ms typical). Connectors (So/And/
+    # But/Now/etc.) are reported but match loosely so they don't gate the
+    # warning. See pipeline/design-system/teaching.md.
+    step_count = len(scene.get("steps") or [])
+    ellipses, connectors, pauses, pause_seconds = count_prosody_markers(scene)
+    print(
+        f"\nProsody markers: {pauses} [pause:Xs] ({pause_seconds:.1f}s total), "
+        f"{ellipses} ellipses, {connectors} connector words "
+        f"across {step_count} steps."
+    )
+    if step_count >= 8 and pauses == 0 and ellipses == 0:
+        print(
+            "⚠  Zero prosody markers detected. Narration likely reads scripted.\n"
+            "   Primary tool: [pause:Xs] — exact silence via splicing in generate.py.\n"
+            "   Secondary:    … (ellipsis) — soft pause honored at cfg_weight ≥ 0.55.\n"
+            "   Add ~1 [pause:Xs] per 3-4 steps at emotional pause points\n"
+            "   (before reveals, pre-arithmetic, mid-thought reconsiderations).\n"
+            "   See pipeline/design-system/teaching.md 'Natural prosody'."
+        )
 
     print(
         f"\nNext: python3 pipeline/stages/05-audio/generate.py {path}"

@@ -64,18 +64,43 @@ Warm, instructive, no CTA pressure.
 - **Exclamations**: avoid. The voice is interesting because of content, not punctuation.
 - **Pauses (em-dashes)**: used for emphasis, not for energy. One per step at most.
 
+## Prosody vocabulary
+
+This persona is patient — it earns pauses, gives ideas room to breathe. The vocabulary is **real-English connectors paired with `[pause:Xs]`** at slightly longer durations than teacher-energetic. See `../../teaching.md` "Natural prosody — the connector-pause pattern" for cross-persona rules and rejection history.
+
+| Marker | When measured uses it |
+|---|---|
+| `[pause:Xs]` | **Primary tool.** Deterministic silence. Measured uses longer pauses than teacher-energetic — typical durations 0.5–0.7s standard, 0.8–1.0s at peak. Pair with a connector for max effect. |
+| `So, [pause:0.6]` | Pre-arithmetic / pre-consequence — measured's most common pattern |
+| `And [pause:0.5]` | Additive continuation, layered explanation |
+| `But [pause:0.7]` | Contrast / base-case surprise — replaces what `Hmm` used to do; measured prefers a slightly longer pause here than teacher-energetic |
+| `Now, [pause:0.6]` | Transition between phases — measured leans on `Now` for orientation more than `Okay` |
+| `Well, [pause:0.5]` | Acknowledging nuance ("Well, [pause:0.5] the right child is also null.") — measured-specific; rare in teacher-energetic |
+| `Then [pause:0.5]` | Sequence step |
+
+**Rejected** — do not use as fillers:
+- `Um` — read literally by Chatterbox; replace with `So, [pause:0.5]` or `[pause:0.5]`
+- `Ah` — read literally; not measured's register anyway
+- `Hmm` / `Hmmm` — initial 4/5 lab reliability **failed in real-world listening** ("sometimes works, sometimes doesn't"). For base-case surprises use `But [pause:0.7]` — the contrast word does the work reliably.
+
+The persona **avoids** `Okay` / `Alright` openers (too peppy — that's `teacher-energetic` territory). Prefers `So,` / `Now,` / `Well,` openers.
+
+Ellipses (`…`) appear within sentences for soft trailing thoughts. For any pause that matters to the listener, use `[pause:Xs]` — deterministic and longer-felt, which suits measured's patient register.
+
 ## Knob values
 
 From `../two-axis-model.md`:
 
 | Arc | exaggeration | cfg_weight | temperature | Legacy preset |
 |---|---|---|---|---|
-| `opening` | 0.50 | 0.50 | 0.80 | `natural` |
-| `methodical` | 0.35 | 0.60 | 0.75 | `calm` |
-| `peak` | 0.65 | 0.40 | 0.90 | `expressive` |
-| `closing` | 0.55 | 0.45 | 0.85 | `expressive`-lite |
+| `opening` | 0.50 | 0.60 | 0.85 | `natural` (tuned) |
+| `methodical` | 0.35 | 0.65 | 0.80 | `calm` (tuned) |
+| `peak` | 0.65 | 0.50 | 0.92 | `expressive` (tuned) |
+| `closing` | 0.55 | 0.55 | 0.88 | `expressive`-lite (tuned) |
 
-These map onto the legacy `tts-narration-writer` preset names, so scenes authored before the two-axis model still produce identical voice output.
+`cfg_weight ≥ 0.50` across all arcs is **load-bearing for prosody** — at lower values, Chatterbox smooths over ellipses and mispronounces fillers.
+
+These values are tuned from the legacy `tts-narration-writer` preset baselines: `cfg_weight` bumped +0.05–0.10 to honor written prosody markers, `temperature` bumped +0.05 for natural variation across long methodical sequences. Pre-tuning scenes still render coherently — only the prosody texture improves.
 
 ## Worked example — Search Node
 
@@ -103,8 +128,10 @@ Same as `teacher-energetic`:
 - Numbers as words ("three" not "3").
 - Code as speech ("head dot next", "O of n").
 - No `[bracket tags]`.
-- ≤12 words per breath group.
+- ≤12 words per breath group (em-dashes **and ellipses** count as breath boundaries).
 - Present tense.
 - Concrete values over variable names.
+
+Ellipses (`…`) and fillers from the vocabulary above are explicitly **not** TTS hazards — they're the persona's signature for measured contemplation. See `../../teaching.md` "Natural prosody" for placement rules.
 
 These rules are persona-agnostic — they're about TTS fluency, not voice character.

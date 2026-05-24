@@ -74,6 +74,8 @@ When a recursive call returns, the return value must be *visible* before any par
 ✅ Step N: "Node four returns one" → caption: "Node four → 1". Step N+1: "Node two sees one from the left, then..." → references the value the viewer just saw.
 ❌ "Left subtree returns three" — never showed it computing to three.
 
+**Preferred visual treatment for recursive tree algorithms**: use the four-layer return-value overlay system (`NullNodeOverlay` + `TravelingNumberOverlay` + `ReturnValueOverlay` + `FormulaOverlay`) documented in `patterns/tree.md` → "Return-value overlay system". Captions become the supporting layer; the overlays do the load-bearing teaching. `CountTreeNodes.tsx` is the reference implementation.
+
 ### Rule 6: Show base cases as full steps, not narration
 
 "If null, return zero" is the foundation of the algorithm. Give it a whole step:
@@ -99,6 +101,118 @@ The final result is on screen as a number overlay or large caption, not just nar
 
 ✅ Big "7" overlay + "Seven!"
 ❌ "And that's seven nodes" with no visual punctuation.
+
+---
+
+## Natural prosody (the connector-pause pattern)
+
+Beginner clarity is necessary but not sufficient. A script that follows Rules 1–8 above can still sound *performed* — every sentence rehearsed, every transition crisp, no acoustic texture. The user feedback that prompted this section was:
+
+> "it feels like someone is reading the script it should feel like someone is thinking and explaining the topic in natural way"
+
+The fix is **acoustic texture via the connector-pause pattern**: a real-English connector word (So, And, But, Now, Then) followed by `[pause:Xs]` — the connector primes the listener for what's coming, the silence delivers the thinking beat. After extensive empirical testing (see `../experiments/filler-lab/README.md`), this is the ONLY production-reliable approach. Non-word fillers (`Um`, `Ah`, `Hmm`, `Ummmm`) all failed reproducibility and were dropped.
+
+### Primary mechanism: `[pause:Xs]` silence-splicing
+
+Narration text may include `[pause:0.5]` markers. The audio generator (`pipeline/stages/05-audio/generate.py`) splits text on these markers, runs Chatterbox per chunk, and splices in **exactly that many seconds of digital silence** before concatenation. Deterministic, millisecond-precise, model-agnostic.
+
+```yaml
+narration: "Node four combines. So, [pause:0.6] one plus zero plus zero. And [pause:0.4] returns one."
+```
+
+This is the community-validated pattern from [PR #164](https://github.com/resemble-ai/chatterbox/pull/164) and [psdwizzard/chatterbox-Audiobook](https://github.com/psdwizzard/chatterbox-Audiobook). It is the **load-bearing prosody tool** — every meaningful step should use at least one.
+
+### ⭐ The connector-pause pattern (the working technique)
+
+The empirical winner from audio testing: a real-English connector word **followed by** `[pause:Xs]`. The connector primes the listener for the type of thought coming; the silence gives them time to anticipate and absorb.
+
+| Pattern | Example | Emotional signal |
+|---|---|---|
+| `So, [pause:0.6]` | "Node four combines. So, [pause:0.6] one plus zero plus zero." | Consequence / pre-arithmetic / "this is what follows" |
+| `And [pause:0.5]` | "Plus one for itself. And [pause:0.5] returns three." | Addition / continuation / "and now this too" |
+| `But [pause:0.6]` | "Recurse left. But [pause:0.6] there is no left child." | Contrast / base-case surprise / "wait, hold on" |
+| `Now, [pause:0.5]` | "Pop back. Now, [pause:0.5] recurse right." | Transition between phases / "moving on" |
+| `Then [pause:0.5]` / `And then, [pause:0.5]` | "Each node asks how big. And then, [pause:0.5] adds one for itself." | Sequence / "next step is" |
+| `And that, [pause:0.5]` | "O of n time. And that, [pause:0.5] is recursion counting a tree." | Closing emphasis / "and that's the takeaway" |
+
+These are real English words. Chatterbox renders them naturally (unlike `Um` / `Ah` / `Hmm` which fail the [short-segment hallucination test](https://github.com/resemble-ai/chatterbox/issues/97)). The pause does the emotional work; the connector makes the silence feel intentional rather than dead.
+
+**Two-beat rhythm**: the connector creates a small breath (comma after it), the `[pause:Xs]` creates the longer thinking silence. Together they sound like someone working through a thought, not reading a sentence.
+
+### Secondary mechanisms: text-level markers Chatterbox honors
+
+| Marker | Rendered as | Use |
+|---|---|---|
+| `[pause:Xs]` | exact `Xs` of digital silence (deterministic) | Primary tool. Pair with a connector word for max effect. |
+| ` — ` (em-dash) | ~300ms pause (model-rendered) | Re-framing within a sentence; subordinate clause flag |
+| `…` (ellipsis) | ~500–700ms audible pause (cfg_weight ≥ 0.55, model-rendered) | Soft trailing thought; use sparingly (`[pause:Xs]` is more reliable) |
+| `,` and `.` | natural punctuation pauses | Routine breath / sentence boundary |
+
+`[pause:Xs]` is the only deterministic option. Use ellipses and em-dashes for shorter, sentence-internal breaths; reach for `[pause:Xs]` whenever the pause matters to the listener's understanding.
+
+### Connector vocabulary (the only "filler" words that work)
+
+These are normal English connectors — they don't hit the short-segment failure mode that killed `Um`/`Ah`/`Hmm`. Use them at step boundaries and major thought transitions.
+
+| Connector | Use |
+|---|---|
+| `So` / `So,` | Pre-arithmetic, consequence, follow-through ("So, [pause:0.6] one plus zero plus zero") |
+| `And` / `And then` / `And that` | Additive continuation, sequence, closing emphasis |
+| `But` | Contrast, base-case surprise, "wait — actually" pivots |
+| `Now` / `Now,` | Phase transition, "moving on to the next thing" |
+| `Then` | Sequence step |
+| `Okay` / `Okay.` | Orientation opener after a pop-back-up or context shift |
+| `Right` / `Right.` | Quick re-anchor mid-scene; less peppy than `Okay` |
+| `Well` | Measured pivot (preferred by `measured` persona; rare in `teacher-energetic`) |
+
+**Rejected after empirical testing** (do not use as fillers):
+- `Um` — read literally by Chatterbox as the word "um"
+- `Ah` — same
+- `Hmm` / `Hmmm` / `Hmmmm` — initial 4/5 reliability in lab; failed in real-world listening (sometimes works, sometimes doesn't). Dropped entirely.
+- `Ummmm` / `Mmmmm` / repeated-letter elongation — 0/5 reproducibility
+
+If you want the *effect* of a hesitation filler ("Um — let me think"), use `Connector, [pause:Xs]` instead: `"So, [pause:0.6] let me think"`. The silence does the emotional work without a non-word.
+
+### Placement rules — emotion, not syntax
+
+✅ **Pre-arithmetic / pre-computation**: `"Node four combines. So, [pause:0.6] one plus zero plus zero."`
+✅ **Before a reveal at peak**: `"three plus three plus one. [pause:0.9] Seven!"`
+✅ **At a base-case surprise**: `"Recurse left. But [pause:0.6] there is no left child."`
+✅ **At a phase transition**: `"Pop back to the root. Now, [pause:0.5] recurse right."`
+✅ **Closing emphasis**: `"O of n time. And that, [pause:0.5] is recursion counting a tree."`
+
+❌ **At every period or comma** — monotonous, formulaic
+❌ **At every step opener** — over-eager; saturates the device
+❌ **Bare `[pause:Xs]` without a connector**: `"[pause:0.5] Recurse left."` — sounds dead. Pair with a connector.
+❌ **Inside a methodical iteration step where the rhythm is the lesson** — pauses there sound hesitant. Keep iteration steps clean for rhythm contrast.
+
+### Density rule of thumb
+
+For a scene of length ≥8 steps:
+
+- **1–2 `[pause:Xs]` per non-trivial step** at emotional pause points (~30–40 total in a 26-step scene)
+- **Pause durations**:
+  - 0.4s — sentence-internal beat, additive emphasis
+  - 0.5–0.6s — standard thinking pause (most common; pair with connectors)
+  - 0.7–0.9s — pre-reveal at peak step (heaviest emphasis)
+- **Methodical iteration steps stay simple** — 0–1 pauses. The contrast with heavier steps creates breathing room.
+- Em-dashes as needed for re-framing (no strict density target)
+
+A 26-step scene lands at roughly 30–40 `[pause:Xs]` markers totaling 15–20s of injected silence. Below that and it reads scripted; above and the pacing drags.
+
+`pipeline/stages/03-narration/preview.py` reports pause count + total silence; warns if a scene ≥8 steps has zero `[pause:Xs]` AND zero ellipses.
+
+### Knob coupling
+
+`[pause:Xs]` is **deterministic** — it works at any `cfg_weight`. The silence is spliced at the audio layer after Chatterbox returns. Use this for any pause that needs to land precisely.
+
+Ellipses and em-dashes are **model-rendered** — they need `cfg_weight ≥ 0.50` to be honored as audible pauses. The default `teacher-energetic` and `measured` presets are tuned to this floor. **If you override knobs per step via `voiceOverride`, do not drop `cfg_weight` below 0.50** for non-peak arcs — at 0.40 or lower, Chatterbox smooths over ellipses entirely.
+
+The peak step (`cfg_weight = 0.40`) is the documented exception: use `[pause:Xs]` (not ellipses) for guaranteed pauses there; the peak's exaggeration energy does the work model-rendered pauses would otherwise do.
+
+### Persona-agnostic
+
+This section applies to `teacher-energetic` AND `measured`. The persona governs voice **character** (energetic vs. calm); prosody governs voice **acoustic texture** (scripted vs. spoken-aloud). They're orthogonal. A `teacher-energetic` scene with the connector-pause pattern sounds like a hyped teacher *thinking-while-explaining*; a `measured` scene with the same pattern sounds like a calm narrator *thinking-while-explaining*. Both beat their no-prosody counterparts. Personas may favor different connectors (`teacher-energetic` leans `So`, `Now`, `Right`; `measured` leans `So`, `Now`, `Well`) — see persona docs for vocabulary.
 
 ---
 
@@ -197,6 +311,10 @@ Before running `pipeline/run.sh`, ask:
 - [ ] Is the right subtree shown explicitly, not collapsed to "same thing"?
 - [ ] Does the final step show a big visible answer, not just narrate it?
 - [ ] Does step count meet the heuristic for the algorithm class?
+- [ ] Does the narration use the **connector-pause pattern** (`So, [pause:0.6]` / `And [pause:0.5]` / `But [pause:0.6]` / `Now, [pause:0.5]`) at thought transitions?
+- [ ] Does each non-trivial step have 1–2 `[pause:Xs]` markers at emotional pause points?
+- [ ] Are non-word fillers (`Um`, `Ah`, `Hmm`) avoided? They were empirically rejected — use connector + pause instead.
+- [ ] Do iteration / repetition steps stay clean (0–1 pauses) to create rhythm contrast against heavier steps?
 
 A "no" on any of these is a script that needs another pass.
 

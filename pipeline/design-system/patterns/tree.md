@@ -211,6 +211,70 @@ For deeper visualization of the call stack, consider:
 - `outputValues: [1, 1, 3, 1, 1, 3]` — strip showing returns in order they happened.
 - `stackItems: [...]` — though this type field is currently unused for tree scenes, a renderer could be added.
 - Caption with formula in progress: `"Node 2: 1 + 1 + 1 = 3"`.
+- **Return-value overlay system** — four cooperating components that make the recursion mechanically visible (see next section). This is now the preferred way to teach recursion; captions become supporting text, not the primary signal.
+
+### Return-value overlay system
+
+Introduced in `CountTreeNodes.tsx` and reusable for any recursive tree algorithm (`treeHeight`, `sumTree`, `diameter`, `maxDepth`, `kthSmallest` with subtree-size, etc.). Four overlay layers stack on top of `TreeDiagram`; each is small, declarative, and driven by tables defined at the top of the scene file.
+
+| Overlay | Visual | Purpose |
+|---|---|---|
+| `NullNodeOverlay` | Dashed circle labeled `null` fades in below the leaf, with a short dashed edge; a grey "0" pill then travels from the null node up to the parent | Makes the *base case* visible. Before this overlay, the null was implicit ("there is no left child"); now it's a real node on screen that returns a real zero |
+| `TravelingNumberOverlay` | Green pill containing the returned number glides along the parent edge from child → parent over `TRAVEL_FRAMES` (~28 frames) | Makes the *return* visible. The viewer literally sees the value move up the call stack |
+| `ReturnValueOverlay` | Persistent green `= N` badge below each node that has returned | Keeps returned values on screen so the parent's combine step can reference them visually |
+| `FormulaOverlay` | Blue pill next to each node; lifecycle: `"L = 0"` (when left arrives) → `"0 + 0 + 1 = 1"` (when right arrives) → absorb into the node on return | Makes the *combine* visible. The formula updates in real time as each child reports back, then shrinks and fades into the node when the parent returns |
+
+The four layers compose. Reading any base-case → combine sequence top-to-bottom shows:
+
+1. Null node + edge fade in (base case is real)
+2. "0" pill travels null → leaf (base case returns)
+3. `L = 0` formula pill appears next to the leaf
+4. Second null on the other side; second "0" travels up
+5. Formula updates to `0 + 0 + 1 = 1`
+6. On the leaf's return step: formula absorbs into the leaf; green `= 1` badge appears; green "1" pill travels leaf → parent
+7. Parent's `L = 1` formula pill appears, and so on
+
+#### Required scene-side scaffolding
+
+Each scene declares these constant tables once, near the top of the file:
+
+```ts
+// Step index at which each node's return value first becomes visible
+const NODE_RETURN_STEP:  Record<string, number> = { n4: 8, n5: 12, n2: 13, ... };
+const NODE_RETURN_VALUE: Record<string, number> = { n4: 1, n5: 1, n2: 3, ... };
+
+// Child → parent edges for the traveling-number animation
+const PARENT_MAP: Record<string, string> = { n4: "n2", n5: "n2", n2: "n1", ... };
+
+// Step → which null child appears at this step (drives NullNodeOverlay)
+const NULL_CHILD_INFO: Record<number, { parentId: string; side: "left" | "right" }> = {
+  6:  { parentId: "n4", side: "left"  },
+  7:  { parentId: "n4", side: "right" },
+  ...
+};
+
+// Per-node formula lifecycle: left-arrive step / right-arrive step / absorb step
+const NODE_FORMULA_LIFECYCLE: Record<string, { leftStep, leftText, rightStep, fullText, absorbStep, ... }>;
+```
+
+`makeSteps()` then post-processes raw steps with `raw.map((step, i) => ({ ...step, snapshot: { ...step.snapshot, nodeReturnValues: ... } }))` — auto-attaching the accumulating `nodeReturnValues` to each snapshot from `NODE_RETURN_STEP`/`NODE_RETURN_VALUE`. **The yaml author does not write `nodeReturnValues` directly**; it's derived from the scene-level tables.
+
+#### Snapshot type extensions
+
+`src/lib/types.ts`'s `ListSnapshot` gained two optional fields supporting this system:
+
+- `nodeReturnValues?: Record<string, number>` — set by `makeSteps()` post-processing; read by `ReturnValueOverlay` / `TravelingNumberOverlay`
+- `showLevelBands?: boolean` — reserved for level-banded visualizations (`ZigzagTraversal`, etc.)
+
+`SceneStep` also gained `excludeFromAnim?: boolean` so a step can be dropped from the `reel-anim` (no-narration) cut while staying in `youtube`/`reel`.
+
+#### When to use it
+
+✅ **Use for recursive aggregation algorithms** where the teaching moment is "values bubble up": `countNodes`, `treeHeight`, `sumTree`, `diameter`, `maxDepth`, `count-good-nodes`, `path-sum`.
+
+⚠️ **Don't use for traversal algorithms** that emit values rather than aggregate them: level-order, left-view, boundary. Those use `outputValues` + `QueueVisualization` instead.
+
+⚠️ **Don't use for mutation algorithms** (`BSTInsert`, `BSTDelete`) — there's no return value to bubble. Captions + `PHASE_MARKERS` are the idiom there.
 
 ### Step-count expectation
 
