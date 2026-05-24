@@ -147,6 +147,7 @@ function makeSteps(): SceneStep[] {
   return [
     // ── Step 0: Goal preview — colored dashed diagonal group lines ─────────────
     {
+      excludeFromAnim: true,
       startFrame: 0,
       highlightLines: { startLine: 0, endLine: 0 },
       visibleLines: 1,
@@ -168,6 +169,7 @@ function makeSteps(): SceneStep[] {
     },
     // ── Step 1: Intuition — mirror of L-to-R ──────────────────────────────────
     {
+      excludeFromAnim: true,
       startFrame: 329,
       highlightLines: { startLine: 0, endLine: 0 },
       visibleLines: 1,
@@ -420,6 +422,7 @@ function makeSteps(): SceneStep[] {
     },
     // ── Step 17: Complexity ────────────────────────────────────────────────────
     {
+      excludeFromAnim: true,
       startFrame: 3716,
       highlightLines: { startLine: 0, endLine: 25 },
       visibleLines: 26,

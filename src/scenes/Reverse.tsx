@@ -38,6 +38,7 @@ const HEAD_COLOR = "#3B82F6";
 const steps: SceneStep[] = [
   // ─── Phase 0: INTRO ──────────────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
@@ -56,6 +57,7 @@ const steps: SceneStep[] = [
 
   // ─── Phase 1: CONCEPT — explain the goal ──────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 255,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
@@ -426,6 +428,7 @@ const steps: SceneStep[] = [
 
   // ─── Phase 7: COMPLEXITY ──────────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 2801,
     highlightLines: { startLine: 0, endLine: 10 },
     snapshot: {
@@ -446,6 +449,7 @@ const steps: SceneStep[] = [
 
   // ─── CTA ──────────────────────────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 3112,
     highlightLines: { startLine: 0, endLine: 10 },
     snapshot: {

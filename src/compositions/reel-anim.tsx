@@ -23,6 +23,8 @@ import { TowerOfHanoi, TOWER_OF_HANOI_SCENE_FRAMES } from "../scenes/TowerOfHano
 import { DiagonalTraversal, DIAGONAL_SCENE_FRAMES } from "../scenes/DiagonalTraversal";
 import { RightToLeftDiagonal, RTL_DIAGONAL_SCENE_FRAMES } from "../scenes/RightToLeftDiagonal";
 import { CountTreeNodes, COUNT_TREE_NODES_SCENE_FRAMES } from "../scenes/CountTreeNodes";
+import { VerticalOrderTraversal, VERTICAL_ORDER_SCENE_FRAMES } from "../scenes/VerticalOrderTraversal";
+import { ZigzagTraversal, ZIGZAG_SCENE_FRAMES } from "../scenes/ZigzagTraversal";
 
 interface TokenProps { tokens: ThemedToken[][] }
 interface DualTokenProps {
@@ -154,5 +156,17 @@ export const DiagonalRLReelAnim: React.FC<TokenProps> = ({ tokens }) => (
 export const CountTreeNodesReelAnim: React.FC<TokenProps> = ({ tokens }) => (
   <StandaloneVideo title="Count Tree Nodes" complexity="O(n)" subtitle="Recursive size of a binary tree" sceneFrames={COUNT_TREE_NODES_SCENE_FRAMES}>
     <CountTreeNodes tokens={tokens} format="reel-anim" />
+  </StandaloneVideo>
+);
+
+export const VerticalOrderReelAnim: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Vertical Order" complexity="O(n log n)" sceneFrames={VERTICAL_ORDER_SCENE_FRAMES}>
+    <VerticalOrderTraversal tokens={tokens} format="reel-anim" />
+  </StandaloneVideo>
+);
+
+export const ZigzagReelAnim: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Tree — Zigzag Order" complexity="O(n)" sceneFrames={ZIGZAG_SCENE_FRAMES}>
+    <ZigzagTraversal tokens={tokens} format="reel-anim" />
   </StandaloneVideo>
 );

@@ -85,6 +85,7 @@ function makeSteps(): SceneStep[] {
 
     // Step 0 ─ Hook + Intro: show full BST
     {
+      excludeFromAnim: true,
       startFrame: 0,
       highlightLines: { startLine: 0, endLine: 0 },
       visibleLines: 1,
@@ -271,6 +272,7 @@ function makeSteps(): SceneStep[] {
     },
     // Step 15 ─ ending: full tree, complexity card, CTA
     {
+      excludeFromAnim: true,
       startFrame: 4811,
       highlightLines: { startLine: 11, endLine: 12 },
       visibleLines: 13,

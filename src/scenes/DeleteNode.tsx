@@ -41,6 +41,7 @@ const steps: SceneStep[] = [
   // ─── Phase 0: CONTEXT ────────────────────────────────────────────────────
   // "Okay so here's our linked list..." (~1.4s in)
   {
+    excludeFromAnim: true,
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
@@ -333,6 +334,7 @@ const steps: SceneStep[] = [
 
   // ─── Phase 5: COMPLEXITY & RECAP ─────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 3295,
     highlightLines: { startLine: 0, endLine: 14 },
     snapshot: {
@@ -353,6 +355,7 @@ const steps: SceneStep[] = [
 
   // ─── SUBSCRIBE CTA ────────────────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 3676,
     highlightLines: { startLine: 0, endLine: 14 },
     snapshot: {

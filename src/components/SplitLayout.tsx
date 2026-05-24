@@ -32,6 +32,7 @@ export const SplitLayout: React.FC<SplitLayoutProps> = ({
           width: `calc(100% - ${leftWidth})`,
           padding: 16,
           boxSizing: "border-box",
+          overflow: "hidden",
           pointerEvents: "none",
         }}
       >

@@ -155,6 +155,7 @@ function makeSteps(): SceneStep[] {
   return [
     // ── Step 0: Output preview — dotted diagonal group lines ──────────────────
     {
+      excludeFromAnim: true,
       startFrame: 0,
       highlightLines: { startLine: 0, endLine: 0 },
       visibleLines: 1,
@@ -179,6 +180,7 @@ function makeSteps(): SceneStep[] {
     },
     // ── Step 1: Intuition hook ─────────────────────────────────────────────────
     {
+      excludeFromAnim: true,
       startFrame: 605,
       highlightLines: { startLine: 0, endLine: 0 },
       visibleLines: 1,
@@ -411,6 +413,7 @@ function makeSteps(): SceneStep[] {
     },
     // ── Step 16: Callback payoff ───────────────────────────────────────────────
     {
+      excludeFromAnim: true,
       startFrame: 5894,
       highlightLines: { startLine: 0, endLine: 25 },
       visibleLines: 26,
@@ -426,6 +429,7 @@ function makeSteps(): SceneStep[] {
     },
     // ── Step 17: Complexity ────────────────────────────────────────────────────
     {
+      excludeFromAnim: true,
       startFrame: 6212,
       highlightLines: { startLine: 0, endLine: 25 },
       visibleLines: 26,

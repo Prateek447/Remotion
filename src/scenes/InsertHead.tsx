@@ -29,6 +29,7 @@ const NEWNODE_COLOR = "#7B1FA2";
 const steps: SceneStep[] = [
   // Phase 1: CONTEXT — explain what a node is
   {
+    excludeFromAnim: true,
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
@@ -238,6 +239,7 @@ const steps: SceneStep[] = [
 
   // Phase 7: RECAP — three simple steps
   {
+    excludeFromAnim: true,
     startFrame: 2313,
     highlightLines: { startLine: 1, endLine: 3 },
     snapshot: {
@@ -258,6 +260,7 @@ const steps: SceneStep[] = [
 
   // SUBSCRIBE CTA
   {
+    excludeFromAnim: true,
     startFrame: 2534,
     highlightLines: { startLine: 0, endLine: 5 },
     snapshot: {

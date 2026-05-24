@@ -96,6 +96,7 @@ function makeSteps(): SceneStep[] {
   return [
     // ── Step 0: Intro ─────────────────────────────────────────────────────────
     {
+      excludeFromAnim: true,
       startFrame: 0,
       highlightLines: { startLine: 0, endLine: 0 },
       snapshot: {
@@ -423,6 +424,7 @@ function makeSteps(): SceneStep[] {
     },
     // ── Step 21: Loop ends + complexity ─────────────────────────────────────────
     {
+      excludeFromAnim: true,
       startFrame: 3996,
       highlightLines: { startLine: 19, endLine: 20 },
       snapshot: {

@@ -42,6 +42,7 @@ const TAIL_COLOR = "#14B8A6";
 const steps: SceneStep[] = [
   // ─── Phase 0: INTRO — show both lists ─────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
@@ -325,6 +326,7 @@ const steps: SceneStep[] = [
 
   // ─── Phase 5: COMPLEXITY ─────────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 2627,
     highlightLines: { startLine: 0, endLine: 15 },
     snapshot: {
@@ -349,6 +351,7 @@ const steps: SceneStep[] = [
 
   // ─── CTA ──────────────────────────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 2989,
     highlightLines: { startLine: 0, endLine: 15 },
     snapshot: {

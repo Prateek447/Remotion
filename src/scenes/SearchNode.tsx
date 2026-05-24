@@ -43,6 +43,7 @@ const CURR_COLOR = "#7c3aed";
 const steps: SceneStep[] = [
   // ─── Phase 0: CONTEXT ─────────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
     visibleLines: 1,
@@ -65,6 +66,7 @@ const steps: SceneStep[] = [
 
   // Problem statement — search for value 9
   {
+    excludeFromAnim: true,
     startFrame: 190,
     highlightLines: { startLine: 0, endLine: 0 },
     visibleLines: 1,
@@ -446,6 +448,7 @@ const steps: SceneStep[] = [
 
   // ─── Phase 4: COMPLEXITY ──────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 2163,
     highlightLines: { startLine: 0, endLine: 9 },
     visibleLines: 10,
@@ -468,6 +471,7 @@ const steps: SceneStep[] = [
 
   // ─── Phase 5: CTA ─────────────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 2420,
     highlightLines: { startLine: 0, endLine: 9 },
     visibleLines: 10,

@@ -37,6 +37,7 @@ const HEAD_COLOR = "#1565C0";
 const steps: SceneStep[] = [
   // Context — full list
   {
+    excludeFromAnim: true,
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {

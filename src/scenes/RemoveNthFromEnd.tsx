@@ -79,6 +79,7 @@ interface ScriptStep extends SceneStep {
 const steps: ScriptStep[] = [
   // ─── Phase 0: Problem intro ──────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 0,
     phase: "intro",
     highlightLines: NO_HL,
@@ -803,6 +804,7 @@ const steps: ScriptStep[] = [
 
   // ─── Phase 4: Complexity recap ───────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 3884,
     phase: "optimal",
     highlightLines: { startLine: 0, endLine: 14 },
@@ -826,6 +828,7 @@ const steps: ScriptStep[] = [
 
   // ─── Phase 5: Subscribe CTA ──────────────────────────────────────────────
   {
+    excludeFromAnim: true,
     startFrame: 4188,
     phase: "optimal",
     highlightLines: { startLine: 0, endLine: 14 },
@@ -854,6 +857,7 @@ const REEL_SAFE: SafeArea = { top: 150, bottom: 380, left: 60, right: 160 };
 const REEL_TOP_RATIO = 0.42;
 
 const diagramSteps: SceneStep[] = steps.map((s) => ({
+  excludeFromAnim: s.excludeFromAnim,
   startFrame: s.startFrame,
   highlightLines: s.highlightLines,
   snapshot: s.snapshot,

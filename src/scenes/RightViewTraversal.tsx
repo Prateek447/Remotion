@@ -82,6 +82,7 @@ function makeSteps(): SceneStep[] {
   return [
     // ── Step 0: Intro ─────────────────────────────────────────────────────────
     {
+      excludeFromAnim: true,
       startFrame: 0,
       highlightLines: { startLine: 0, endLine: 0 },
       visibleLines: 1,
@@ -393,6 +394,7 @@ function makeSteps(): SceneStep[] {
     },
     // ── Step 21: Complexity ───────────────────────────────────────────────────
     {
+      excludeFromAnim: true,
       startFrame: 3800,
       highlightLines: { startLine: 0, endLine: 13 },
       visibleLines: 14,

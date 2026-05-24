@@ -90,11 +90,6 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
     fps,
     config: { damping: 22, stiffness: 250 },
   });
-  const getLineWidthPx = (lineIndex: number) => {
-    const lineChars = tokens[lineIndex]?.reduce((acc, tok) => acc + tok.content.length, 0) ?? 0;
-    return lineChars * charW + PILL_PAD * 2;
-  };
-
   // ── Auto-scroll: keep highlighted line(s) in the upper-center of visible area ──
   // Scrolling is active whenever containerHeight is provided (both reel and youtube).
   const totalH   = padding * 2 + tokens.length * lineH;
@@ -114,28 +109,28 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   const prevEnd   = previous.highlightLines.endLine;
   const hasPrev   = prevStart >= 0;
 
+  const maxLineWidth = (start: number, end: number) => {
+    let max = 0;
+    for (let i = start; i <= end; i++) {
+      const chars = tokens[i]?.reduce((acc, tok) => acc + tok.content.length, 0) ?? 0;
+      max = Math.max(max, chars);
+    }
+    return max * charW + 16; // 8px breathing room on each side
+  };
+
   const highlightStrips = currStart >= 0
     ? (() => {
-        let maxW = 0;
-        for (let i = currStart; i <= currEnd; i++) {
-          maxW = Math.max(maxW, getLineWidthPx(i));
-        }
-        let prevMaxW = maxW;
-        if (hasPrev) {
-          prevMaxW = 0;
-          for (let i = prevStart; i <= prevEnd; i++) {
-            prevMaxW = Math.max(prevMaxW, getLineWidthPx(i));
-          }
-        }
-
         const currTop    = padding + currStart * lineH;
         const currHeight = (currEnd - currStart + 1) * lineH;
         const prevTop    = hasPrev ? padding + prevStart * lineH : currTop;
         const prevHeight = hasPrev ? (prevEnd - prevStart + 1) * lineH : currHeight;
 
-        const animTop    = interpolate(t, [0, 1], [prevTop,    currTop]);
-        const animHeight = interpolate(t, [0, 1], [prevHeight, currHeight]);
-        const animWidth  = interpolate(t, [0, 1], [prevMaxW,   maxW]) + 16;
+        const currWidth  = maxLineWidth(currStart, currEnd);
+        const prevWidth  = hasPrev ? maxLineWidth(prevStart, prevEnd) : currWidth;
+
+        const animTop     = interpolate(t, [0, 1], [prevTop,    currTop]);
+        const animHeight  = interpolate(t, [0, 1], [prevHeight, currHeight]);
+        const animWidth   = interpolate(t, [0, 1], [prevWidth,  currWidth]);
         const animOpacity = hasPrev ? 1 : wipeProgress;
 
         return (
@@ -143,8 +138,8 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
             style={{
               position:      "absolute",
               left:          pLeft - 8,
-              top:           animTop,
               width:         animWidth,
+              top:           animTop,
               height:        animHeight,
               border:        `2px solid rgba(0, 150, 255, ${0.8 * animOpacity})`,
               borderRadius:  "6px",

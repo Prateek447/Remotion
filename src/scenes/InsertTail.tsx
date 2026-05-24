@@ -36,6 +36,7 @@ const CURR_COLOR = "#2E7D32";
 const steps: SceneStep[] = [
   // Phase 1: CONTEXT — show existing list
   {
+    excludeFromAnim: true,
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
@@ -294,6 +295,7 @@ const steps: SceneStep[] = [
 
   // Phase 8: RECAP
   {
+    excludeFromAnim: true,
     startFrame: 2492,
     highlightLines: { startLine: 1, endLine: 10 },
     snapshot: {
@@ -314,6 +316,7 @@ const steps: SceneStep[] = [
 
   // SUBSCRIBE CTA
   {
+    excludeFromAnim: true,
     startFrame: 2689,
     highlightLines: { startLine: 0, endLine: 12 },
     snapshot: {

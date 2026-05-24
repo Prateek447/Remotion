@@ -38,6 +38,7 @@ const CURR_COLOR = "#2E7D32";
 const steps: SceneStep[] = [
   // Context — full list
   {
+    excludeFromAnim: true,
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
@@ -58,6 +59,7 @@ const steps: SceneStep[] = [
 
   // Tail intro — same idea, walk further
   {
+    excludeFromAnim: true,
     startFrame: 280,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {

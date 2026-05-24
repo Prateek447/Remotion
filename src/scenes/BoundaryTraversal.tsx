@@ -99,6 +99,7 @@ function makeSteps(): SceneStep[] {
   return [
     // Step 0 — Intro: show tree, 9 rings, n5 has no ring
     {
+      excludeFromAnim: true,
       startFrame: 0,
       highlightLines: { startLine: 0, endLine: 0 },
       snapshot: {
@@ -291,6 +292,7 @@ function makeSteps(): SceneStep[] {
     },
     // Step 16 — return res; O(n) time and space
     {
+      excludeFromAnim: true,
       startFrame: 3200,
       highlightLines: { startLine: 8, endLine: 9 },
       snapshot: {

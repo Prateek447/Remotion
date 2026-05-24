@@ -44,6 +44,8 @@ export interface ListSnapshot {
   stackItems?: number[];
   outputValues?: number[];
   outputLabel?: string;
+  showLevelBands?: boolean;
+  nodeReturnValues?: Record<string, number>;
 }
 
 export interface HighlightStep {
@@ -56,6 +58,7 @@ export interface SceneStep {
   highlightLines: HighlightStep;
   startFrame: number;
   visibleLines?: number;
+  excludeFromAnim?: boolean;
 }
 
 export interface CodeSnippet {

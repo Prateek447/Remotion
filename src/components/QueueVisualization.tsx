@@ -55,22 +55,14 @@ const CircleCard: React.FC<{
   const exitTumble = isLeaving ? interpolate(transitionT, [0, 1], [0, -18])               : 0;
 
   const isActive     = !isLeaving && hl === "active";
-  const emphP        = isActive ? spring({ frame: localFrame, fps, config: springPresets.emphasis }) : 0;
-  const emphSc       = isActive ? interpolate(emphP as number, [0, 0.5, 1], [1, 1.14, 1]) : 1;
   const wobbleDecay  = isActive ? Math.exp(-localFrame * 0.07) : 0;
   const wobbleSin    = Math.sin(localFrame * 0.55);
   const wobbleShiftX = wobbleDecay * 5 * wobbleSin;
   const wobbleAngle  = wobbleDecay * 1.5 * wobbleSin;
 
-  const ringPulse   = isActive ? Math.sin(localFrame * 0.12) * 0.5 + 0.5 : 0;
-  const ringOpacity = isActive ? 0.35 + ringPulse * 0.45 : 0;
-  const ringSpread  = isActive ? 4 + ringPulse * 6 : 0;
-
   const palette      = QUEUE_PALETTE[hl];
   const glowStrength = (hl === "active" || hl === "new") ? 1.0 : hl === "visited" ? 0.2 : 0.35;
-  const glowBase     = `0 0 ${10 + glowStrength * 14}px ${palette.color}66, 0 0 ${22 + glowStrength * 20}px ${palette.color}22`;
-  const activeRing   = isActive ? `, 0 0 0 ${ringSpread}px ${palette.color}${Math.round(ringOpacity * 255).toString(16).padStart(2, "0")}` : "";
-  const boxShadow    = glowBase + activeRing;
+  const boxShadow    = `0 0 ${10 + glowStrength * 14}px ${palette.color}66, 0 0 ${22 + glowStrength * 20}px ${palette.color}22`;
 
   return (
     <div
@@ -86,7 +78,7 @@ const CircleCard: React.FC<{
         alignItems:     "center",
         justifyContent: "center",
         flexShrink:     0,
-        transform:      `translateX(${enterTX + exitTX + wobbleShiftX}px) translateY(${exitGravY}px) scale(${enterSc * emphSc * exitSc}) rotate(${exitTumble + wobbleAngle}deg)`,
+        transform:      `translateX(${enterTX + exitTX + wobbleShiftX}px) translateY(${exitGravY}px) scale(${enterSc * exitSc}) rotate(${exitTumble + wobbleAngle}deg)`,
         opacity:        enterOp * exitOp * palette.opacity,
       }}
     >
@@ -281,8 +273,8 @@ const QueuePanel: React.FC<{
           alignItems:   "center",
           padding:      `${Math.round(itemSize * 0.18)}px ${Math.round(itemSize * 0.28)}px`,
           background:   "linear-gradient(135deg, rgba(0,150,255,0.09) 0%, rgba(0,100,180,0.05) 100%)",
-          border:       "1.5px solid rgba(0,150,255,0.35)",
-          borderRadius: 24,
+          border:       "2.5px solid rgba(0,150,255,0.55)",
+          borderRadius: 12,
           boxShadow:    "0 0 40px rgba(0,150,255,0.1), inset 0 1px 0 rgba(255,255,255,0.06)",
         }}
       >
@@ -317,7 +309,7 @@ const QueuePanel: React.FC<{
               width:          itemSize * 1.4,
               height:         itemSize,
               border:         "1.5px dashed rgba(255,255,255,0.15)",
-              borderRadius:   "50%",
+              borderRadius:   12,
               display:        "flex",
               alignItems:     "center",
               justifyContent: "center",

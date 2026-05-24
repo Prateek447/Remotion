@@ -354,6 +354,58 @@ export const rtlDiagonalCode = `public List<List<Integer>> diagonalRL(TreeNode r
     return result;
 }`;
 
+export const verticalOrderCode = `public List<List<Integer>> verticalOrder(TreeNode root) {
+    if (root == null) return List.of();
+    TreeMap<Integer, List<Integer>> colMap = new TreeMap<>();
+    Map<TreeNode, Integer> colOf = new HashMap<>();
+    Queue<TreeNode> q = new LinkedList<>();
+    // seed: root is at column 0
+    colOf.put(root, 0);
+    q.offer(root);
+    while (!q.isEmpty()) {
+        TreeNode node = q.poll();
+        int col = colOf.get(node);
+        // add to this column's list
+        colMap.computeIfAbsent(col, k -> new ArrayList<>()).add(node.val);
+        if (node.left != null) {
+            // left child → one column to the left
+            colOf.put(node.left, col - 1);
+            q.offer(node.left);
+        }
+        if (node.right != null) {
+            // right child → one column to the right
+            colOf.put(node.right, col + 1);
+            q.offer(node.right);
+        }
+    }
+    return new ArrayList<>(colMap.values());
+}`;
+
+export const zigzagLevelOrderCode = `public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+    if (root == null) return List.of();
+    List<List<Integer>> result = new ArrayList<>();
+    Queue<TreeNode> q = new LinkedList<>();
+    q.offer(root);
+    boolean leftToRight = true;
+    while (!q.isEmpty()) {
+        int size = q.size();
+        LinkedList<Integer> level = new LinkedList<>();
+        for (int i = 0; i < size; i++) {
+            TreeNode node = q.poll();
+            if (leftToRight) {
+                level.addLast(node.val);
+            } else {
+                level.addFirst(node.val);
+            }
+            if (node.left != null)  q.offer(node.left);
+            if (node.right != null) q.offer(node.right);
+        }
+        result.add(level);
+        leftToRight = !leftToRight;
+    }
+    return result;
+}`;
+
 export const levelOrderCode = `public List<Integer> levelOrder(TreeNode root) {
   List<Integer> result = new ArrayList<>();
   if (root == null) return result;

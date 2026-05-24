@@ -71,6 +71,7 @@ const steps: SceneStep[] = [
   // ─── Phase 0: INTRO — what is a cycle? ────────────────────────────────────
   // Audio 0: 262 frames
   {
+    excludeFromAnim: true,
     startFrame: 0,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
@@ -83,6 +84,7 @@ const steps: SceneStep[] = [
   // Step 1: Show the cycle arrow (5 -> 3)
   // Audio 1: 298 frames
   {
+    excludeFromAnim: true,
     startFrame: 272,
     highlightLines: { startLine: 0, endLine: 0 },
     snapshot: {
@@ -264,6 +266,7 @@ const steps: SceneStep[] = [
   // ─── Phase 6: WHY IT WORKS ───────────────────────────────────────────────
   // Audio 11: 344 frames
   {
+    excludeFromAnim: true,
     startFrame: 2600,
     highlightLines: { startLine: 3, endLine: 8 },
     snapshot: {
@@ -277,6 +280,7 @@ const steps: SceneStep[] = [
   // ─── Phase 7: COMPLEXITY ─────────────────────────────────────────────────
   // Audio 12: 396 frames
   {
+    excludeFromAnim: true,
     startFrame: 2954,
     highlightLines: { startLine: 0, endLine: 11 },
     snapshot: {
@@ -290,6 +294,7 @@ const steps: SceneStep[] = [
   // ─── CTA ──────────────────────────────────────────────────────────────────
   // Audio 13: 167 frames
   {
+    excludeFromAnim: true,
     startFrame: 3360,
     highlightLines: { startLine: 0, endLine: 11 },
     snapshot: {

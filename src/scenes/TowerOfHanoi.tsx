@@ -65,6 +65,7 @@ const S15: PegState = { A: [],        B: [],       C: [4,3,2,1]}; // disk1 B→C
 const steps: TowerStep[] = [
   // Step 0 — Intro: all 4 disks on peg A
   {
+    excludeFromAnim: true,
     startFrame: 0,   // 363f
     highlightLines: { startLine: 0, endLine: 5 },
     snapshot: { nodes: [], pointers: [], arrows: [] },
@@ -73,6 +74,7 @@ const steps: TowerStep[] = [
   },
   // Step 1 — Base case
   {
+    excludeFromAnim: true,
     startFrame: 373,
     highlightLines: { startLine: 1, endLine: 1 },
     snapshot: { nodes: [], pointers: [], arrows: [] },
@@ -81,6 +83,7 @@ const steps: TowerStep[] = [
   },
   // Step 2 — First recursive call: move n-1 disks A→B via C
   {
+    excludeFromAnim: true,
     startFrame: 587,
     highlightLines: { startLine: 2, endLine: 2 },
     snapshot: { nodes: [], pointers: [], arrows: [] },
@@ -119,6 +122,7 @@ const steps: TowerStep[] = [
   { startFrame: 2520, highlightLines: { startLine: 3, endLine: 3 }, snapshot: { nodes: [], pointers: [], arrows: [] }, pegs: S15, movingDisk: 1, fromPeg: "B", toPeg: "C", params: { n: 1, src: "B", dst: "C", via: "A" } },
   // Step 18 — Summary
   {
+    excludeFromAnim: true,
     startFrame: 2724,
     highlightLines: { startLine: 0, endLine: 5 },
     snapshot: { nodes: [], pointers: [], arrows: [] },
@@ -238,9 +242,8 @@ export const TowerOfHanoi: React.FC<TowerOfHanoiProps> = ({
   const isAnim = format === "reel-anim";
   const isReel = format === "reel" || isAnim;
 
-  const { current, previous, localFrame } = useStepTransition(
-    steps as SceneStep[],
-  );
+  const activeSteps = isAnim ? compressStepsForAnim(steps as SceneStep[]) : (steps as SceneStep[]);
+  const { current, previous, localFrame } = useStepTransition(activeSteps);
   const curr = current as TowerStep;
   const prev = previous as TowerStep;
 

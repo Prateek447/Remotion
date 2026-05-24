@@ -72,6 +72,7 @@ function makeSteps(): SceneStep[] {
   return [
     // Step 0 — Hook: full tree, no highlights
     {
+      excludeFromAnim: true,
       startFrame: 0,
       highlightLines: { startLine: 0, endLine: 0 },
       snapshot: {
@@ -301,6 +302,7 @@ function makeSteps(): SceneStep[] {
     },
     // Step 15 — Return + complexity
     {
+      excludeFromAnim: true,
       startFrame: 2250,
       highlightLines: { startLine: 11, endLine: 11 },
       snapshot: {

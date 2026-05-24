@@ -299,6 +299,44 @@ const rtlDiagonalLines = [
   { stepIndex: 17, text: "Time O of n — every node visited exactly once. Space O of n. The only change from left-to-right diagonal: swap left and right in the inner loop. Subscribe for more tree patterns." },
 ];
 
+const verticalOrderLines = [
+  { stepIndex: 0,  text: "Most people look at this and think — just group nodes by their horizontal position, easy. Then they try it, and the output comes out scrambled. The problem isn't the traversal. It's one specific choice you make when storing the groups. By the end, you'll see exactly what that choice is — and why it makes everything just work." },
+  { stepIndex: 1,  text: "Here's the intuition before we touch any code. Every time you take a left turn in the tree, your column number drops by one. Every right turn, it goes up by one. That's it. Root is column zero, left child is minus one, right child is plus one. Hold onto that — everything we write is just automating this one idea." },
+  { stepIndex: 2,  text: "If the tree is empty, return empty. Nothing to explain there." },
+  { stepIndex: 3,  text: "Now here's the key decision. We need a map to collect nodes under each column number. You might reach for a HashMap — but HashMap stores things in no particular order. So when you read the columns back out, they could come in any sequence. Instead, use a TreeMap. A TreeMap keeps its keys sorted automatically. So the columns will come out left to right without you doing anything extra. We also need a second map to track each node's column, and a queue to process nodes level by level." },
+  { stepIndex: 4,  text: "Put the root into the queue, label it column zero. Now start the loop — poll means take from the front of the queue. We take node one out. It's column zero, so it goes into the TreeMap under zero. That's the first entry. If this is clicking for you already, subscribe — this is what I post every week." },
+  { stepIndex: 5,  text: "Node one has two children. Left child two — going left means column zero minus one, so column negative one. Right child three — going right means column zero plus one, column positive one. Both go into the queue." },
+  { stepIndex: 6,  text: "Take node two out. It's at column negative one. Drop it into that column's list. Simple." },
+  { stepIndex: 7,  text: "Node two's children now. Four goes left — column negative two, the furthest left in our entire tree. Five goes right — column zero. Same column as the root. So five is going to end up in the same group as node one. Keep that in mind — I'll come back to it." },
+  { stepIndex: 8,  text: "Take node three. Column positive one, added. Its right child six gets column positive two and joins the queue. Now — remember what I said about five sharing a column with one? Watch what happens when we process five. The order they appear in that group actually matters." },
+  { stepIndex: 9,  text: "Take node four — column negative two. No children. Done." },
+  { stepIndex: 10, text: "Take node five. Column zero — so it joins node one in the same group. And look: one is first, five is second. Why? Because we used a queue. A queue processes the tree level by level, top to bottom. Node one was on a higher level, so it got processed earlier. If you had traversed the tree in a different way — going deep down one branch before the other — five could have come out before one, and the answer would be wrong. The queue is what makes the order correct." },
+  { stepIndex: 11, text: "Take node six — column positive two. Added. No children." },
+  { stepIndex: 12, text: "Take node seven — column positive one. It joins node three. Queue is empty, every node is processed. Quick question — what breaks if you swap the TreeMap for a regular HashMap? Think about it and drop your answer in the comments." },
+  { stepIndex: 13, text: "Now we just read the TreeMap. It's already sorted, so it hands us the columns left to right: four from column minus two, two from minus one, one and five from zero, three and seven from plus one, six from plus two. No sorting step. No second loop. The TreeMap took care of it." },
+  { stepIndex: 14, text: "Time complexity is O n log n — visiting every node is O n, but each TreeMap insertion costs log n to stay sorted, so that adds up. Space is O n. That's the whole solution. Next up is top view traversal — same column tracking, but you only keep the first node you see in each column. I'll see you there." },
+];
+
+const zigzagLines = [
+  { stepIndex: 0,  text: "You've probably seen level order — row by row, left to right. Zigzag does the same thing, but flips direction every level. Level zero: just one. Level one: three, two — that's right to left. Level two: four, five, six, seven — left to right again. Sound weird? Let me show you exactly how it works." },
+  { stepIndex: 1,  text: "The whole trick fits in one boolean: leftToRight. When it's true, we go left to right. When it's false, right to left. We flip it after every level. That's the entire algorithm — one flag." },
+  { stepIndex: 2,  text: "Null root? Return empty list. Simple safety check." },
+  { stepIndex: 3,  text: "Set up the result list, create a queue, drop the root in. And set leftToRight to true — the first level always starts left to right." },
+  { stepIndex: 4,  text: "Enter the while loop. Size is one — that's how many nodes are in this level. We create a fresh LinkedList called level to collect this level's values." },
+  { stepIndex: 5,  text: "Poll node one. leftToRight is true, so we call addLast. Level is now just [1]." },
+  { stepIndex: 6,  text: "Node one has both children. Offer two and three into the queue." },
+  { stepIndex: 7,  text: "Add level [1] to result. Then flip leftToRight to false. Next level goes right to left." },
+  { stepIndex: 8,  text: "Second pass. Size is two — nodes two and three are waiting. leftToRight is now false. Pay attention — this is where the magic happens." },
+  { stepIndex: 9,  text: "Poll node two. leftToRight is false, so we call addFirst this time. Level = [2]." },
+  { stepIndex: 10, text: "Two has children — offer four and five." },
+  { stepIndex: 11, text: "Now poll node three. addFirst again — puts three at the FRONT. Level becomes [3, 2]. That's the zigzag! Right to left, without reversing the whole array." },
+  { stepIndex: 12, text: "Three has children — offer six and seven." },
+  { stepIndex: 13, text: "Add [3, 2] to result. Flip leftToRight back to true. Output so far: one, three, two." },
+  { stepIndex: 14, text: "Third pass. Four leaf nodes. leftToRight is true — addLast each. No children to offer. Add [4, 5, 6, 7]. Queue drains." },
+  { stepIndex: 15, text: "Return result. That's zigzag: [1], then [3, 2], then [4, 5, 6, 7]. One BFS pass, one boolean, one LinkedList trick." },
+  { stepIndex: 16, text: "Time is O of n — every node visited once. Space is O of n for the queue. The addFirst and addLast trick is the key insight. Subscribe for more tree patterns like this." },
+];
+
 const allNarrations = [
   { sceneId: "insert-head", lines: insertHeadLines },
   { sceneId: "insert-tail", lines: insertTailLines },
@@ -315,6 +353,8 @@ const allNarrations = [
   { sceneId: "boundary", lines: boundaryLines },
   { sceneId: "diagonal-traversal", lines: diagonalLines },
   { sceneId: "diagonal-rl", lines: rtlDiagonalLines },
+  { sceneId: "vertical-order", lines: verticalOrderLines },
+  { sceneId: "zigzag", lines: zigzagLines },
 ];
 
 function getAudioDuration(filePath) {
