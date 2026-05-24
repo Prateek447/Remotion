@@ -1,0 +1,107 @@
+# Smoke-test fixture: tree traversal with queue + ring + outputValues.
+
+sceneId: left-view-mini
+title: "Left View Mini"
+dataStructure: tree
+operationKind: traversal
+complexity:
+  time: "O(n)"
+  space: "O(n)"
+voice:
+  persona: teacher-energetic
+code:
+  language: java
+  source: |
+    void leftView(Node root) {
+        if (root == null) return;
+        Queue<Node> q = new LinkedList<>();
+        q.add(root);
+        while (!q.isEmpty()) {
+            int n = q.size();
+        }
+    }
+
+positionMaps:
+  default:
+    n1: { x: 0.47, y: 0.22 }
+    n2: { x: 0.33, y: 0.50 }
+    n3: { x: 0.61, y: 0.50 }
+  reel:
+    n1: { x: 0.50, y: 0.23 }
+    n2: { x: 0.34, y: 0.50 }
+    n3: { x: 0.66, y: 0.50 }
+  reel-anim:
+    n1: { x: 0.50, y: 0.16 }
+    n2: { x: 0.32, y: 0.45 }
+    n3: { x: 0.68, y: 0.45 }
+
+ringNodeIds: ["n1", "n2"]
+
+steps:
+  - stepIndex: 0
+    arc: opening
+    intent: "Show tree"
+    narration: "Binary tree — one, two, three."
+    targetFrames: 60
+    visibleLines: 1
+    highlight: { startLine: 0, endLine: 0 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1 }
+        - { id: "n2", value: 2 }
+        - { id: "n3", value: 3 }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3" }
+      caption: "Left view of a binary tree"
+      outputLabel: "Left View"
+      outputValues: []
+      queueItems: []
+
+  - stepIndex: 1
+    arc: methodical
+    intent: "Queue root"
+    narration: "Push root into the queue."
+    targetFrames: 80
+    visibleLines: 4
+    highlight: { startLine: 2, endLine: 3 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: active }
+        - { id: "n2", value: 2 }
+        - { id: "n3", value: 3 }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3" }
+      caption: "Queue starts with the root"
+      outputLabel: "Left View"
+      outputValues: []
+      queueItems:
+        - { value: 1, highlight: new }
+
+  - stepIndex: 2
+    arc: closing
+    intent: "Complete"
+    narration: "Done. O of n."
+    targetFrames: 60
+    visibleLines: 7
+    highlight: { startLine: 0, endLine: 6 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: found }
+        - { id: "n2", value: 2, highlight: found }
+        - { id: "n3", value: 3, highlight: visited }
+      pointers: []
+      arrows:
+        - { from: "n1", to: "n2" }
+        - { from: "n1", to: "n3" }
+      caption: "Output: 1  2"
+      complexityInfo: { time: "O(n)", space: "O(n)" }
+      outputLabel: "Left View"
+      outputValues: [1, 2]
+      queueItems: []
+
+outputs:
+  formats: [youtube, reel, reel-anim]

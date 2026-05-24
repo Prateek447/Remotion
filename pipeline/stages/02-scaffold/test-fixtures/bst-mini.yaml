@@ -1,0 +1,96 @@
+# Smoke-test fixture: tree mutation. Small tree, 3 steps.
+
+sceneId: bst-mini
+title: "BST Mini"
+dataStructure: tree
+operationKind: mutation
+complexity:
+  time: "O(h)"
+  space: "O(h)"
+voice:
+  persona: teacher-energetic
+code:
+  language: java
+  source: |
+    Node insertRec(Node node, int val) {
+        if (node == null) return new Node(val);
+        if (val < node.val) {
+            node.left = insertRec(node.left, val);
+        } else if (val > node.val) {
+            node.right = insertRec(node.right, val);
+        }
+        return node;
+    }
+
+positionMaps:
+  default:
+    n50: { x: 0.50, y: 0.18 }
+    n30: { x: 0.30, y: 0.45 }
+    n70: { x: 0.70, y: 0.45 }
+  reel:
+    n50: { x: 0.50, y: 0.13 }
+    n30: { x: 0.27, y: 0.38 }
+    n70: { x: 0.73, y: 0.38 }
+  reel-anim:
+    n50: { x: 0.50, y: 0.12 }
+    n30: { x: 0.26, y: 0.36 }
+    n70: { x: 0.74, y: 0.36 }
+
+steps:
+  - stepIndex: 0
+    arc: opening
+    intent: "Show BST"
+    narration: "Binary search tree — fifty, thirty, seventy."
+    targetFrames: 60
+    visibleLines: 1
+    highlight: { startLine: 0, endLine: 0 }
+    snapshot:
+      nodes:
+        - { id: "n50", value: 50 }
+        - { id: "n30", value: 30 }
+        - { id: "n70", value: 70 }
+      pointers: []
+      arrows:
+        - { from: "n50", to: "n30" }
+        - { from: "n50", to: "n70" }
+      caption: "BST: 50, 30, 70"
+
+  - stepIndex: 1
+    arc: methodical
+    intent: "Compare at root"
+    narration: "Compare with fifty. Move right."
+    targetFrames: 80
+    visibleLines: 7
+    highlight: { startLine: 4, endLine: 5 }
+    snapshot:
+      nodes:
+        - { id: "n50", value: 50, highlight: active }
+        - { id: "n30", value: 30 }
+        - { id: "n70", value: 70 }
+      pointers: []
+      arrows:
+        - { from: "n50", to: "n30" }
+        - { from: "n50", to: "n70" }
+      caption: "Compare at root — move right"
+
+  - stepIndex: 2
+    arc: closing
+    intent: "Done"
+    narration: "Done. Constant time."
+    targetFrames: 60
+    visibleLines: 9
+    highlight: { startLine: 7, endLine: 7 }
+    snapshot:
+      nodes:
+        - { id: "n50", value: 50 }
+        - { id: "n30", value: 30 }
+        - { id: "n70", value: 70 }
+      pointers: []
+      arrows:
+        - { from: "n50", to: "n30" }
+        - { from: "n50", to: "n70" }
+      caption: "Done"
+      complexityInfo: { time: "O(h)", space: "O(h)" }
+
+outputs:
+  formats: [youtube, reel, reel-anim]

@@ -1,0 +1,213 @@
+# Scene Schema — Single Source of Truth
+#
+# Every video scene is described by one YAML document conforming to this schema.
+# From a valid scene document, the pipeline derives:
+#   - The Remotion .tsx scene file (stage 2)
+#   - The narration text per step + presets (stages 3-4)
+#   - Audio clips (stage 5)
+#   - Frame timing (stage 6)
+#   - The rendered MP4 + thumbnail + description (stage 7)
+#
+# This file documents the schema by example. The pipeline tooling will validate
+# scene documents against this contract.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────
+
+sceneId: example-scene           # kebab-case. Used as folder name for audio: public/narration/<sceneId>/
+title: "Example Operation"        # Title-cased. Shown in title card. ≤24 chars.
+subtitle: "Insert at head"        # One-line subtitle. ≤40 chars.
+
+# Where this scene fits in the broader library. Used to select the right
+# patterns/<dataStructure>.md reference.
+dataStructure: linked-list        # linked-list | tree | graph | array | stack | queue | dp-table | …
+operationKind: mutation            # traversal | mutation | algorithm | comparison | proof
+complexityTier: 1                 # 1=single op, 2=op suite, 3=concept explainer, 4=problem walkthrough
+
+# Complexity badge shown on the title card.
+complexity:
+  time: "O(1)"
+  space: "O(1)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# APPROACH (set in stage 1a — community-sourced)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# kebab-case identifier of the presentation approach. See
+# design-system/approaches.md. `algorithm-walkthrough` is the codebase default
+# and is always one of the 4 options offered. Other values come from community
+# research at scene-authoring time.
+approach: algorithm-walkthrough
+
+# Required. Documents WHY this approach was picked.
+# - For `algorithm-walkthrough`, can be brief.
+# - For any other approach, list the community sources surveyed and the rationale.
+approachNotes: |
+  Step-by-step trace with full recursion frames shown. Codebase default;
+  matches all existing scenes. Picked for compatibility — no custom
+  scaffolder template needed.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# VOICE
+# ─────────────────────────────────────────────────────────────────────────────
+
+voice:
+  persona: teacher-energetic       # teacher-energetic | measured | casual
+                                   # See design-system/voice/personas/*.md
+  # Optional: reference voice file. Defaults to project default if omitted.
+  # referenceAudio: "voices/teacher_male_01.wav"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CODE
+# ─────────────────────────────────────────────────────────────────────────────
+
+code:
+  language: java                   # java | python | typescript | …
+  # The code shown in the code panel. Indentation is significant — viewers see it.
+  source: |
+    void insertHead(int val) {
+        Node newNode = new Node(val);
+        newNode.next = head;
+        head = newNode;
+        size++;
+    }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEPS — the heart of the scene
+# ─────────────────────────────────────────────────────────────────────────────
+
+steps:
+  # Step 0 is always orientation: show the initial state, name the values.
+  - stepIndex: 0
+    arc: opening                   # opening | methodical | peak | closing
+    intent: "Show the existing list"
+    caption: "Starting list: 3 → 7 → 9"   # ≤40 chars. What the viewer sees as text overlay.
+    narration: "Alright, watch this — we have a linked list. Three, seven, nine. Three nodes."
+    # targetFrames is a *budget*. The TTS clip should fit; if it overruns, the apply
+    # stage stretches the visual to match. Writers should aim for ~3 words/sec.
+    targetFrames: 60
+    highlight:                     # Code lines to highlight. 0-indexed against code.source.
+      startLine: 0
+      endLine: 0
+    snapshot:                      # The visual state at this step.
+      nodes:
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n7", value: 7, highlight: none }
+        - { id: "n9", value: 9, highlight: none }
+      pointers:
+        - { id: "head", points: "n3", label: "head" }
+      arrows:
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+      # Optional: newNode (for insertion ops), searchTarget (for find ops)
+
+  - stepIndex: 1
+    arc: methodical
+    intent: "Create the new node"
+    caption: "Create new node (val=1)"
+    narration: "First, create a new node. Value: one."
+    targetFrames: 50
+    highlight: { startLine: 1, endLine: 1 }
+    snapshot:
+      nodes:
+        - { id: "n3", value: 3, highlight: none }
+        - { id: "n7", value: 7, highlight: none }
+        - { id: "n9", value: 9, highlight: none }
+      newNode: { id: "n1", value: 1, highlight: new }
+      pointers:
+        - { id: "head", points: "n3", label: "head" }
+      arrows:
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  - stepIndex: 2
+    arc: methodical
+    intent: "Wire new node's next to head"
+    caption: "newNode.next → head"
+    narration: "Point new node dot next to head. So it's pointing at three."
+    targetFrames: 55
+    highlight: { startLine: 2, endLine: 2 }
+    snapshot:
+      nodes: [...]
+      newNode: { id: "n1", value: 1, highlight: active }
+      arrows:
+        - { from: "n1", to: "n3", highlight: true }
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+      pointers:
+        - { id: "head", points: "n3", label: "head" }
+
+  - stepIndex: 3
+    arc: peak
+    intent: "Move head, increment size"
+    caption: "head = newNode; size++"
+    narration: "And boom — head points to one. List grows. O of one. Beautiful."
+    targetFrames: 70
+    highlight: { startLine: 3, endLine: 4 }
+    snapshot:
+      nodes: [...]
+      pointers:
+        - { id: "head", points: "n1", label: "head" }
+      arrows: [...]
+
+  - stepIndex: 4
+    arc: closing
+    intent: "Wrap up"
+    caption: "Done — O(1) insert at head"
+    narration: "And that's it. Insert at head. Constant time. Easy."
+    targetFrames: 50
+    highlight: { startLine: 0, endLine: 4 }   # Highlight whole function
+    snapshot: { ... }                          # Same as previous, no change
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTPUTS — what to render
+# ─────────────────────────────────────────────────────────────────────────────
+
+outputs:
+  formats:
+    - youtube                       # 1920×1080, SplitLayout
+    - reel                          # 1080×1920, StackedLayout
+  # Optional: format-specific overrides for pacing/captions
+  # reel:
+  #   captionDensity: high          # Reel viewers watch sound-off; denser captions help.
+  #   targetFramesMultiplier: 0.85  # Reels run ~15% faster than YouTube.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PUBLISH METADATA (stage 7)
+# ─────────────────────────────────────────────────────────────────────────────
+
+publish:
+  description: |
+    Insert at the head of a linked list — the simplest mutation in linked-list
+    land. Three steps, constant time. Here's how the pointer rewiring works.
+  tags: ["linked list", "data structures", "DSA", "computer science"]
+  hashtags: ["#dsa", "#linkedlist", "#coding"]
+  thumbnail:
+    bgPattern: dots                 # Style of thumbnail background
+    accentColor: blue               # From theme palette
+    showCode: false                 # Whether the thumbnail includes a code snippet
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FIELD REFERENCE
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# NodeHighlight values (used in snapshot.nodes[].highlight):
+#   none      — idle / not yet visited
+#   active    — currently processing
+#   found     — confirmed/output (only value that renders uniquely green on tree)
+#   new       — newly created node
+#   visited   — has been processed (dims via opacity, not color)
+#   removing  — about to be removed
+#   error     — error state
+#
+# See design-system/theme.md for the full NodeHighlight semantics + which values
+# render distinctly on which components.
+#
+# Arc values dictate voice knobs via design-system/voice/two-axis-model.md.
+# Persona + Arc → (exaggeration, cfg_weight, temperature) is deterministic.
+#
+# targetFrames is the *visual budget* for the step. The TTS clip is expected
+# to fit. If the clip overruns, scripts/apply-narration-updates.py stretches
+# the visual; if it underruns, the visual holds on its final frame until the
+# next step.

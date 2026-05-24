@@ -1,0 +1,86 @@
+import React from "react";
+import { useVideoConfig } from "remotion";
+import type { ThemedToken } from "shiki";
+import type { SceneStep } from "../lib/types";
+import { SplitLayout } from "../components/SplitLayout";
+import { StackedLayout, type SafeArea } from "../components/StackedLayout";
+import { LinkedListDiagram } from "../components/LinkedListDiagram";
+import { CodeBlock } from "../components/CodeBlock";
+import { CodeWindow } from "../components/CodeWindow";
+import { SfxLayer } from "../components/SfxLayer";
+import { NarrationLayer } from "../components/NarrationLayer";
+import { AmbientLayer } from "../components/AmbientLayer";
+import { AnimationOnlyLayout, ANIM_DIAGRAM_HEIGHT } from "../components/AnimationOnlyLayout";
+import { compressStepsForAnim } from "../lib/animSteps";
+
+/*
+ * Code lines (0-indexed):
+[[ code_comment_block ]]
+ */
+{% if pointer_constants %}
+[[ pointer_constants ]]
+{% endif %}
+const steps: SceneStep[] = [
+[[ steps_literal ]]];
+
+export const [[ scene_frames_const ]] = [[ scene_frames_value ]];
+
+const REEL_SAFE: SafeArea = { top: [[ reel_safe.top ]], bottom: [[ reel_safe.bottom ]], left: [[ reel_safe.left ]], right: [[ reel_safe.right ]] };
+const REEL_TOP_RATIO = [[ reel_top_ratio_const ]];
+
+export interface [[ component_name ]]Props {
+  tokens: ThemedToken[][];
+  format?: "youtube" | "reel" | "reel-anim";
+}
+
+export const [[ component_name ]]: React.FC<[[ component_name ]]Props> = ({ tokens, format = "youtube" }) => {
+  const { width, height } = useVideoConfig();
+  const isReel = format === "reel";
+  const isAnim = format === "reel-anim";
+  const activeSteps = isAnim ? compressStepsForAnim(steps) : steps;
+
+  const safeW = width - REEL_SAFE.left - REEL_SAFE.right;
+  const safeH = height - REEL_SAFE.top - REEL_SAFE.bottom;
+
+  const diagramAreaW = isAnim ? width : isReel ? safeW : width * 0.62;
+  const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
+  const nodeScale = isAnim ? [[ anim_node_scale ]] : isReel ? [[ reel_node_scale ]] : 1;
+  const codeFontSize = isReel ? [[ reel_code_font_size ]] : 24;
+
+  const diagram = (
+    <LinkedListDiagram
+      steps={activeSteps}
+      areaWidth={diagramAreaW}
+      areaHeight={diagramAreaH}
+      nodeScale={nodeScale}
+      verticalOffset={isReel || isAnim ? -30 : 0}
+    />
+  );
+
+  const code = (
+    <CodeWindow title="[[ code_window_title ]]" hideTitle={isReel}>
+      <CodeBlock
+        tokens={tokens}
+        steps={activeSteps}
+        fontSize={codeFontSize}
+        centered={isReel}
+        centerWidth={isReel ? safeW : undefined}
+      />
+    </CodeWindow>
+  );
+
+  return (
+    <>
+      {isAnim ? (
+        <AnimationOnlyLayout>{diagram}</AnimationOnlyLayout>
+      ) : isReel ? (
+        <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} />
+      ) : (
+        <SplitLayout left={diagram} right={code} />
+      )}
+      <AmbientLayer animOnly={isAnim} />
+      <SfxLayer steps={activeSteps} duckVolume={[[ duck_volume ]]} animOnly={isAnim} />
+      {!isAnim && <NarrationLayer sceneId="[[ scene_id ]]" steps={activeSteps} />}
+    </>
+  );
+};

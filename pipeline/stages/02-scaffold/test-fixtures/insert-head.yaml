@@ -1,0 +1,324 @@
+# Regression fixture: reverse-engineered from src/scenes/InsertHead.tsx
+# When scaffolded, the output .tsx should be structurally equivalent to the original.
+# startFrame values are recomputed cumulatively from targetFrames (apply-narration-updates
+# will overwrite these later from real durations.json).
+
+sceneId: insert-head
+title: "Insert at Head"
+subtitle: "O(1) head insertion"
+dataStructure: linked-list
+operationKind: mutation
+complexityTier: 1
+complexity:
+  time: "O(1)"
+  space: "O(1)"
+
+voice:
+  persona: teacher-energetic
+
+code:
+  language: java
+  source: |
+    public void insertAtHead(int val) {
+        Node newNode = new Node(val);
+        newNode.next = head;
+        head = newNode;
+        size++;
+    }
+
+pointers:
+  head:
+    color: "#1565C0"
+  newNode:
+    color: "#7B1FA2"
+
+reel:
+  safeArea: { top: 150, bottom: 380, left: 60, right: 160 }
+  # topRatio omitted → use STACKED_TOP_RATIO default (no extra constant emitted)
+  nodeScale: 1.2
+  animNodeScale: 1.4
+  codeFontSize: 30
+
+duckVolume: 0.5
+
+steps:
+  # Phase 1: CONTEXT — single node
+  - stepIndex: 0
+    arc: opening
+    intent: "Show single-node context"
+    narration: "Alright, watch this — here's a node. Just one box. Holds the value three."
+    targetFrames: 263
+    highlight: { startLine: 0, endLine: 0 }
+    snapshot:
+      nodes:
+        - { id: "n3", value: 3 }
+      pointers: []
+      arrows: []
+
+  # Phase 1 cont.: full list with head
+  - stepIndex: 1
+    arc: methodical
+    intent: "Show full list with head"
+    narration: "Now extend it — three, seven, nine. Head points to three."
+    targetFrames: 194
+    highlight: { startLine: 0, endLine: 0 }
+    snapshot:
+      nodes:
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n3", color: "#1565C0" }
+      arrows:
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  # Phase 2: PROBLEM
+  - stepIndex: 2
+    arc: methodical
+    intent: "Introduce the new node"
+    narration: "We want to insert one at the head. Here's our new node."
+    targetFrames: 137
+    highlight: { startLine: 0, endLine: 0 }
+    snapshot:
+      nodes:
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n3", color: "#1565C0" }
+      arrows:
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+      newNode: { id: "n1", value: 1, highlight: new }
+
+  # Phase 3: WRONG WAY — head moves first
+  - stepIndex: 3
+    arc: methodical
+    intent: "Wrong way: head moves first"
+    narration: "Tempting move — point head at one right away. Watch what breaks."
+    targetFrames: 137
+    highlight: { startLine: 3, endLine: 3 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: new }
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n1", color: "#1565C0" }
+      arrows:
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  # Wrong way: nodes unreachable
+  - stepIndex: 4
+    arc: methodical
+    intent: "Show unreachability"
+    narration: "Now three, seven, nine are orphans. Nobody points to them. Lost."
+    targetFrames: 216
+    highlight: { startLine: 3, endLine: 3 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: new }
+        - { id: "n3", value: 3, highlight: error }
+        - { id: "n7", value: 7, highlight: error }
+        - { id: "n9", value: 9, highlight: error }
+      pointers:
+        - { id: "head", label: "head", points: "n1", color: "#1565C0" }
+      arrows: []
+
+  # Recovery: back to good state
+  - stepIndex: 5
+    arc: methodical
+    intent: "Rewind to good state"
+    narration: "Rewind. Order matters. Wire the new node up first."
+    targetFrames: 150
+    highlight: { startLine: 0, endLine: 0 }
+    snapshot:
+      nodes:
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n3", color: "#1565C0" }
+      arrows:
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  # Phase 4: CORRECT — Create new node
+  - stepIndex: 6
+    arc: methodical
+    intent: "Create the new node"
+    narration: "Step one. Make a new node. Value one."
+    targetFrames: 117
+    highlight: { startLine: 1, endLine: 1 }
+    snapshot:
+      nodes:
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n3", color: "#1565C0" }
+      arrows:
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+      newNode: { id: "n1", value: 1, highlight: new }
+
+  # newNode.next = head (dashed intent arrow)
+  - stepIndex: 7
+    arc: methodical
+    intent: "newNode.next = head"
+    narration: "Two. Point new node dot next to head. Now it sees three."
+    targetFrames: 189
+    highlight: { startLine: 2, endLine: 2 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: new }
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n3", color: "#1565C0" }
+        - { id: "newNode", label: "newNode", points: "n1", color: "#7B1FA2" }
+      arrows:
+        - { from: "n1", to: "n3", dashed: true, highlight: true }
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  # head = newNode
+  - stepIndex: 8
+    arc: peak
+    intent: "head = newNode"
+    narration: "Three. Move head to the new node. Done."
+    targetFrames: 145
+    highlight: { startLine: 3, endLine: 3 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1 }
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n1", color: "#1565C0" }
+      arrows:
+        - { from: "n1", to: "n3" }
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  # size++
+  - stepIndex: 9
+    arc: methodical
+    intent: "Increment size"
+    narration: "Bump size. List grew by one."
+    targetFrames: 169
+    highlight: { startLine: 4, endLine: 5 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: found }
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n1", color: "#1565C0" }
+      arrows:
+        - { from: "n1", to: "n3" }
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  # Phase 5: WHY O(1)
+  - stepIndex: 10
+    arc: methodical
+    intent: "Explain O(1)"
+    narration: "No matter the list size — three steps. Constant time. O of one."
+    targetFrames: 262
+    highlight: { startLine: 0, endLine: 5 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: active }
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n1", color: "#1565C0" }
+      arrows:
+        - { from: "n1", to: "n3" }
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  # Phase 6: EDGE — empty list
+  - stepIndex: 11
+    arc: methodical
+    intent: "Edge case: empty list"
+    narration: "Empty list. New node becomes both head and tail. Still O of one."
+    targetFrames: 214
+    highlight: { startLine: 1, endLine: 3 }
+    snapshot:
+      nodes:
+        - { id: "e1", value: 1, highlight: new }
+      pointers:
+        - { id: "head", label: "head", points: "e1", color: "#1565C0" }
+      arrows: []
+
+  # Phase 7: RECAP
+  - stepIndex: 12
+    arc: methodical
+    intent: "Recap three steps"
+    narration: "Three steps. Create. Link. Move head. That's it."
+    targetFrames: 211
+    highlight: { startLine: 1, endLine: 3 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: active }
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { id: "head", label: "head", points: "n1", color: "#1565C0" }
+      arrows:
+        - { from: "n1", to: "n3" }
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  # CTA — final glow
+  - stepIndex: 13
+    arc: closing
+    intent: "CTA — final glow"
+    narration: "Like this? Subscribe — more data structure builds coming."
+    targetFrames: 212
+    highlight: { startLine: 0, endLine: 5 }
+    snapshot:
+      nodes:
+        - { id: "n1", value: 1, highlight: found }
+        - { id: "n3", value: 3, highlight: found }
+        - { id: "n7", value: 7, highlight: found }
+        - { id: "n9", value: 9, highlight: found }
+      pointers:
+        - { id: "head", label: "head", points: "n1", color: "#1565C0" }
+      arrows:
+        - { from: "n1", to: "n3" }
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+outputs:
+  formats:
+    - youtube
+    - reel
+    - reel-anim
+
+publish:
+  description: |
+    Insert at the head of a singly linked list — the canonical constant-time
+    mutation. Three pointer rewires, in the right order.
+  tags: ["linked list", "data structures", "DSA"]
+  hashtags: ["#dsa", "#linkedlist", "#coding"]
+
+standalone:
+  nextTopic: "Insert at Tail"
+
+# Identifier mapping for paste snippets (Root.tsx / standalone / code-snippets)
+identifiers:
+  componentName: InsertHead
+  sceneFramesConst: INSERT_HEAD_SCENE_FRAMES
+  codeConstName: insertAtHeadCode
+  codeWindowTitle: "LinkedList.java"

@@ -1,0 +1,89 @@
+# Smoke-test fixture: small linked-list algorithm. Not a full reverse — just
+# enough steps to exercise the algorithm template (pointers + sentinel null).
+
+sceneId: reverse-mini
+title: "Reverse Mini"
+dataStructure: linked-list
+operationKind: algorithm
+complexity:
+  time: "O(n)"
+  space: "O(1)"
+voice:
+  persona: teacher-energetic
+code:
+  language: java
+  source: |
+    public void reverse() {
+        Node prev = null;
+        Node curr = head;
+        while (curr != null) {
+            curr = curr.next;
+        }
+    }
+
+pointers:
+  prev:    { color: "#E87B35" }
+  curr:    { color: "#8B5CF6" }
+  next:    { color: "#2563EB" }
+  head:    { color: "#3B82F6" }
+
+reel:
+  safeArea: { top: 150, bottom: 380, left: 30, right: 30 }
+  topRatio: 0.45
+
+steps:
+  - stepIndex: 0
+    arc: opening
+    intent: "Show starting list"
+    narration: "Linked list — three, seven, nine. Reverse it."
+    targetFrames: 60
+    highlight: { startLine: 0, endLine: 0 }
+    snapshot:
+      nodes:
+        - { id: "n3", value: 3 }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { label: "head", points: "n3", color: "#3B82F6" }
+      arrows:
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  - stepIndex: 1
+    arc: methodical
+    intent: "Initialize pointers"
+    narration: "Prev starts null. Curr at head."
+    targetFrames: 90
+    highlight: { startLine: 1, endLine: 2 }
+    snapshot:
+      nodes:
+        - { id: "n3", value: 3, highlight: active }
+        - { id: "n7", value: 7 }
+        - { id: "n9", value: 9 }
+      pointers:
+        - { label: "prev", points: null, color: "#E87B35" }
+        - { label: "curr", points: "n3", color: "#8B5CF6" }
+      arrows:
+        - { from: "n3", to: "n7" }
+        - { from: "n7", to: "n9" }
+
+  - stepIndex: 2
+    arc: closing
+    intent: "Loop ends"
+    narration: "Loop ended. Done."
+    targetFrames: 60
+    highlight: { startLine: 3, endLine: 5 }
+    snapshot:
+      hideEndNull: true
+      nodes:
+        - { id: "n3", value: 3, reversed: true, highlight: found }
+        - { id: "n7", value: 7, reversed: true, highlight: found }
+        - { id: "n9", value: 9, reversed: true, highlight: found }
+      pointers:
+        - { label: "head", points: "n9", color: "#3B82F6" }
+      arrows:
+        - { from: "n9", to: "n7" }
+        - { from: "n7", to: "n3" }
+
+outputs:
+  formats: [youtube, reel, reel-anim]
