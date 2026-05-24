@@ -1,24 +1,9 @@
 ---
 name: tts-narration-writer
-description: DEPRECATED — superseded by pipeline/design-system/voice/. See pipeline/design-system/voice/two-axis-model.md (persona × arc framework) and voice/personas/*.md. This skill remains as historical reference.
+description: Write TTS narration text and per-step voice presets for the base (non-Turbo) Chatterbox model. Covers prosody-as-emotion (since paralinguistic tags don't render), the exaggeration / cfg_weight / temperature knob set, and the per-step preset table that drops into `scripts/generate-narration-chatterbox.py`. Use when writing a voice script for a new scene, picking per-step Chatterbox parameters, fixing flat or monotonic narration, or translating an emotional arc into base-Chatterbox-readable text.
 ---
 
-> ⚠️ **DEPRECATED — DO NOT USE FOR NEW WORK**
->
-> This skill's single-preset model (calm / natural / expressive / dramatic) has been superseded by the **two-axis voice model** (persona × arc) in the pipeline design system.
->
-> For new videos, load these instead:
-> - `pipeline/design-system/voice/two-axis-model.md` — the persona × arc framework with combined preset table
-> - `pipeline/design-system/voice/personas/teacher-energetic.md` — the new default voice
-> - `pipeline/design-system/voice/personas/measured.md` — captures the voice this skill used to describe
->
-> **Preset wiring is now live**: `scripts/generate-narration-chatterbox.py` reads `*_presets` lists per scene (generated automatically by `pipeline/stages/03-narration/extract.py` from scene.yaml's persona × per-step arc).
->
-> The prosody-substitution table (em-dashes for `[gasp]`, etc.) and TTS-readiness rules (numbers-as-words, spell-out-code) below are still load-bearing — they've been incorporated into both voice persona docs.
-
----
-
-# TTS Narration Writer (Base Chatterbox) *(legacy)*
+# TTS Narration Writer (Base Chatterbox)
 
 Every narration line is a **standalone audio clip** read by base Chatterbox. The model cannot read paralinguistic tags — it pronounces `[chuckle]` as the literal English word. Emotion has to live in the **words and punctuation**, with the per-clip knobs shaping prosody on top.
 
