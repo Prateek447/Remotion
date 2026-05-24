@@ -674,6 +674,35 @@ export const rtlDiagonalDurations: NarrationDuration[] = [
   { step: 17, duration: 11.64, frames: 350 },
 ];
 
+export const countTreeNodesDurations: NarrationDuration[] = [
+  { step: 0, duration: 4.88, frames: 147 },
+  { step: 1, duration: 5.2, frames: 156 },
+  { step: 2, duration: 6.52, frames: 196 },
+  { step: 3, duration: 2.72, frames: 82 },
+  { step: 4, duration: 4.96, frames: 149 },
+  { step: 5, duration: 4.04, frames: 122 },
+  { step: 6, duration: 5.84, frames: 176 },
+  { step: 7, duration: 5.12, frames: 154 },
+  { step: 8, duration: 3.56, frames: 107 },
+  { step: 9, duration: 4.32, frames: 130 },
+  { step: 10, duration: 4.88, frames: 147 },
+  { step: 11, duration: 4.4, frames: 132 },
+  { step: 12, duration: 3.84, frames: 116 },
+  { step: 13, duration: 5.04, frames: 152 },
+  { step: 14, duration: 3.96, frames: 119 },
+  { step: 15, duration: 4.28, frames: 129 },
+  { step: 16, duration: 4.72, frames: 142 },
+  { step: 17, duration: 4.28, frames: 129 },
+  { step: 18, duration: 4.64, frames: 140 },
+  { step: 19, duration: 4.32, frames: 130 },
+  { step: 20, duration: 5.16, frames: 155 },
+  { step: 21, duration: 4.96, frames: 149 },
+  { step: 22, duration: 4.28, frames: 129 },
+  { step: 23, duration: 5.84, frames: 176 },
+  { step: 24, duration: 5.8, frames: 174 },
+  { step: 25, duration: 4.76, frames: 143 },
+];
+
 export const narrationDurationsByScene: Record<string, NarrationDuration[]> = {
   "insert-head": insertHeadDurations,
   "insert-tail": insertTailDurations,
@@ -700,4 +729,5 @@ export const narrationDurationsByScene: Record<string, NarrationDuration[]> = {
   "boundary":            boundaryDurations,
   "diagonal-traversal":  diagonalDurations,
   "diagonal-rl":         rtlDiagonalDurations,
+  "count-tree-nodes": countTreeNodesDurations,
 };
