@@ -18,7 +18,7 @@ import { TreeDiagram } from "../components/TreeDiagram";
 const REEL_SAFE: SafeArea = { top: 150, bottom: 380, left: 90, right: 130 };
 const REEL_TOP_RATIO = 0.52;
 
-export const COUNT_TREE_NODES_SCENE_FRAMES = 2260;
+export const COUNT_TREE_NODES_SCENE_FRAMES = 3941;
 
 /*
  * Code lines (0-indexed):
@@ -125,7 +125,7 @@ function makeSteps(): SceneStep[] {
     },
     // Name recursion as the mechanism
     {
-      startFrame: 85,
+      startFrame: 157,
       highlightLines: { startLine: 0, endLine: 0 },
       visibleLines: 1,
       snapshot: {
@@ -152,7 +152,7 @@ function makeSteps(): SceneStep[] {
     },
     // Show the formula in code
     {
-      startFrame: 175,
+      startFrame: 323,
       highlightLines: { startLine: 1, endLine: 4 },
       visibleLines: 6,
       snapshot: {
@@ -179,7 +179,7 @@ function makeSteps(): SceneStep[] {
     },
     // Enter the recursion at the root
     {
-      startFrame: 280,
+      startFrame: 529,
       highlightLines: { startLine: 0, endLine: 0 },
       visibleLines: 6,
       snapshot: {
@@ -206,7 +206,7 @@ function makeSteps(): SceneStep[] {
     },
     // Recurse into the left child of root
     {
-      startFrame: 355,
+      startFrame: 621,
       highlightLines: { startLine: 2, endLine: 2 },
       visibleLines: 6,
       snapshot: {
@@ -233,7 +233,7 @@ function makeSteps(): SceneStep[] {
     },
     // Descend further to the leaf n4
     {
-      startFrame: 440,
+      startFrame: 780,
       highlightLines: { startLine: 2, endLine: 2 },
       visibleLines: 6,
       snapshot: {
@@ -260,7 +260,7 @@ function makeSteps(): SceneStep[] {
     },
     // First base case — n4's left child is null
     {
-      startFrame: 520,
+      startFrame: 912,
       highlightLines: { startLine: 1, endLine: 1 },
       visibleLines: 6,
       snapshot: {
@@ -287,7 +287,7 @@ function makeSteps(): SceneStep[] {
     },
     // Second base case — n4's right child is null
     {
-      startFrame: 615,
+      startFrame: 1098,
       highlightLines: { startLine: 1, endLine: 1 },
       visibleLines: 6,
       snapshot: {
@@ -314,7 +314,7 @@ function makeSteps(): SceneStep[] {
     },
     // Node 4 combines its children's returns
     {
-      startFrame: 700,
+      startFrame: 1262,
       highlightLines: { startLine: 4, endLine: 4 },
       visibleLines: 6,
       snapshot: {
@@ -341,7 +341,7 @@ function makeSteps(): SceneStep[] {
     },
     // Enter the call on n5
     {
-      startFrame: 785,
+      startFrame: 1379,
       highlightLines: { startLine: 3, endLine: 3 },
       visibleLines: 6,
       snapshot: {
@@ -368,7 +368,7 @@ function makeSteps(): SceneStep[] {
     },
     // n5's left child is null — base case
     {
-      startFrame: 870,
+      startFrame: 1519,
       highlightLines: { startLine: 1, endLine: 1 },
       visibleLines: 6,
       snapshot: {
@@ -395,7 +395,7 @@ function makeSteps(): SceneStep[] {
     },
     // n5's right child is null — base case
     {
-      startFrame: 950,
+      startFrame: 1676,
       highlightLines: { startLine: 1, endLine: 1 },
       visibleLines: 6,
       snapshot: {
@@ -422,7 +422,7 @@ function makeSteps(): SceneStep[] {
     },
     // Node 5 combines its children's returns
     {
-      startFrame: 1030,
+      startFrame: 1818,
       highlightLines: { startLine: 4, endLine: 4 },
       visibleLines: 6,
       snapshot: {
@@ -449,7 +449,7 @@ function makeSteps(): SceneStep[] {
     },
     // Node 2 combines child returns
     {
-      startFrame: 1115,
+      startFrame: 1944,
       highlightLines: { startLine: 4, endLine: 4 },
       visibleLines: 6,
       snapshot: {
@@ -476,7 +476,7 @@ function makeSteps(): SceneStep[] {
     },
     // Enter the call on n3
     {
-      startFrame: 1220,
+      startFrame: 2106,
       highlightLines: { startLine: 3, endLine: 3 },
       visibleLines: 6,
       snapshot: {
@@ -503,7 +503,7 @@ function makeSteps(): SceneStep[] {
     },
     // Descend left from n3 to n6
     {
-      startFrame: 1310,
+      startFrame: 2235,
       highlightLines: { startLine: 2, endLine: 2 },
       visibleLines: 6,
       snapshot: {
@@ -530,7 +530,7 @@ function makeSteps(): SceneStep[] {
     },
     // n6's left child is null — base case
     {
-      startFrame: 1390,
+      startFrame: 2374,
       highlightLines: { startLine: 1, endLine: 1 },
       visibleLines: 6,
       snapshot: {
@@ -557,7 +557,7 @@ function makeSteps(): SceneStep[] {
     },
     // n6's right child is null — base case
     {
-      startFrame: 1470,
+      startFrame: 2526,
       highlightLines: { startLine: 1, endLine: 1 },
       visibleLines: 6,
       snapshot: {
@@ -584,7 +584,7 @@ function makeSteps(): SceneStep[] {
     },
     // Node 6 combines its children's returns
     {
-      startFrame: 1550,
+      startFrame: 2665,
       highlightLines: { startLine: 4, endLine: 4 },
       visibleLines: 6,
       snapshot: {
@@ -611,7 +611,7 @@ function makeSteps(): SceneStep[] {
     },
     // Enter the call on n7
     {
-      startFrame: 1635,
+      startFrame: 2815,
       highlightLines: { startLine: 3, endLine: 3 },
       visibleLines: 6,
       snapshot: {
@@ -638,7 +638,7 @@ function makeSteps(): SceneStep[] {
     },
     // n7's left child is null — base case
     {
-      startFrame: 1720,
+      startFrame: 2955,
       highlightLines: { startLine: 1, endLine: 1 },
       visibleLines: 6,
       snapshot: {
@@ -665,7 +665,7 @@ function makeSteps(): SceneStep[] {
     },
     // n7's right child is null — base case
     {
-      startFrame: 1800,
+      startFrame: 3120,
       highlightLines: { startLine: 1, endLine: 1 },
       visibleLines: 6,
       snapshot: {
@@ -692,7 +692,7 @@ function makeSteps(): SceneStep[] {
     },
     // Node 7 combines its children's returns
     {
-      startFrame: 1880,
+      startFrame: 3279,
       highlightLines: { startLine: 4, endLine: 4 },
       visibleLines: 6,
       snapshot: {
@@ -719,7 +719,7 @@ function makeSteps(): SceneStep[] {
     },
     // Node 3 combines its children's returns
     {
-      startFrame: 1965,
+      startFrame: 3418,
       highlightLines: { startLine: 4, endLine: 4 },
       visibleLines: 6,
       snapshot: {
@@ -746,7 +746,7 @@ function makeSteps(): SceneStep[] {
     },
     // Root combines — one plus three plus three is seven
     {
-      startFrame: 2065,
+      startFrame: 3604,
       highlightLines: { startLine: 4, endLine: 4 },
       visibleLines: 6,
       snapshot: {
@@ -773,7 +773,7 @@ function makeSteps(): SceneStep[] {
     },
     // Wrap up with complexity
     {
-      startFrame: 2175,
+      startFrame: 3788,
       highlightLines: { startLine: 0, endLine: 5 },
       visibleLines: 6,
       snapshot: {
