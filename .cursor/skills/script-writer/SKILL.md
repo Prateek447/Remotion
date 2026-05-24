@@ -1,9 +1,24 @@
 ---
 name: script-writer
-description: Structure educational code explanation videos for maximum clarity and engagement. Covers scene decomposition, step pacing, narration scripting, hook design, and the teach-show-reinforce pattern. Use when planning a new video topic, breaking an algorithm into animated steps, writing narration, or deciding scene order and timing.
+description: DEPRECATED — superseded by pipeline/ design system. See pipeline/README.md and pipeline/design-system/overview.md. This skill remains as historical reference for editorial principles only.
 ---
 
-# Script Writer for Code Explanation Videos
+> ⚠️ **DEPRECATED — DO NOT USE FOR NEW WORK**
+>
+> This skill has been superseded by the `pipeline/` design system at the repo root.
+>
+> For new videos, load these instead:
+> - `pipeline/README.md` — pipeline stage map
+> - `pipeline/design-system/overview.md` — design philosophy & contracts
+> - `pipeline/design-system/scene-schema.yaml` — the single-source-of-truth schema
+> - `pipeline/design-system/patterns/<data-structure>.md` — codebase-observable patterns
+> - `pipeline/RUNBOOK.md` — concrete execution commands
+>
+> The editorial principles below (hook design, step pacing, narration rules) are still correct but have been distilled and re-encoded into the design system docs with concrete codebase grounding. Refer to `pipeline/design-system/voice/` for voice direction and `pipeline/design-system/patterns/` for visual structure.
+
+---
+
+# Script Writer for Code Explanation Videos *(legacy)*
 
 Every video is a **story with a teaching goal**. The viewer should understand the concept after watching once at 1x speed. Structure every video around this principle.
 
