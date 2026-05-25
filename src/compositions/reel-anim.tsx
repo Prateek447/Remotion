@@ -25,6 +25,7 @@ import { RightToLeftDiagonal, RTL_DIAGONAL_SCENE_FRAMES } from "../scenes/RightT
 import { CountTreeNodes, COUNT_TREE_NODES_SCENE_FRAMES } from "../scenes/CountTreeNodes";
 import { VerticalOrderTraversal, VERTICAL_ORDER_SCENE_FRAMES } from "../scenes/VerticalOrderTraversal";
 import { ZigzagTraversal, ZIGZAG_SCENE_FRAMES } from "../scenes/ZigzagTraversal";
+import { IntroTrees, INTRO_TREES_SCENE_FRAMES } from "../scenes/IntroTrees";
 
 interface TokenProps { tokens: ThemedToken[][] }
 interface DualTokenProps {
@@ -168,5 +169,11 @@ export const VerticalOrderReelAnim: React.FC<TokenProps> = ({ tokens }) => (
 export const ZigzagReelAnim: React.FC<TokenProps> = ({ tokens }) => (
   <StandaloneVideo title="Binary Tree — Zigzag Order" complexity="O(n)" sceneFrames={ZIGZAG_SCENE_FRAMES}>
     <ZigzagTraversal tokens={tokens} format="reel-anim" />
+  </StandaloneVideo>
+);
+
+export const IntroTreesReelAnim: React.FC<TokenProps> = ({ tokens }) => (
+  <StandaloneVideo title="Binary Trees — Introduction" complexity="O(1)" subtitle="Root, Leaf, Height & more" sceneFrames={INTRO_TREES_SCENE_FRAMES}>
+    <IntroTrees tokens={tokens} format="reel-anim" />
   </StandaloneVideo>
 );

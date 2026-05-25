@@ -1298,7 +1298,7 @@ export const CountTreeNodes: React.FC<CountTreeNodesProps> = ({ tokens, format =
   const safeH = height - REEL_SAFE.top - REEL_SAFE.bottom;
   const diagramAreaW = isAnim ? width : isReel ? safeW : width * 0.62;
   const diagramAreaH = isAnim ? ANIM_DIAGRAM_HEIGHT : isReel ? Math.round(safeH * REEL_TOP_RATIO) : height;
-  const nodeScale = isAnim ? 1.4 : isReel ? 0.82 : 1;
+  const nodeScale = isAnim ? 1.15 : isReel ? 0.82 : 1;
   const steps = isAnim ? compressStepsForAnim(makeSteps()) : makeSteps();
   const { current, localFrame } = useStepTransition(steps);
   const complexityInfo = current.snapshot.complexityInfo;
@@ -1309,7 +1309,7 @@ export const CountTreeNodes: React.FC<CountTreeNodesProps> = ({ tokens, format =
         width: diagramAreaW,
         height: isAnim ? diagramAreaH : isReelOnly ? diagramAreaH : height,
         position: "relative",
-        overflow: "hidden",
+        overflow: isAnim ? "visible" : "hidden",
         margin: isReelOnly ? "0 auto" : undefined,
       }}
     >
@@ -1374,7 +1374,7 @@ export const CountTreeNodes: React.FC<CountTreeNodesProps> = ({ tokens, format =
       ) : isReelOnly ? (
         <StackedLayout top={diagram} bottom={code} safeArea={REEL_SAFE} topRatio={REEL_TOP_RATIO} />
       ) : (
-        <SplitLayout left={diagram} right={code} leftWidth="54%" />
+        <SplitLayout left={diagram} right={code} leftWidth="67%" />
       )}
       <AmbientLayer />
       {!isAnim && <SfxLayer steps={steps} duckVolume={0.45} />}

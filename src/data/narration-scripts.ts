@@ -785,6 +785,53 @@ export const countTreeNodesDurations: NarrationDuration[] = [
   { step: 25, duration: 8.13, frames: 244 },
 ];
 
+export const introTreesNarration: SceneNarration = {
+  sceneId: "intro-trees",
+  lines: [
+    { stepIndex: 0,  text: "Trees are everywhere in computer science — file systems, databases, compilers, HTML. Once you understand binary trees, every algorithm that follows becomes clear. Let's start from zero." },
+    { stepIndex: 1,  text: "A binary tree is a hierarchical data structure. It's made up of nodes connected by edges. The rule: each node can have at most two children — a left child and a right child." },
+    { stepIndex: 2,  text: "The very top node is called the ROOT. Every tree has exactly one root. It's where every traversal starts." },
+    { stepIndex: 3,  text: "When a node connects to a node below it, that relationship is called parent and child. Node one is the parent. Node two is its left child, node three its right child." },
+    { stepIndex: 4,  text: "Two nodes that share the same parent are called SIBLINGS. Node two and node three both have node one as their parent — so they are siblings of each other." },
+    { stepIndex: 5,  text: "Left and right are not just labels — they define the structure. A node on the left side and the same node on the right creates a completely different tree." },
+    { stepIndex: 6,  text: "Every node is the root of its own SUBTREE — the node itself plus all its descendants. Node two, together with four and five, forms its own subtree." },
+    { stepIndex: 7,  text: "Nodes with no children are called LEAVES. They're at the bottom of the tree — the endpoints. In this tree, four, five, six, and seven are all leaves." },
+    { stepIndex: 8,  text: "Nodes that have at least one child are called INTERNAL nodes. Here, two and three are internal — they have children below them." },
+    { stepIndex: 9,  text: "The DEGREE of a node is how many children it has. Node one has two children — degree two. Nodes two and three are also degree two. Leaves have no children — degree zero." },
+    { stepIndex: 10, text: "Nodes at the same distance from the root belong to the same LEVEL. The root is level zero. Two and three are level one. Four, five, six, and seven are level two." },
+    { stepIndex: 11, text: "Height is the longest root-to-leaf path, counted in edges. Watch the highlighted path — root one, down to node two, down to leaf four. Two edges. Height equals two." },
+    { stepIndex: 12, text: "Depth works the other way. It's the number of edges from the root down to a specific node. Root has depth zero. Nodes two and three are depth one. The four leaves at the bottom are all depth two." },
+    { stepIndex: 13, text: "A PATH is a sequence of connected nodes with no repetition. Here, one to three to seven is a path of length two. Height is simply the length of the longest path from root to any leaf." },
+    { stepIndex: 14, text: "In code, a tree node is just a class with three fields. That's all you need to represent any binary tree." },
+    { stepIndex: 15, text: "val stores the node's value. It can be an integer, a string — any data type." },
+    { stepIndex: 16, text: "left and right are references to the left and right child nodes. If a child doesn't exist, they're null." },
+    { stepIndex: 17, text: "The constructor takes a value, sets left and right to null. Every node starts as a leaf — you connect it by setting the parent's left or right pointer." },
+    { stepIndex: 18, text: "One class. Three fields. From this, you can build binary search trees, heaps, tries — every tree structure we cover. Subscribe to see them all." },
+  ],
+};
+
+export const introTreesDurations: NarrationDuration[] = [
+  { step: 0,  duration: 11.20, frames: 336 },
+  { step: 1,  duration: 10.36, frames: 311 },
+  { step: 2,  duration: 6.48,  frames: 195 },
+  { step: 3,  duration: 8.80,  frames: 264 },
+  { step: 4,  duration: 8.84,  frames: 266 },
+  { step: 5,  duration: 8.16,  frames: 245 },
+  { step: 6,  duration: 10.12, frames: 304 },
+  { step: 7,  duration: 9.40,  frames: 282 },
+  { step: 8,  duration: 6.96,  frames: 209 },
+  { step: 9,  duration: 9.36,  frames: 281 },
+  { step: 10, duration: 9.44,  frames: 284 },
+  { step: 11, duration: 11.84, frames: 356 },
+  { step: 12, duration: 15.56, frames: 467 },
+  { step: 13, duration: 11.40, frames: 342 },
+  { step: 14, duration: 6.12,  frames: 184 },
+  { step: 15, duration: 4.20,  frames: 126 },
+  { step: 16, duration: 7.68,  frames: 231 },
+  { step: 17, duration: 8.52,  frames: 256 },
+  { step: 18, duration: 9.04,  frames: 272 },
+];
+
 export const narrationDurationsByScene: Record<string, NarrationDuration[]> = {
   "insert-head": insertHeadDurations,
   "insert-tail": insertTailDurations,
@@ -814,4 +861,5 @@ export const narrationDurationsByScene: Record<string, NarrationDuration[]> = {
   "vertical-order":      verticalOrderDurations,
   "zigzag":              zigzagDurations,
   "count-tree-nodes":    countTreeNodesDurations,
+  "intro-trees":         introTreesDurations,
 };

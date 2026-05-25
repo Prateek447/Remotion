@@ -381,6 +381,18 @@ export const verticalOrderCode = `public List<List<Integer>> verticalOrder(TreeN
     return new ArrayList<>(colMap.values());
 }`;
 
+export const treeNodeCode = `class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+
+    TreeNode(int val) {
+        this.val = val;
+        this.left = null;
+        this.right = null;
+    }
+}`;
+
 export const zigzagLevelOrderCode = `public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
     if (root == null) return List.of();
     List<List<Integer>> result = new ArrayList<>();

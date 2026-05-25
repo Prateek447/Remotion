@@ -35,6 +35,7 @@ import {
   countTreeNodesCode,
   verticalOrderCode,
   zigzagLevelOrderCode,
+  treeNodeCode,
 } from "./data/code-snippets";
 
 import { InsertHead } from "./scenes/InsertHead";
@@ -66,6 +67,7 @@ import { RightToLeftDiagonal, RTL_DIAGONAL_SCENE_FRAMES } from "./scenes/RightTo
 import { CountTreeNodes, COUNT_TREE_NODES_SCENE_FRAMES } from "./scenes/CountTreeNodes";
 import { VerticalOrderTraversal, VERTICAL_ORDER_SCENE_FRAMES } from "./scenes/VerticalOrderTraversal";
 import { ZigzagTraversal, ZIGZAG_SCENE_FRAMES } from "./scenes/ZigzagTraversal";
+import { INTRO_TREES_SCENE_FRAMES } from "./scenes/IntroTrees";
 import { TLSThumbnail } from "./thumbnails/TLSThumbnail";
 import { FactorialThumbnail } from "./thumbnails/FactorialThumbnail";
 import { DetectCycleThumbnail } from "./thumbnails/DetectCycleThumbnail";
@@ -110,6 +112,9 @@ import {
   CountTreeNodesReelAnim,
   VerticalOrderReelAnim,
   ZigzagReelAnim,
+  IntroTreesVideo,
+  IntroTreesReel,
+  IntroTreesReelAnim,
 } from "./compositions";
 
 const WIDTH = 1920;
@@ -498,6 +503,11 @@ export const RemotionRoot: React.FC = () => {
       </Folder>
 
       <Folder name="Trees">
+        <Folder name="IntroTrees">
+          <Composition id="Video-IntroTrees" component={IntroTreesVideo} durationInFrames={standaloneDuration(INTRO_TREES_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(treeNodeCode)} />
+          <Composition id="Reel-IntroTrees" component={IntroTreesReel} durationInFrames={standaloneDuration(INTRO_TREES_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(treeNodeCode)} />
+          <Composition id="Anim-IntroTrees" component={IntroTreesReelAnim} durationInFrames={standaloneDuration(16 * ANIM_FRAMES_PER_STEP)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(treeNodeCode)} />
+        </Folder>
         <Folder name="BSTInsert">
           <Composition id="Video-BSTInsert" component={BSTInsertVideo} durationInFrames={standaloneDuration(BST_INSERT_SCENE_FRAMES)} fps={FPS} width={WIDTH} height={HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(bstInsertCode)} />
           <Composition id="Reel-BSTInsert" component={BSTInsertReel} durationInFrames={standaloneDuration(BST_INSERT_SCENE_FRAMES)} fps={FPS} width={REEL_WIDTH} height={REEL_HEIGHT} defaultProps={{ tokens: emptyTokens }} calculateMetadata={makeCalcMetadata(bstInsertCode)} />

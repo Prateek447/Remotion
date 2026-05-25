@@ -1,5 +1,5 @@
 import React from "react";
-import { interpolate, spring, useVideoConfig } from "remotion";
+import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { ThemedToken } from "shiki";
 import type { ArrowData, ListNodeData, SceneStep } from "../lib/types";
 import { useStepTransition } from "../lib/useStepTransition";
@@ -90,6 +90,23 @@ const P1248106  = ["n1", "n2", "n4", "n8", "n9", "n10", "n6"];
 const P12481067 = ["n1", "n2", "n4", "n8", "n9", "n10", "n6", "n7"];
 const PBND      = ["n1", "n2", "n3", "n4", "n6", "n7", "n8", "n9", "n10"];
 const PALL      = ["n1", "n2", "n3", "n4", "n5", "n6", "n7", "n8", "n9", "n10"];
+
+// Boundary traversal order: 1→2→4→8→9→10→6→7→3
+// Each segment appears when its `triggerValue` enters outputValues.
+// cpFrac: quadratic bezier control point (fractional) — pushed outward from tree center.
+const BOUNDARY_SEGMENTS: Array<{
+  fromId: string; toId: string; triggerValue: number;
+  cpFrac: { x: number; y: number };
+}> = [
+  { fromId: "n1",  toId: "n2",  triggerValue: 2,  cpFrac: { x: 0.22, y: 0.23 } },
+  { fromId: "n2",  toId: "n4",  triggerValue: 4,  cpFrac: { x: 0.09, y: 0.38 } },
+  { fromId: "n4",  toId: "n8",  triggerValue: 8,  cpFrac: { x: 0.02, y: 0.55 } },
+  { fromId: "n8",  toId: "n9",  triggerValue: 9,  cpFrac: { x: 0.155, y: 0.74 } },
+  { fromId: "n9",  toId: "n10", triggerValue: 10, cpFrac: { x: 0.31,  y: 0.74 } },
+  { fromId: "n10", toId: "n6",  triggerValue: 6,  cpFrac: { x: 0.50,  y: 0.78 } },
+  { fromId: "n6",  toId: "n7",  triggerValue: 7,  cpFrac: { x: 0.70,  y: 0.60 } },
+  { fromId: "n7",  toId: "n3",  triggerValue: 3,  cpFrac: { x: 0.90,  y: 0.37 } },
+];
 
 // boundaryCode line map (0-indexed, 36 lines):
 //  0-9  : boundary() main   11-17: addLeft (11=comment)
@@ -630,6 +647,91 @@ const StackViz: React.FC<{
   );
 };
 
+// ── BoundaryPathOverlay ───────────────────────────────────────────────────────
+// Progressive dashed green arrows tracing the boundary traversal order.
+
+const BoundaryPathOverlay: React.FC<{
+  steps: SceneStep[];
+  positionMap: Record<string, { x: number; y: number }>;
+  areaWidth: number;
+  areaHeight: number;
+  nodeRadius: number;
+}> = ({ steps, positionMap, areaWidth, areaHeight, nodeRadius }) => {
+  const { fps } = useVideoConfig();
+  const frame = useCurrentFrame();
+  const { current, previous, localFrame } = useStepTransition(steps);
+  const outputValues    = current.snapshot.outputValues  ?? [];
+  const prevOutputValues = previous.snapshot.outputValues ?? [];
+
+  const GREEN       = "#40c057";
+  const DASH_PERIOD = 16;
+  const dashOffset  = -((frame * 0.5) % DASH_PERIOD);
+
+  return (
+    <svg
+      style={{
+        position: "absolute", top: 0, left: 0,
+        width: "100%", height: "100%",
+        overflow: "visible", pointerEvents: "none", zIndex: 2,
+      }}
+      viewBox={`0 0 ${areaWidth} ${areaHeight}`}
+    >
+      <defs>
+        <marker id="bnd-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill={GREEN} />
+        </marker>
+      </defs>
+      {BOUNDARY_SEGMENTS.map(({ fromId, toId, triggerValue, cpFrac }) => {
+        const isVisible = outputValues.includes(triggerValue);
+        if (!isVisible) return null;
+
+        const fromPos = positionMap[fromId];
+        const toPos   = positionMap[toId];
+        if (!fromPos || !toPos) return null;
+
+        const x1  = fromPos.x * areaWidth;
+        const y1  = fromPos.y * areaHeight;
+        const x2  = toPos.x  * areaWidth;
+        const y2  = toPos.y  * areaHeight;
+        const cpx = cpFrac.x * areaWidth;
+        const cpy = cpFrac.y * areaHeight;
+
+        // Offset start along straight line direction
+        const dx = x2 - x1, dy = y2 - y1;
+        const d  = Math.sqrt(dx * dx + dy * dy);
+        const sx = x1 + (dx / d) * nodeRadius;
+        const sy = y1 + (dy / d) * nodeRadius;
+
+        // Offset end along bezier tangent at endpoint (cp→end)
+        const cpDx = x2 - cpx, cpDy = y2 - cpy;
+        const cpD  = Math.sqrt(cpDx * cpDx + cpDy * cpDy);
+        const ex   = x2 - (cpDx / cpD) * nodeRadius;
+        const ey   = y2 - (cpDy / cpD) * nodeRadius;
+
+        const isNew   = !prevOutputValues.includes(triggerValue);
+        const opacity = isNew
+          ? spring({ frame: localFrame, fps, config: springPresets.enter })
+          : 1;
+
+        return (
+          <path
+            key={`${fromId}-${toId}`}
+            d={`M ${sx},${sy} Q ${cpx},${cpy} ${ex},${ey}`}
+            stroke={GREEN}
+            strokeWidth={2.5}
+            strokeDasharray="10 6"
+            strokeDashoffset={dashOffset}
+            fill="none"
+            opacity={opacity}
+            markerEnd="url(#bnd-arrow)"
+            style={{ filter: "drop-shadow(0 0 5px #40c05788)" }}
+          />
+        );
+      })}
+    </svg>
+  );
+};
+
 export const BoundaryTraversal: React.FC<BoundaryTraversalProps> = ({
   tokens,
   format = "youtube",
@@ -665,6 +767,13 @@ export const BoundaryTraversal: React.FC<BoundaryTraversalProps> = ({
         areaHeight={diagramAreaH}
         nodeScale={nodeScale}
         ringNodeIds={["n1", "n2", "n3", "n4", "n6", "n7", "n8", "n9", "n10"]}
+      />
+      <BoundaryPathOverlay
+        steps={steps}
+        positionMap={makePositionMap(format)}
+        areaWidth={diagramAreaW}
+        areaHeight={diagramAreaH}
+        nodeRadius={30 * nodeScale}
       />
       {isAnim && <PhaseLabel startLine={current.highlightLines.startLine} localFrame={localFrame} />}
     </div>

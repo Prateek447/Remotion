@@ -482,6 +482,28 @@ zigzag_lines = [
     {"stepIndex": 16, "text": "Time is O of n — every node visited once. Space is O of n for the queue. The addFirst and addLast trick is the key insight. Subscribe for more tree patterns like this."},
 ]
 
+intro_trees_lines = [
+    {"stepIndex": 0,  "text": "Trees are everywhere in computer science — file systems, databases, compilers, HTML. Once you understand binary trees, every algorithm that follows becomes clear. Let's start from zero."},
+    {"stepIndex": 1,  "text": "A binary tree is a hierarchical data structure. It's made up of nodes connected by edges. The rule: each node can have at most two children — a left child and a right child."},
+    {"stepIndex": 2,  "text": "The very top node is called the ROOT. Every tree has exactly one root. It's where every traversal starts."},
+    {"stepIndex": 3,  "text": "When a node connects to a node below it, that relationship is called parent and child. Node one is the parent. Node two is its left child, node three its right child."},
+    {"stepIndex": 4,  "text": "Two nodes that share the same parent are called SIBLINGS. Node two and node three both have node one as their parent — so they are siblings of each other."},
+    {"stepIndex": 5,  "text": "Left and right are not just labels — they define the structure. A node on the left side and the same node on the right creates a completely different tree."},
+    {"stepIndex": 6,  "text": "Every node is the root of its own SUBTREE — the node itself plus all its descendants. Node two, together with four and five, forms its own subtree."},
+    {"stepIndex": 7,  "text": "Nodes with no children are called LEAVES. They're at the bottom of the tree — the endpoints. In this tree, four, five, six, and seven are all leaves."},
+    {"stepIndex": 8,  "text": "Nodes that have at least one child are called INTERNAL nodes. Here, two and three are internal — they have children below them."},
+    {"stepIndex": 9,  "text": "The DEGREE of a node is how many children it has. Node one has two children — degree two. Nodes two and three are also degree two. Leaves have no children — degree zero."},
+    {"stepIndex": 10, "text": "Nodes at the same distance from the root belong to the same LEVEL. The root is level zero. Two and three are level one. Four, five, six, and seven are level two."},
+    {"stepIndex": 11, "text": "Height is the longest root-to-leaf path, counted in edges. Watch the highlighted path — root one, down to node two, down to leaf four. Two edges. Height equals two."},
+    {"stepIndex": 12, "text": "Depth works the other way. It's the number of edges from the root down to a specific node. Root has depth zero. Nodes two and three are depth one. The four leaves at the bottom are all depth two."},
+    {"stepIndex": 13, "text": "A PATH is a sequence of connected nodes with no repetition. Here, one to three to seven is a path of length two. Height is simply the length of the longest path from root to any leaf."},
+    {"stepIndex": 14, "text": "In code, a tree node is just a class with three fields. That's all you need to represent any binary tree."},
+    {"stepIndex": 15, "text": "val stores the node's value. It can be an integer, a string — any data type."},
+    {"stepIndex": 16, "text": "left and right are references to the left and right child nodes. If a child doesn't exist, they're null."},
+    {"stepIndex": 17, "text": "The constructor takes a value, sets left and right to null. Every node starts as a leaf — you connect it by setting the parent's left or right pointer."},
+    {"stepIndex": 18, "text": "One class. Three fields. From this, you can build binary search trees, heaps, tries — every tree structure we cover. Subscribe to see them all."},
+]
+
 ALL_NARRATIONS = [
     {"sceneId": "insert-head",          "lines": insert_head_lines},
     {"sceneId": "insert-tail",          "lines": insert_tail_lines},
@@ -510,6 +532,7 @@ ALL_NARRATIONS = [
     {"sceneId": "diagonal-rl",          "lines": rtl_diagonal_lines},
     {"sceneId": "vertical-order",       "lines": vertical_order_lines},
     {"sceneId": "zigzag",               "lines": zigzag_lines},
+    {"sceneId": "intro-trees",          "lines": intro_trees_lines},
 ]
 
 # ---------------------------------------------------------------------------
