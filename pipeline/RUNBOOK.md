@@ -161,11 +161,13 @@ Audio + sync review (after listening in Studio):
 
 If I gave you fixes:
   1. Classify each fix:
-       - VOICE: voiceOverride knob nudge / narration rewrite / persona change
+       - VOICE: chunk `params` tune / chunk split / `pauseAfter` adjust /
+                chunk text rewrite / chunk seed lock / persona change
        - VISUAL: snapshot, caption, targetFrames, highlight (audio review may
                  reveal a visual mismatch I didn't catch in Prompt 2)
        - BOTH: e.g., rewriting narration that changes both audio and caption
-  2. Apply scene.yaml edits.
+  2. Apply sidecar edits in pipeline/scenes/<sceneId>.narration.yaml
+     (and scene.yaml only for visual / content-text changes).
   3. For each cross-scene pattern, update the right design-system doc
      (voice/personas/<persona>.md / voice/two-axis-model.md /
      teaching.md TTS-readiness / patterns/<x>.md). Show diffs.
@@ -273,7 +275,7 @@ The review gates after Prompts 1 and 3 are the only places human judgment is req
 | Studio: scene renders but audio silent after Prompt 3 | Either Prompt 3 didn't complete `apply` (re-run it), or Studio is caching — restart `npm run studio`. |
 | `apply.py`: "step-count mismatch" | scene.tsx step count drifted from durations.json. Re-run Prompt 3 (`--force`) then retry apply. |
 | `apply.py`: "could not locate '<CONST>_SCENE_FRAMES'" | Scaffolder named the constant non-standardly. Add `sceneConstName` override in scene.yaml. |
-| Audio sounds flat or rushed | Send feedback via Prompt 4. Claude applies `voiceOverride` paired adjustments. |
+| Audio sounds flat or rushed | Send feedback via Prompt 4 — identify the chunk(s) via `chunks/step-N-N.M.wav`. Claude tunes chunk `params` (paired ex↑/cfg↓ for flat, opposite for rushed) in the sidecar. |
 | Audio review reveals caption too long for the spoken phrase | Send via Prompt 4 — Claude classifies it BOTH and fixes scene.yaml + regenerates audio if narration changes. |
 
 ---
@@ -284,7 +286,7 @@ The review gates after Prompts 1 and 3 are the only places human judgment is req
 - **No thumbnail / description / metadata generation** — Prompt 5 ends at the MP4.
 - **No publishing** — no YouTube / Instagram API integration.
 - **No cross-format pacing adjustment** — Reels and YouTube share narration timing.
-- **No automated knob auto-tune** — voiceOverride iteration is manual via Prompt 4.
+- **No automated knob auto-tune** — chunk param tuning is manual via Prompt 4 (or direct sidecar editing).
 
 ---
 
@@ -294,40 +296,81 @@ Cheat sheet for pipeline tools, experiments, audio generation, applying updates,
 final render. The five-prompt flow above is the primary interface; everything here is
 the granular toolbox for manual override, debugging, and experimentation.
 
-### Stage 2 — Visual (validate, scaffold, narration preview)
+### Stage 2 — Visual (validate, scaffold, narration scaffold + preview)
 
 ```bash
-# Validate scene.yaml against design-system contracts (schema, approach, tts hazards)
+# Validate scene.yaml against design-system contracts (schema, approach, content sanity)
 python3 pipeline/stages/01-validate/validate.py pipeline/scenes/<sid>.yaml
 
 # Scaffold src/scenes/<Name>.tsx + print paste snippets for Root.tsx etc.
 python3 pipeline/stages/02-scaffold/scaffold.py pipeline/scenes/<sid>.yaml
 
-# Read-only narration preview: TTS lint + per-step (persona × arc) presets + prosody summary
+# Scaffold the chunked narration sidecar (one chunk per step, default params keyed off arc).
+# Refuses to overwrite an existing sidecar unless --force.
+python3 pipeline/stages/03-narration/scaffold.py pipeline/scenes/<sid>.yaml
+
+# Validate + summarize the sidecar (chunk counts, param ranges, TTS lint per chunk,
+# coverage cross-check vs. scene.yaml). Read-only. Hard-errors on missing scene coverage.
 python3 pipeline/stages/03-narration/preview.py pipeline/scenes/<sid>.yaml
 ```
 
 ### Stage 3 — Audio generation & apply
 
+The audio generator requires the chunked-narration sidecar (`<sid>.narration.yaml`).
+It runs one Chatterbox call per chunk with per-chunk
+`(exaggeration, cfg_weight, temperature)` and splices `torch.zeros` silence
+between chunks per each chunk's `pauseAfter`. There is no AUTO-mode fallback;
+scenes without a sidecar are rejected.
+
 ```bash
-# Generate audio for full scene (~5–15 min on GPU, longer on CPU)
+# Generate audio for full scene (~30–45 min on GPU, longer on CPU)
 python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml
 
-# Regenerate one step only — for misfires or after a voiceOverride change
-python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml --step 3 --force
+# Regenerate one step only — for misfires or after tuning chunk params
+python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml --step 24 --force
 
-# Force-regenerate full scene — after narration rewrite or preset retune
+# Force-regenerate full scene
 python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml --force
 
-# Override reference voice for a single run (default lives in scene.yaml.voice.reference)
+# Override the reference voice clip
 python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml --reference scripts/<other>.wav
 
-# Apply audio durations to scene.tsx + narration-scripts.ts (pipeline-native, no scripts/ dep)
+# Apply audio durations to scene.tsx + narration-scripts.ts
 python3 pipeline/stages/06-apply/apply.py pipeline/scenes/<sid>.yaml
 
 # Dry-run apply — print intended edits without writing
 python3 pipeline/stages/06-apply/apply.py pipeline/scenes/<sid>.yaml --dry-run
 ```
+
+#### Sidecar authoring + tune loop
+
+```bash
+# 1. Generate skeleton (one chunk per step, default params seeded by arc)
+python3 pipeline/stages/03-narration/scaffold.py pipeline/scenes/<sid>.yaml
+
+# 2. Hand-author the sidecar — split high-emotion steps into multiple chunks,
+#    tune params per chunk against the tier legend in teaching.md
+#    Reference: pipeline/scenes/count-tree-nodes.narration.yaml
+
+# 3. Validate the authored sidecar
+python3 pipeline/stages/03-narration/preview.py pipeline/scenes/<sid>.yaml
+
+# 4. Smoke-test a single step before committing to full-scene compute
+python3 pipeline/stages/05-audio/generate.py pipeline/scenes/<sid>.yaml --step <N> --force
+
+# 5. Listen
+open public/narration/<sid>/step-<N>.mp3
+# Or listen to a single chunk in isolation (gated on output.perChunkDebug: true)
+open public/narration/<sid>/chunks/step-<N>-<N>.M.wav
+
+# 6. Tune chunk params in the sidecar, repeat step 4. Iterate until satisfied.
+# 7. Lock keepers by adding `seed: <int>` to chunks that landed perfectly.
+# 8. Full-scene regenerate when all spot-checked steps are good.
+```
+
+Per-chunk WAVs at `public/narration/<sid>/chunks/step-N-N.M.wav` are debug-only;
+apply.py never reads them. The concatenated `step-N.mp3` files are what feed
+into timing reconciliation.
 
 ### Stage 4 — Final render
 
@@ -411,9 +454,10 @@ end-to-end without Claude in the loop.
 
 ```bash
 bash pipeline/run.sh <yaml> validate            # validator only
-bash pipeline/run.sh <yaml> scaffold            # validate + scaffold
-bash pipeline/run.sh <yaml> narration-preview   # TTS lint + prosody summary
-bash pipeline/run.sh <yaml> prefix              # validate + scaffold + narration-preview (default)
+bash pipeline/run.sh <yaml> scaffold            # validate + scaffold tsx
+bash pipeline/run.sh <yaml> narration-scaffold  # scene.yaml → <scene>.narration.yaml skeleton
+bash pipeline/run.sh <yaml> narration-preview   # validate + summarize the sidecar
+bash pipeline/run.sh <yaml> prefix              # validate + scaffold + narration-scaffold + narration-preview (default)
 bash pipeline/run.sh <yaml> audio               # generate audio for full scene
 bash pipeline/run.sh <yaml> audio-stage         # audio + review-audio template
 bash pipeline/run.sh <yaml> apply               # apply timings to scene.tsx + narration-scripts.ts
@@ -425,7 +469,7 @@ bash pipeline/run.sh <yaml> finalize            # apply + render
 
 Empirical proving ground for prosody techniques. See
 `pipeline/experiments/filler-lab/README.md` for the full history (Um / Ah / Hmm all
-dropped — the connector-pause pattern is what shipped).
+dropped — chunked authoring is what shipped).
 
 ```bash
 # Initial 34-variant discovery (~10–15 min on GPU, 1 take per variant)

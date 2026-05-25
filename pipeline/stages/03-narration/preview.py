@@ -1,12 +1,23 @@
 #!/usr/bin/env python3
-"""Preview narration: persona × arc preset resolution + TTS-readiness lint.
+"""Validate + summarize the chunked-narration sidecar.
 
-This is a *read-only* preview — it does not write any files. Use before running
-the pipeline-native audio generator (stage 5) to catch:
+Read-only — does not generate audio or modify files. Runs as the pre-flight
+check before stage 05 audio generation:
 
-  - TTS-unreadable narration (digits, [bracket-tags], `O(n)`, `.next`, etc.)
-  - Long breath groups that will sound bot-read
-  - Per-step preset values the audio generator will apply
+  - Validates sidecar schema (every step has chunks, every chunk has the
+    required fields, params triples present and in range).
+  - Cross-checks against scene.yaml — every scene stepIndex must have a
+    chunked entry; warns on extra sidecar entries that don't match a scene
+    step.
+  - Lints per-chunk text for TTS hazards (digits-as-numerals, [brackets],
+    OOP operators that need to be spelled out).
+  - Summarizes param ranges and total inter-chunk silence per step.
+  - Surfaces shape warnings authors typically want to fix:
+      • single-chunk opening / peak / closing (probably under-chunked)
+      • peak step's max exaggeration below 0.85 (under-emphasized reveal)
+      • back-to-back chunks with identical params (could be merged into one)
+
+Exits non-zero on hard schema errors or scene/sidecar coverage mismatches.
 
 Usage:
     python3 pipeline/stages/03-narration/preview.py <scene.yaml>
@@ -19,32 +30,11 @@ from pathlib import Path
 try:
     import yaml
 except ImportError:
-    print("ERROR: pyyaml required. Install with: pip install pyyaml", file=sys.stderr)
+    print("ERROR: pyyaml required. Install with: pip install pyyaml",
+          file=sys.stderr)
     sys.exit(2)
 
-# Source of truth: pipeline/design-system/voice/two-axis-model.md
-PRESET_MATRIX: dict[str, dict[str, dict[str, float]]] = {
-    "teacher-energetic": {
-        "opening":    {"exaggeration": 0.60, "cfg_weight": 0.55, "temperature": 0.90},
-        "methodical": {"exaggeration": 0.55, "cfg_weight": 0.60, "temperature": 0.88},
-        "peak":       {"exaggeration": 0.80, "cfg_weight": 0.40, "temperature": 0.95},
-        "closing":    {"exaggeration": 0.70, "cfg_weight": 0.50, "temperature": 0.92},
-    },
-    "measured": {
-        "opening":    {"exaggeration": 0.50, "cfg_weight": 0.60, "temperature": 0.85},
-        "methodical": {"exaggeration": 0.35, "cfg_weight": 0.65, "temperature": 0.80},
-        "peak":       {"exaggeration": 0.65, "cfg_weight": 0.50, "temperature": 0.92},
-        "closing":    {"exaggeration": 0.55, "cfg_weight": 0.55, "temperature": 0.88},
-    },
-    "casual": {
-        "opening":    {"exaggeration": 0.55, "cfg_weight": 0.45, "temperature": 0.85},
-        "methodical": {"exaggeration": 0.50, "cfg_weight": 0.50, "temperature": 0.82},
-        "peak":       {"exaggeration": 0.70, "cfg_weight": 0.35, "temperature": 0.90},
-        "closing":    {"exaggeration": 0.60, "cfg_weight": 0.45, "temperature": 0.87},
-    },
-}
-
-TTS_HAZARDS = [
+TTS_HAZARDS: list[tuple[str, str]] = [
     ("O(",       "O of n / O of one / O of log n"),
     (".next",    "dot next"),
     (".val",     "dot val"),
@@ -61,91 +51,49 @@ TTS_HAZARDS = [
     (">=",       "greater than or equal to"),
 ]
 
-# Connector vocabulary — the production prosody mechanism is the connector-pause
-# pattern: a real-English connector word followed by [pause:Xs] (see
-# teaching.md "Natural prosody — the connector-pause pattern" and
-# pipeline/experiments/filler-lab/README.md for empirical rejection of non-word
-# fillers). These connectors render fine in Chatterbox because they're normal
-# English words, not the short-segment failure mode that killed Um/Ah/Hmm.
-#
-# Counted in the prosody summary so authors can see how many connector beats
-# the scene contains. Matched too loosely to gate the warning on (so/now/right
-# also appear as regular content words) — the warning gates on [pause:Xs] and
-# ellipsis count only.
-CONNECTORS = {"so", "and", "but", "now", "then", "okay", "right", "well"}
-CONNECTOR_RE = re.compile(
-    r"\b(" + "|".join(sorted(CONNECTORS, key=len, reverse=True)) + r")\b",
-    re.IGNORECASE,
-)
-
-# Pause marker syntax: [pause:0.5] inserts 500ms of digital silence at that
-# position via silence-splicing in pipeline/stages/05-audio/generate.py.
-# These markers are NOT TTS hazards (they're stripped before the digit/bracket
-# checks below). See teaching.md "Natural prosody" for placement rules.
-PAUSE_PATTERN = re.compile(r"\[pause:(\d+(?:\.\d+)?)\]")
+# Reasonable bounds for the three Chatterbox knobs. Outside these the model
+# behavior degrades (per the README + community observations).
+PARAM_RANGES: dict[str, tuple[float, float]] = {
+    "exaggeration": (0.0, 1.2),
+    "cfg_weight":   (0.0, 1.0),
+    "temperature":  (0.5, 1.5),
+}
 
 
-def resolve_preset(persona: str, step: dict) -> dict:
-    arc = step["arc"]
-    base = dict(PRESET_MATRIX[persona][arc])
-    override = step.get("voiceOverride") or {}
-    base.update({k: v for k, v in override.items() if k in base})
-    return base
-
-
-def lint_tts(narration: str) -> list[str]:
+def lint_chunk_text(text: str) -> list[str]:
+    """TTS-readiness lint for a single chunk's text."""
     issues: list[str] = []
-    if not isinstance(narration, str):
+    if not isinstance(text, str):
         return issues
-    # Strip [pause:Xs] markers before the digit/bracket checks — they're
-    # intentional prosody markers handled by silence-splicing, not literal
-    # text Chatterbox will read.
-    text_without_pauses = PAUSE_PATTERN.sub("", narration)
-    if re.search(r"\b\d+\b", text_without_pauses):
+    if re.search(r"\b\d+\b", text):
         issues.append("contains digits — spell as words")
-    if "[" in text_without_pauses or "]" in text_without_pauses:
+    if "[" in text or "]" in text:
         issues.append("contains [brackets] — Chatterbox reads them literally")
     for hazard, fix in TTS_HAZARDS:
-        if hazard in text_without_pauses:
+        if hazard in text:
             issues.append(f"{hazard!r} → say {fix!r}")
-    # Breath-group boundaries: period/!/?, em-dash, ellipsis (… or ...),
-    # and [pause:Xs] markers (which inject silence at the audio level).
-    # All of these reset the breath count.
-    bg_split_re = r"—|--|…|\.\.\.|\[pause:\d+(?:\.\d+)?\]"
-    for sentence in re.split(r"[.!?]", narration):
-        for bg in re.split(bg_split_re, sentence):
-            wc = len(bg.strip().split())
-            if wc > 12:
-                issues.append(f"breath group of {wc} words > 12: {bg.strip()!r}")
+    # Per-chunk word count — chunks should be tight emotion-coherent beats.
+    # If a chunk is long, emotion likely drifts within it; recommend split.
+    wc = len(text.split())
+    if wc > 18:
+        issues.append(f"chunk has {wc} words — consider splitting "
+                      f"(one chunk = one emotion)")
     return issues
 
 
-def count_prosody_markers(scene: dict) -> tuple[int, int, int, float]:
-    """Return (ellipses, connectors, pause_markers, pause_seconds_total)
-    across all step narrations.
-
-    Used for the scene-level zero-prosody warning. Connectors (So/And/But/
-    Now/Then/Okay/Right/Well) are matched case-insensitively — they're the
-    real-English vocabulary that pairs with [pause:Xs] in the production
-    prosody pattern. Pause markers (`[pause:Xs]`) are counted alongside
-    their total injected silence duration for visibility — they're the
-    strongest prosody signal because they render as exact silence regardless
-    of model behavior.
-    """
-    total_ellipses = 0
-    total_connectors = 0
-    total_pauses = 0
-    total_pause_seconds = 0.0
-    for step in scene.get("steps", []) or []:
-        text = step.get("narration", "")
-        if not isinstance(text, str):
+def validate_params(params: dict, chunk_id: str) -> list[str]:
+    issues: list[str] = []
+    for key, (lo, hi) in PARAM_RANGES.items():
+        if key not in params:
+            issues.append(f"chunk {chunk_id} missing params.{key}")
             continue
-        total_ellipses += text.count("…") + text.count("...")
-        total_connectors += len(CONNECTOR_RE.findall(text))
-        for dur in PAUSE_PATTERN.findall(text):
-            total_pauses += 1
-            total_pause_seconds += float(dur)
-    return total_ellipses, total_connectors, total_pauses, total_pause_seconds
+        v = params[key]
+        if not isinstance(v, (int, float)):
+            issues.append(f"chunk {chunk_id} params.{key} not numeric: {v!r}")
+        elif not (lo <= v <= hi):
+            issues.append(f"chunk {chunk_id} params.{key}={v} out of range "
+                          f"[{lo}, {hi}]")
+    return issues
 
 
 def main() -> None:
@@ -153,79 +101,139 @@ def main() -> None:
         print("Usage: preview.py <scene.yaml>", file=sys.stderr)
         sys.exit(2)
 
-    path = Path(sys.argv[1])
-    if not path.exists():
-        print(f"Not found: {path}", file=sys.stderr)
+    scene_path = Path(sys.argv[1])
+    if not scene_path.exists():
+        print(f"Not found: {scene_path}", file=sys.stderr)
         sys.exit(2)
 
-    scene = yaml.safe_load(path.read_text())
+    sidecar_path = scene_path.with_suffix("").with_suffix(".narration.yaml")
+    if not sidecar_path.exists():
+        print(
+            f"ERROR: sidecar missing at {sidecar_path}\n"
+            f"  Run: python3 pipeline/stages/03-narration/scaffold.py {scene_path}",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
+    scene = yaml.safe_load(scene_path.read_text())
     sid = scene["sceneId"]
-    persona = scene["voice"]["persona"]
+    scene_arc_by_idx = {s["stepIndex"]: s.get("arc", "methodical")
+                        for s in scene["steps"]}
+    scene_step_indices = set(scene_arc_by_idx.keys())
 
-    if persona not in PRESET_MATRIX:
-        print(f"Unknown persona: {persona!r}. Allowed: {list(PRESET_MATRIX)}", file=sys.stderr)
+    sidecar = yaml.safe_load(sidecar_path.read_text())
+    if not isinstance(sidecar, dict) or "steps" not in sidecar:
+        print(f"ERROR: sidecar missing 'steps' key", file=sys.stderr)
         sys.exit(2)
 
+    sidecar_steps = sidecar["steps"]
+    sidecar_idx = {s["stepIndex"] for s in sidecar_steps}
+
     print("=" * 78)
-    print(f"NARRATION PREVIEW — sceneId={sid}  persona={persona}")
+    print(f"CHUNKED NARRATION PREVIEW — sceneId={sid}")
+    print(f"  scene:   {scene_path}")
+    print(f"  sidecar: {sidecar_path}")
     print("=" * 78)
 
-    # Per-step preset table
-    print(f"\n{'step':>4}  {'arc':<11}  {'exagg':>6}  {'cfg_w':>6}  {'temp':>5}  text")
-    print("-" * 78)
+    hard_error = False
     any_lint = False
-    for step in scene["steps"]:
-        idx = step["stepIndex"]
-        arc = step["arc"]
-        preset = resolve_preset(persona, step)
-        narration = step.get("narration", "")
-        short = narration if len(narration) <= 40 else narration[:37] + "..."
+    any_warn = False
+
+    # Coverage cross-check
+    missing = scene_step_indices - sidecar_idx
+    extra = sidecar_idx - scene_step_indices
+    if missing:
+        hard_error = True
+        print(f"\n❌ Sidecar missing entries for stepIndex: {sorted(missing)}")
+        print(f"   Stage 05 generate.py will refuse to run until these exist.")
+    if extra:
+        any_warn = True
+        print(f"\n⚠  Sidecar has entries for stepIndex not in scene yaml: "
+              f"{sorted(extra)}  (will be ignored at generate time)")
+
+    # Per-step table
+    print(f"\n{'step':>4}  {'arc':<10}  {'chunks':>6}  "
+          f"{'ex range':<12}  {'cfg range':<12}  {'pause':>7}  intent")
+    print("-" * 78)
+
+    grand_chunks = 0
+    grand_pause = 0.0
+
+    for s in sorted(sidecar_steps, key=lambda x: x["stepIndex"]):
+        idx = s["stepIndex"]
+        arc = scene_arc_by_idx.get(idx, "?")
+        chunks = s["chunks"]
+        if not chunks:
+            hard_error = True
+            print(f"{idx:>4}  {arc:<10}  {'0':>6}  — empty chunks list ❌")
+            continue
+
+        ex = [c["params"]["exaggeration"] for c in chunks]
+        cfg = [c["params"]["cfg_weight"] for c in chunks]
+        pauses = [float(c.get("pauseAfter", 0) or 0) for c in chunks]
+        intent = s.get("intent", "")
+        grand_chunks += len(chunks)
+        grand_pause += sum(pauses)
 
         print(
-            f"{idx:>4}  {arc:<11}  "
-            f"{preset['exaggeration']:>6.2f}  {preset['cfg_weight']:>6.2f}  {preset['temperature']:>5.2f}  "
-            f"{short}"
+            f"{idx:>4}  {arc:<10}  {len(chunks):>6}  "
+            f"{min(ex):.2f}-{max(ex):.2f}    "
+            f"{min(cfg):.2f}-{max(cfg):.2f}    "
+            f"{sum(pauses):>5.2f}s   {intent}"
         )
 
-        issues = lint_tts(narration)
-        if issues:
-            any_lint = True
-            for issue in issues:
-                print(f"        ⚠ {issue}")
+        # Shape warnings
+        if arc in ("opening", "peak", "closing") and len(chunks) == 1:
+            any_warn = True
+            print(f"        ⚠  single chunk on {arc} arc — typically "
+                  f"under-chunked; opening/peak/closing have multiple beats")
+        if arc == "peak" and max(ex) < 0.85:
+            any_warn = True
+            print(f"        ⚠  peak max ex={max(ex):.2f} — reveal beat "
+                  f"should be ≥ 0.85 (recommend 0.90-0.95)")
+
+        # Per-chunk lint, param range check, identical-neighbor merge hint
+        prev_triple = None
+        for c in chunks:
+            param_issues = validate_params(c["params"], c["id"])
+            for pi in param_issues:
+                hard_error = True
+                print(f"        ❌ {pi}")
+
+            text_issues = lint_chunk_text(c.get("text", ""))
+            if text_issues:
+                any_lint = True
+                short = c.get("text", "")[:60]
+                short += "..." if len(c.get("text", "")) > 60 else ""
+                print(f"        ⚠  chunk {c['id']}: {text_issues[0]}")
+                for issue in text_issues[1:]:
+                    print(f"                     {issue}")
+
+            p = c["params"]
+            triple = (p.get("exaggeration"), p.get("cfg_weight"),
+                      p.get("temperature"))
+            if prev_triple == triple and len(chunks) > 1:
+                any_warn = True
+                print(f"        ⚠  chunk {c['id']} has identical params to "
+                      f"previous — could be merged into one chunk")
+            prev_triple = triple
 
     print()
+    print(f"Totals: {len(sidecar_steps)} step(s), {grand_chunks} chunks, "
+          f"{grand_pause:.1f}s of inter-chunk silence")
+
+    if hard_error:
+        print("\n❌ Hard errors above — fix before running generate.py.")
+        sys.exit(2)
     if any_lint:
-        print("⚠  TTS-readiness warnings above — fix narration in scene.yaml before audio gen.")
+        print("\n⚠  TTS-readiness warnings above — review chunk text before "
+              "audio gen.")
+    elif any_warn:
+        print("\n⚠  Shape warnings above — review before audio gen if relevant.")
     else:
-        print("✅ No TTS-readiness issues detected.")
+        print("\n✅ Sidecar looks clean. Ready for stage 05.")
 
-    # Scene-level prosody heuristic. `[pause:Xs]` markers are the strongest
-    # signal — they render as deterministic silence at exact durations via
-    # silence-splicing in generate.py. Ellipses (…) are softer (Chatterbox-
-    # honored at high cfg_weight, ~500-700ms typical). Connectors (So/And/
-    # But/Now/etc.) are reported but match loosely so they don't gate the
-    # warning. See pipeline/design-system/teaching.md.
-    step_count = len(scene.get("steps") or [])
-    ellipses, connectors, pauses, pause_seconds = count_prosody_markers(scene)
-    print(
-        f"\nProsody markers: {pauses} [pause:Xs] ({pause_seconds:.1f}s total), "
-        f"{ellipses} ellipses, {connectors} connector words "
-        f"across {step_count} steps."
-    )
-    if step_count >= 8 and pauses == 0 and ellipses == 0:
-        print(
-            "⚠  Zero prosody markers detected. Narration likely reads scripted.\n"
-            "   Primary tool: [pause:Xs] — exact silence via splicing in generate.py.\n"
-            "   Secondary:    … (ellipsis) — soft pause honored at cfg_weight ≥ 0.55.\n"
-            "   Add ~1 [pause:Xs] per 3-4 steps at emotional pause points\n"
-            "   (before reveals, pre-arithmetic, mid-thought reconsiderations).\n"
-            "   See pipeline/design-system/teaching.md 'Natural prosody'."
-        )
-
-    print(
-        f"\nNext: python3 pipeline/stages/05-audio/generate.py {path}"
-        f"\n      (or: bash pipeline/run.sh {path} audio)"
-    )
+    print(f"\nNext: python3 pipeline/stages/05-audio/generate.py {scene_path}")
 
 
 if __name__ == "__main__":

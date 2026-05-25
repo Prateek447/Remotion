@@ -1,5 +1,13 @@
 # Count Total Nodes in Binary Tree — recursive size algorithm.
 #
+# ⚠ Audio for this scene is produced from the chunked-narration sidecar at
+#   `pipeline/scenes/count-tree-nodes.narration.yaml` — that file is the
+#   authoritative source for what Chatterbox speaks. The `narration` field on
+#   each step below is a content-only draft (the words for the step) used to
+#   seed chunk text and as a readability reference. It is NOT consumed at
+#   audio-generation time. See `pipeline/design-system/teaching.md`
+#   "Natural prosody (chunked narration)".
+#
 # Topology: balanced binary tree of 7 nodes
 #         1
 #       /   \
@@ -94,7 +102,7 @@ steps:
     arc: opening
     intent: "Show tree, pose the question"
     caption: "How many nodes total?"
-    narration: "Alright, watch this. A binary tree. Seven nodes total. So, [pause:0.6] how does code count them all?"
+    narration: "Alright, watch this. A binary tree. Seven nodes total. So, how does code count them all?"
     targetFrames: 75
     visibleLines: 1
     highlight: { startLine: 0, endLine: 0 }
@@ -122,7 +130,7 @@ steps:
     arc: methodical
     intent: "Name recursion as the mechanism"
     caption: "Each node counts its subtree"
-    narration: "Right. Here's the idea. Each node asks — how big is my subtree? And then, [pause:0.5] adds one for itself."
+    narration: "Right. Here's the idea. Each node asks — how big is my subtree? And then, adds one for itself."
     targetFrames: 80
     visibleLines: 1
     highlight: { startLine: 0, endLine: 0 }
@@ -150,7 +158,7 @@ steps:
     arc: methodical
     intent: "Show the formula in code"
     caption: "Three rules: null, recurse, return"
-    narration: "Look at the code. If null, [pause:0.5] return zero. Otherwise, [pause:0.5] recurse left, recurse right, and [pause:0.4] return one plus those."
+    narration: "Look at the code. If null, return zero. Otherwise, recurse left, recurse right, and return one plus those."
     targetFrames: 95
     visibleLines: 6
     highlight: { startLine: 1, endLine: 4 }
@@ -206,7 +214,7 @@ steps:
     arc: methodical
     intent: "Recurse into the left child of root"
     caption: "Recurse left — call on node 2"
-    narration: "Node one is not null. So, [pause:0.6] we recurse left. Call countNodes on node two."
+    narration: "Node one is not null. So, we recurse left. Call countNodes on node two."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 2, endLine: 2 }
@@ -262,7 +270,7 @@ steps:
     arc: methodical
     intent: "First base case — n4's left child is null"
     caption: "n4.left is null → 0"
-    narration: "Node four. Recurse left. But [pause:0.6] there is no left child. So, [pause:0.5] null hits the base case. Return zero."
+    narration: "Node four. Recurse left. But there is no left child. So, null hits the base case. Return zero."
     targetFrames: 85
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
@@ -290,7 +298,7 @@ steps:
     arc: methodical
     intent: "Second base case — n4's right child is null"
     caption: "n4.right is null → 0"
-    narration: "Now, [pause:0.5] recurse right from node four. Right child also null. [pause:0.4] Return zero again."
+    narration: "Now, recurse right from node four. Right child also null. Return zero again."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
@@ -318,7 +326,7 @@ steps:
     arc: methodical
     intent: "Node 4 combines its children's returns"
     caption: "Node 4: 1 + 0 + 0 = 1"
-    narration: "Node four combines. So, [pause:0.6] one plus zero plus zero. And [pause:0.4] returns one."
+    narration: "Node four combines. So, one plus zero plus zero. And returns one."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
@@ -346,7 +354,7 @@ steps:
     arc: methodical
     intent: "Enter the call on n5"
     caption: "Pop up. Now call on node 5"
-    narration: "Pop back to node two. [pause:0.4] Now, [pause:0.5] recurse right. Call countNodes on node five."
+    narration: "Pop back to node two. Now, recurse right. Call countNodes on node five."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 3, endLine: 3 }
@@ -374,7 +382,7 @@ steps:
     arc: methodical
     intent: "n5's left child is null — base case"
     caption: "n5.left is null → 0"
-    narration: "Node five. Recurse left. [pause:0.5] No left child. Null. Return zero."
+    narration: "Node five. Recurse left. No left child. Null. Return zero."
     targetFrames: 70
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
@@ -402,7 +410,7 @@ steps:
     arc: methodical
     intent: "n5's right child is null — base case"
     caption: "n5.right is null → 0"
-    narration: "Recurse right from node five. [pause:0.4] Right child also null. Return zero."
+    narration: "Recurse right from node five. Right child also null. Return zero."
     targetFrames: 70
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
@@ -430,7 +438,7 @@ steps:
     arc: methodical
     intent: "Node 5 combines its children's returns"
     caption: "Node 5: 1 + 0 + 0 = 1"
-    narration: "Node five combines. So, [pause:0.6] one plus zero plus zero. And [pause:0.4] returns one."
+    narration: "Node five combines. So, one plus zero plus zero. And returns one."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
@@ -458,7 +466,7 @@ steps:
     arc: methodical
     intent: "Node 2 combines child returns"
     caption: "Node 2: 1 + 1 + 1 = 3"
-    narration: "Right. Back at node two. Left returned one. Right returned one. And [pause:0.5] plus one for itself. [pause:0.5] Returns three."
+    narration: "Right. Back at node two. Left returned one. Right returned one. And plus one for itself. Returns three."
     targetFrames: 95
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
@@ -486,7 +494,7 @@ steps:
     arc: methodical
     intent: "Enter the call on n3"
     caption: "Now recurse right from root"
-    narration: "Pop back to the root. [pause:0.4] Now, [pause:0.5] recurse right. Call countNodes on node three."
+    narration: "Pop back to the root. Now, recurse right. Call countNodes on node three."
     targetFrames: 80
     visibleLines: 6
     highlight: { startLine: 3, endLine: 3 }
@@ -542,7 +550,7 @@ steps:
     arc: methodical
     intent: "n6's left child is null — base case"
     caption: "n6.left is null → 0"
-    narration: "Node six. Recurse left. [pause:0.5] No left child. Null. Return zero."
+    narration: "Node six. Recurse left. No left child. Null. Return zero."
     targetFrames: 70
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
@@ -570,7 +578,7 @@ steps:
     arc: methodical
     intent: "n6's right child is null — base case"
     caption: "n6.right is null → 0"
-    narration: "Recurse right from node six. [pause:0.4] Right child also null. Return zero."
+    narration: "Recurse right from node six. Right child also null. Return zero."
     targetFrames: 70
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
@@ -598,7 +606,7 @@ steps:
     arc: methodical
     intent: "Node 6 combines its children's returns"
     caption: "Node 6: 1 + 0 + 0 = 1"
-    narration: "Node six combines. So, [pause:0.6] one plus zero plus zero. And [pause:0.4] returns one."
+    narration: "Node six combines. So, one plus zero plus zero. And returns one."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
@@ -626,7 +634,7 @@ steps:
     arc: methodical
     intent: "Enter the call on n7"
     caption: "Now call on node 7"
-    narration: "Pop back to node three. [pause:0.4] Now, [pause:0.5] recurse right. Call countNodes on node seven."
+    narration: "Pop back to node three. Now, recurse right. Call countNodes on node seven."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 3, endLine: 3 }
@@ -654,7 +662,7 @@ steps:
     arc: methodical
     intent: "n7's left child is null — base case"
     caption: "n7.left is null → 0"
-    narration: "Node seven. Recurse left. [pause:0.5] No left child. Null. Return zero."
+    narration: "Node seven. Recurse left. No left child. Null. Return zero."
     targetFrames: 70
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
@@ -682,7 +690,7 @@ steps:
     arc: methodical
     intent: "n7's right child is null — base case"
     caption: "n7.right is null → 0"
-    narration: "Recurse right from node seven. [pause:0.4] Right child also null. Return zero."
+    narration: "Recurse right from node seven. Right child also null. Return zero."
     targetFrames: 70
     visibleLines: 6
     highlight: { startLine: 1, endLine: 1 }
@@ -710,7 +718,7 @@ steps:
     arc: methodical
     intent: "Node 7 combines its children's returns"
     caption: "Node 7: 1 + 0 + 0 = 1"
-    narration: "Node seven combines. So, [pause:0.6] one plus zero plus zero. And [pause:0.4] returns one."
+    narration: "Node seven combines. So, one plus zero plus zero. And returns one."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
@@ -738,7 +746,7 @@ steps:
     arc: methodical
     intent: "Node 3 combines its children's returns"
     caption: "Node 3: 1 + 1 + 1 = 3"
-    narration: "Right. Back at node three. Left gave one. Right gave one. And [pause:0.5] plus one for itself. [pause:0.5] Returns three."
+    narration: "Right. Back at node three. Left gave one. Right gave one. And plus one for itself. Returns three."
     targetFrames: 90
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
@@ -766,7 +774,7 @@ steps:
     arc: peak
     intent: "Root combines — one plus three plus three is seven"
     caption: "Root: 1 + 3 + 3 = 7 — done!"
-    narration: "Okay. So, [pause:0.7] back at the root. Left gave us three. Right gave us three. So, [pause:0.8] three plus three plus one. [pause:0.9] Seven!"
+    narration: "Okay. So, back at the root. Left gave us three. Right gave us three. So, three plus three plus one. Seven!"
     targetFrames: 100
     visibleLines: 6
     highlight: { startLine: 4, endLine: 4 }
@@ -794,7 +802,7 @@ steps:
     arc: closing
     intent: "Wrap up with complexity"
     caption: "Seven nodes — O(n) time"
-    narration: "Every node visited once. [pause:0.4] O of n time. [pause:0.5] And that, [pause:0.5] is recursion counting a tree."
+    narration: "Every node visited once. O of n time. And that, is recursion counting a tree."
     targetFrames: 75
     visibleLines: 6
     highlight: { startLine: 0, endLine: 5 }

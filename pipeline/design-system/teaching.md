@@ -104,115 +104,120 @@ The final result is on screen as a number overlay or large caption, not just nar
 
 ---
 
-## Natural prosody (the connector-pause pattern)
+## Natural prosody (chunked narration)
 
 Beginner clarity is necessary but not sufficient. A script that follows Rules 1–8 above can still sound *performed* — every sentence rehearsed, every transition crisp, no acoustic texture. The user feedback that prompted this section was:
 
 > "it feels like someone is reading the script it should feel like someone is thinking and explaining the topic in natural way"
 
-The fix is **acoustic texture via the connector-pause pattern**: a real-English connector word (So, And, But, Now, Then) followed by `[pause:Xs]` — the connector primes the listener for what's coming, the silence delivers the thinking beat. After extensive empirical testing (see `../experiments/filler-lab/README.md`), this is the ONLY production-reliable approach. Non-word fillers (`Um`, `Ah`, `Hmm`, `Ummmm`) all failed reproducibility and were dropped.
+The fix is **chunked narration**: a sidecar yaml (`<scene>.narration.yaml`) where each step is broken into emotion-coherent chunks, each chunk runs through Chatterbox with its own `(exaggeration, cfg_weight, temperature)`, and `torch.zeros` silence is spliced between chunks per `pauseAfter`. This is the only audio path.
 
-### Primary mechanism: `[pause:Xs]` silence-splicing
+The historical alternative — inline `[pause:Xs]` markers in the scene yaml's `narration` field, resolved through a `voice.persona × step.arc` preset table — was deprecated. A single Chatterbox `generate()` call has one acoustic identity for its full duration, so the persona × arc table can't crescendo within a step. The chunk boundary IS the emotion boundary; that's the load-bearing architectural choice.
 
-Narration text may include `[pause:0.5]` markers. The audio generator (`pipeline/stages/05-audio/generate.py`) splits text on these markers, runs Chatterbox per chunk, and splices in **exactly that many seconds of digital silence** before concatenation. Deterministic, millisecond-precise, model-agnostic.
+The scene yaml's `narration` field is preserved as a content-only draft (the words for the step) — `scaffold.py` consumes it to seed chunk text, and human authors keep it as a readability reference. It is NOT what Chatterbox reads at audio-gen time.
+
+---
+
+### Chunked narration (sidecar yaml)
+
+**Why this exists.** A single Chatterbox `generate()` call has one acoustic identity for its full duration — you can't crescendo within a chunk. So the chunk boundary IS the emotion boundary. The persona × arc table (which emits one triple per step) collapses everything inside a step to one acoustic shape; chunks restore the ability to encode "calm setup → slow arithmetic → explosive reveal" within a single step.
+
+**Schema** — `pipeline/scenes/<scene>.narration.yaml` next to the scene yaml:
 
 ```yaml
-narration: "Node four combines. So, [pause:0.6] one plus zero plus zero. And [pause:0.4] returns one."
+sceneId: count-tree-nodes
+sourceScene: pipeline/scenes/count-tree-nodes.yaml
+voice:
+  reference: scripts/clone.wav
+output:
+  baseDir: public/narration/count-tree-nodes
+  perChunkDebug: true          # writes per-chunk debug WAVs alongside step-N.mp3
+
+steps:
+  - stepIndex: 24
+    intent: "PEAK — final combine, the 'aha'"
+    chunks:
+      - id: "24.0"
+        intent: "arriving at the moment"
+        text: "Okay."
+        params: { exaggeration: 0.68, cfg_weight: 0.55, temperature: 0.90 }
+        pauseAfter: 0.35
+      - id: "24.4"
+        intent: "slow arithmetic — building tension"
+        text: "So, three plus three plus one."
+        params: { exaggeration: 0.78, cfg_weight: 0.45, temperature: 0.92 }
+        pauseAfter: 0.80          # longest pause in scene — pre-reveal hold
+      - id: "24.5"
+        intent: "PEAK REVEAL — maximum energy"
+        text: "Seven!"
+        params: { exaggeration: 0.95, cfg_weight: 0.32, temperature: 0.95 }
+        pauseAfter: 0.0
 ```
 
-This is the community-validated pattern from [PR #164](https://github.com/resemble-ai/chatterbox/pull/164) and [psdwizzard/chatterbox-Audiobook](https://github.com/psdwizzard/chatterbox-Audiobook). It is the **load-bearing prosody tool** — every meaningful step should use at least one.
+**Per-chunk fields:**
+- `id` — stable string, used for per-chunk debug WAV filenames and for locking seeds later
+- `text` — the actual narration; **no** `[pause:Xs]` markers (pauses live between chunks)
+- `params` — full `(exaggeration, cfg_weight, temperature)` triple passed straight to `ChatterboxTTS.generate()`
+- `pauseAfter` — seconds of `torch.zeros` silence after this chunk (before next chunk or end of step)
+- `intent` — optional, free-text human readable
+- `seed` — optional, integer; lock for reproducibility once a take lands well
 
-### ⭐ The connector-pause pattern (the working technique)
+**Param tier legend** (use as a starting palette; tune to taste):
 
-The empirical winner from audio testing: a real-English connector word **followed by** `[pause:Xs]`. The connector primes the listener for the type of thought coming; the silence gives them time to anticipate and absorb.
+| Beat type | exaggeration | cfg_weight | temperature | Example |
+|---|---|---|---|---|
+| Calm orientation | 0.50 | 0.62 | 0.85 | "A binary tree." |
+| Standard methodical | 0.60 | 0.55 | 0.88 | "Recurse left." |
+| Curious / lean-in | 0.65 | 0.52 | 0.90 | "how does code count?" |
+| Mini-reveal | 0.78 | 0.45 | 0.92 | "And returns one." |
+| Subtree return | 0.82 | 0.42 | 0.93 | "Returns three." |
+| **PEAK reveal** (1× per scene) | **0.95** | **0.32** | **0.95** | "Seven!" |
+| Closing CTA | 0.75 | 0.48 | 0.92 | "...counting a tree." |
 
-| Pattern | Example | Emotional signal |
-|---|---|---|
-| `So, [pause:0.6]` | "Node four combines. So, [pause:0.6] one plus zero plus zero." | Consequence / pre-arithmetic / "this is what follows" |
-| `And [pause:0.5]` | "Plus one for itself. And [pause:0.5] returns three." | Addition / continuation / "and now this too" |
-| `But [pause:0.6]` | "Recurse left. But [pause:0.6] there is no left child." | Contrast / base-case surprise / "wait, hold on" |
-| `Now, [pause:0.5]` | "Pop back. Now, [pause:0.5] recurse right." | Transition between phases / "moving on" |
-| `Then [pause:0.5]` / `And then, [pause:0.5]` | "Each node asks how big. And then, [pause:0.5] adds one for itself." | Sequence / "next step is" |
-| `And that, [pause:0.5]` | "O of n time. And that, [pause:0.5] is recursion counting a tree." | Closing emphasis / "and that's the takeaway" |
+The knob-coupling rule still applies: higher exaggeration speeds delivery, lower cfg_weight compensates with slower pacing. Bump them together (`ex↑ cfg↓` for energy, `ex↓ cfg↑` for calm).
 
-These are real English words. Chatterbox renders them naturally (unlike `Um` / `Ah` / `Hmm` which fail the [short-segment hallucination test](https://github.com/resemble-ai/chatterbox/issues/97)). The pause does the emotional work; the connector makes the silence feel intentional rather than dead.
+**Per-chunk debug WAVs** — when `output.perChunkDebug: true`, the generator writes each chunk's WAV alone to `public/narration/<sid>/chunks/step-N-N.M.wav`. Listen to a single chunk in isolation when only one beat sounds wrong; that tells you whether the chunk's params are off or whether the concatenation context is off (different fixes).
 
-**Two-beat rhythm**: the connector creates a small breath (comma after it), the `[pause:Xs]` creates the longer thinking silence. Together they sound like someone working through a thought, not reading a sentence.
+**Sidecar coverage.** Every scene stepIndex must have a sidecar entry — `generate.py` hard-errors on missing coverage. `preview.py` reports the gap before you run audio. The scaffolder produces one entry per step from the start, so missing coverage only happens if someone deletes an entry by hand.
 
-### Secondary mechanisms: text-level markers Chatterbox honors
+**Chunks per step — how many?**
+- Steps with one emotional tone (single methodical descent like "Recurse left.", a null-base-case observation, a routine return) keep a single chunk. Use the methodical seed params; one Chatterbox call captures the beat.
+- Steps with more than one emotional beat — almost always true for `opening`, `peak`, `closing`, and any "subtree return" combine step — split into multiple chunks. Each chunk's params reflect that specific beat: setup chunks calmer, reveal chunks louder.
+- The peak step in count-tree-nodes has 6 chunks spanning ex 0.65 → 0.95; the null-base-case methodical steps have 3–4 chunks all in a tight 0.55–0.60 ex band. Chunking a uniform step into many tiny chunks at identical params just slows compute for no audible gain — `preview.py` flags identical back-to-back chunk params as a "could be merged" warning.
 
-| Marker | Rendered as | Use |
-|---|---|---|
-| `[pause:Xs]` | exact `Xs` of digital silence (deterministic) | Primary tool. Pair with a connector word for max effect. |
-| ` — ` (em-dash) | ~300ms pause (model-rendered) | Re-framing within a sentence; subordinate clause flag |
-| `…` (ellipsis) | ~500–700ms audible pause (cfg_weight ≥ 0.55, model-rendered) | Soft trailing thought; use sparingly (`[pause:Xs]` is more reliable) |
-| `,` and `.` | natural punctuation pauses | Routine breath / sentence boundary |
+**Reference example:** `pipeline/scenes/count-tree-nodes.narration.yaml` — full 92-chunk authoring across 26 steps. Step 24 (the peak) has the widest dynamic range (ex 0.65 → 0.95 in 6 chunks); the methodical null-base-case steps (10, 11, 16, 17, 20, 21) sit in a tight 0.55–0.60 ex band because the emotion really is uniform.
 
-`[pause:Xs]` is the only deterministic option. Use ellipses and em-dashes for shorter, sentence-internal breaths; reach for `[pause:Xs]` whenever the pause matters to the listener's understanding.
+---
 
-### Connector vocabulary (the only "filler" words that work)
+### Chunk content style
 
-These are normal English connectors — they don't hit the short-segment failure mode that killed `Um`/`Ah`/`Hmm`. Use them at step boundaries and major thought transitions.
+Per-chunk acoustic params handle prosody — but the *words* in each chunk's `text` still matter, because Chatterbox renders those words and how natural they sound depends on what the words are. Rules carried over from the deprecated AUTO-mode work:
 
-| Connector | Use |
+**Use natural English connectors at chunk boundaries**, not non-word fillers. When a chunk's text starts with a thinking beat — "So,", "And,", "But", "Now,", "Then", "And then,", "And that," — Chatterbox renders it cleanly and the connector primes the listener for the emotional shift the chunk's params deliver. After extensive testing (see `../experiments/filler-lab/README.md`), non-word fillers (`Um`, `Ah`, `Hmm`, `Ummmm`, `Mmmmm`) were empirically rejected — they render literally or inconsistently. Real-English connectors are the only working "filler" vocabulary.
+
+**Per-persona connector preferences:**
+- `teacher-energetic` leans on `Okay`, `Right`, `So`, `Now`, `And then` (punchy openers)
+- `measured` leans on `So`, `Now`, `Well`, `Then` (calmer, less peppy)
+- `But` works as a base-case surprise word in both personas — it's the contrast doing the work, not the energy
+
+**Keep chunks tight — one chunk = one beat = one emotion.** Aim for ≤18 words per chunk. Beyond that, emotion almost certainly drifts within the chunk; split it. `preview.py` flags chunks over 18 words as a shape warning.
+
+**TTS-readiness still applies per-chunk:** spell numbers as words ("three" not "3"), no `[brackets]` (no `[pause:Xs]` either — pauses live in `pauseAfter`), code-as-speech ("dot next", "O of n"). `preview.py` lints each chunk's text against these hazards before audio gen.
+
+**Persona is now a content-style guide, not a prosody resolver.** The `teacher-energetic` and `measured` personas describe how the text *reads* (energy level, sentence shape, opener choice, sentence rhythm) — they're a writing-style guide for chunk text. The acoustic prosody is purely the per-chunk `params`. A `teacher-energetic` scene reads punchier than a `measured` one, but both achieve "thinking, not reading" via the same chunking mechanism. See `voice/personas/*.md` for the per-persona writing style.
+
+### Pause durations — empirical bands
+
+When you set `pauseAfter` on a chunk, these durations are what land well:
+
+| Duration | Use |
 |---|---|
-| `So` / `So,` | Pre-arithmetic, consequence, follow-through ("So, [pause:0.6] one plus zero plus zero") |
-| `And` / `And then` / `And that` | Additive continuation, sequence, closing emphasis |
-| `But` | Contrast, base-case surprise, "wait — actually" pivots |
-| `Now` / `Now,` | Phase transition, "moving on to the next thing" |
-| `Then` | Sequence step |
-| `Okay` / `Okay.` | Orientation opener after a pop-back-up or context shift |
-| `Right` / `Right.` | Quick re-anchor mid-scene; less peppy than `Okay` |
-| `Well` | Measured pivot (preferred by `measured` persona; rare in `teacher-energetic`) |
+| 0.3–0.4s | Sentence-internal beat between two coherent chunks of the same idea |
+| 0.5–0.6s | Standard thinking pause — most common; between chunks where emotion shifts mildly |
+| 0.7–0.9s | Pre-reveal beat at peak step — heaviest emphasis. **One** pause this long per scene, max. |
+| 1.0s+ | Almost never. Sounds like dead air or a stream cut. |
 
-**Rejected after empirical testing** (do not use as fillers):
-- `Um` — read literally by Chatterbox as the word "um"
-- `Ah` — same
-- `Hmm` / `Hmmm` / `Hmmmm` — initial 4/5 reliability in lab; failed in real-world listening (sometimes works, sometimes doesn't). Dropped entirely.
-- `Ummmm` / `Mmmmm` / repeated-letter elongation — 0/5 reproducibility
-
-If you want the *effect* of a hesitation filler ("Um — let me think"), use `Connector, [pause:Xs]` instead: `"So, [pause:0.6] let me think"`. The silence does the emotional work without a non-word.
-
-### Placement rules — emotion, not syntax
-
-✅ **Pre-arithmetic / pre-computation**: `"Node four combines. So, [pause:0.6] one plus zero plus zero."`
-✅ **Before a reveal at peak**: `"three plus three plus one. [pause:0.9] Seven!"`
-✅ **At a base-case surprise**: `"Recurse left. But [pause:0.6] there is no left child."`
-✅ **At a phase transition**: `"Pop back to the root. Now, [pause:0.5] recurse right."`
-✅ **Closing emphasis**: `"O of n time. And that, [pause:0.5] is recursion counting a tree."`
-
-❌ **At every period or comma** — monotonous, formulaic
-❌ **At every step opener** — over-eager; saturates the device
-❌ **Bare `[pause:Xs]` without a connector**: `"[pause:0.5] Recurse left."` — sounds dead. Pair with a connector.
-❌ **Inside a methodical iteration step where the rhythm is the lesson** — pauses there sound hesitant. Keep iteration steps clean for rhythm contrast.
-
-### Density rule of thumb
-
-For a scene of length ≥8 steps:
-
-- **1–2 `[pause:Xs]` per non-trivial step** at emotional pause points (~30–40 total in a 26-step scene)
-- **Pause durations**:
-  - 0.4s — sentence-internal beat, additive emphasis
-  - 0.5–0.6s — standard thinking pause (most common; pair with connectors)
-  - 0.7–0.9s — pre-reveal at peak step (heaviest emphasis)
-- **Methodical iteration steps stay simple** — 0–1 pauses. The contrast with heavier steps creates breathing room.
-- Em-dashes as needed for re-framing (no strict density target)
-
-A 26-step scene lands at roughly 30–40 `[pause:Xs]` markers totaling 15–20s of injected silence. Below that and it reads scripted; above and the pacing drags.
-
-`pipeline/stages/03-narration/preview.py` reports pause count + total silence; warns if a scene ≥8 steps has zero `[pause:Xs]` AND zero ellipses.
-
-### Knob coupling
-
-`[pause:Xs]` is **deterministic** — it works at any `cfg_weight`. The silence is spliced at the audio layer after Chatterbox returns. Use this for any pause that needs to land precisely.
-
-Ellipses and em-dashes are **model-rendered** — they need `cfg_weight ≥ 0.50` to be honored as audible pauses. The default `teacher-energetic` and `measured` presets are tuned to this floor. **If you override knobs per step via `voiceOverride`, do not drop `cfg_weight` below 0.50** for non-peak arcs — at 0.40 or lower, Chatterbox smooths over ellipses entirely.
-
-The peak step (`cfg_weight = 0.40`) is the documented exception: use `[pause:Xs]` (not ellipses) for guaranteed pauses there; the peak's exaggeration energy does the work model-rendered pauses would otherwise do.
-
-### Persona-agnostic
-
-This section applies to `teacher-energetic` AND `measured`. The persona governs voice **character** (energetic vs. calm); prosody governs voice **acoustic texture** (scripted vs. spoken-aloud). They're orthogonal. A `teacher-energetic` scene with the connector-pause pattern sounds like a hyped teacher *thinking-while-explaining*; a `measured` scene with the same pattern sounds like a calm narrator *thinking-while-explaining*. Both beat their no-prosody counterparts. Personas may favor different connectors (`teacher-energetic` leans `So`, `Now`, `Right`; `measured` leans `So`, `Now`, `Well`) — see persona docs for vocabulary.
+A 26-step scene with ~90 chunks lands at roughly 20–30s of total inter-chunk silence. Below that and the pacing feels rushed; above and it drags.
 
 ---
 
@@ -311,10 +316,14 @@ Before running `pipeline/run.sh`, ask:
 - [ ] Is the right subtree shown explicitly, not collapsed to "same thing"?
 - [ ] Does the final step show a big visible answer, not just narrate it?
 - [ ] Does step count meet the heuristic for the algorithm class?
-- [ ] Does the narration use the **connector-pause pattern** (`So, [pause:0.6]` / `And [pause:0.5]` / `But [pause:0.6]` / `Now, [pause:0.5]`) at thought transitions?
-- [ ] Does each non-trivial step have 1–2 `[pause:Xs]` markers at emotional pause points?
-- [ ] Are non-word fillers (`Um`, `Ah`, `Hmm`) avoided? They were empirically rejected — use connector + pause instead.
-- [ ] Do iteration / repetition steps stay clean (0–1 pauses) to create rhythm contrast against heavier steps?
+- [ ] **Has a `<scene>.narration.yaml` sidecar been authored?** It's required — generate.py refuses to run without it.
+- [ ] Does every scene stepIndex have a sidecar entry? `preview.py` cross-checks this and hard-errors on missing coverage.
+- [ ] Are emotion-heavy steps (opening, peak, closing, subtree-return combines) split into ≥2 chunks, not single-chunk?
+- [ ] Is the peak step's reveal chunk ≥ ex 0.90, cfg ≤ 0.35? That's the highest-energy chunk in the scene; anything lower undersells the moment.
+- [ ] Do chunks use natural English connectors (`So,` / `And` / `But` / `Now,` / `Then`) at boundaries — not non-word fillers (`Um` / `Ah` / `Hmm`)? Those were empirically rejected.
+- [ ] Is each chunk ≤18 words? Longer chunks let emotion drift; `preview.py` flags this.
+- [ ] Do methodical iteration / repetition steps use single chunks or short chunk lists (not over-chunked)? They provide rhythm contrast against heavier steps.
+- [ ] Total inter-chunk silence between 20–30s for a 26-step scene? `preview.py` reports the total.
 
 A "no" on any of these is a script that needs another pass.
 

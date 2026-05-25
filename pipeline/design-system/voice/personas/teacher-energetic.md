@@ -73,34 +73,30 @@ A teacher-energetic scene has **more steps than a measured scene, not fewer**. T
 
 If you find yourself shortening a teacher-energetic scene to "punch it up," you're doing it wrong. The persona is about *how* lines sound, not about how many lines exist. See `../../teaching.md` for the explanation-density doctrine that applies regardless of persona.
 
-## Prosody vocabulary
+## Connector vocabulary (for chunk text)
 
-This persona snaps into things — energy comes from rhythm and concreteness, not from hesitation. The vocabulary is **real-English connectors paired with `[pause:Xs]`**. See `../../teaching.md` "Natural prosody — the connector-pause pattern" for cross-persona rules and rejection history.
+This persona snaps into things — energy comes from rhythm and concreteness. When writing chunk text, use these real-English connectors at chunk boundaries; the chunk's params do the acoustic work, the connector does the linguistic transition.
 
-| Marker | When teacher-energetic uses it |
+| Connector | When teacher-energetic uses it |
 |---|---|
-| `[pause:Xs]` | **Primary tool.** Deterministic silence. teacher-energetic durations: 0.4–0.6s standard, 0.7–0.9s at peak (pre-reveal). Pair with a connector word for max effect. |
-| `So, [pause:0.6]` | Pre-arithmetic / pre-consequence ("Node four combines. So, [pause:0.6] one plus zero plus zero.") — the most common pattern |
-| `And [pause:0.5]` | Additive continuation ("Plus one for itself. And [pause:0.5] returns three.") |
-| `But [pause:0.6]` | Contrast / base-case surprise ("Recurse left. But [pause:0.6] there is no left child.") — replaces what `Hmm` used to do |
-| `Now, [pause:0.5]` | Phase transition ("Pop back. Now, [pause:0.5] recurse right.") |
-| `Then [pause:0.5]` / `And then, [pause:0.5]` | Sequence ("Each node asks. And then, [pause:0.5] adds one for itself.") |
-| `Okay.` / `Alright.` | Step opener after a real shift. Used standalone (no pause attached) — the period creates the breath. |
-| `Right.` | Quick re-anchor mid-scene ("Right. Back at the root."). Standalone. |
+| `So,` | Pre-arithmetic / pre-consequence ("Node four combines. So, one plus zero plus zero.") — most common |
+| `And` | Additive continuation ("Plus one for itself. And returns three.") |
+| `But` | Contrast / base-case surprise ("Recurse left. But there is no left child.") — replaces what `Hmm` used to do |
+| `Now,` | Phase transition ("Pop back. Now, recurse right.") |
+| `Then` / `And then,` | Sequence ("Each node asks. And then, adds one for itself.") |
+| `Okay.` / `Alright.` | Step opener after a real shift |
+| `Right.` | Quick re-anchor mid-scene ("Right. Back at the root.") |
 
-**Rejected** — do not use as fillers:
-- `Um` — read literally by Chatterbox
-- `Ah` — same
-- `Hmm` / `Hmmm` — initially LOCKED at 4/5 lab reliability; **dropped after real-world listening showed inconsistent rendering** ("sometimes works, sometimes doesn't"). Replace base-case surprises with `But [pause:0.6]` — the contrast word does the same work reliably.
+**Rejected** — do not use in chunk text:
+- `Um`, `Ah` — read literally by Chatterbox
+- `Hmm` / `Hmmm` — initially LOCKED at 4/5 lab reliability; **dropped after real-world listening showed inconsistent rendering**. Replace base-case surprises with `But` + a high-cfg chunk for the contrast beat — the contrast word does the same work reliably.
 - Repeated-letter elongation (`Ummmm`, `Mmmmm`) — 0/5 reliability
 
-The persona's energy comes from delivery rhythm and concrete values, NOT from non-word fillers. If a previous draft used `Um —`, replace with `So, [pause:0.6]`. If it used `hmm —`, replace with `But [pause:0.6]`.
+The persona's energy comes from delivery rhythm, concrete values, and the per-chunk param dynamic range. The connector vocabulary above is the linguistic transition layer.
 
-Ellipses (`…`) appear sparingly within sentences for sub-second breaths. For any pause that matters to the listener's understanding, use `[pause:Xs]` instead — it's deterministic.
+## Knob values (scaffolder seed palette)
 
-## Knob values
-
-From `../two-axis-model.md`:
+These are the **starting** values the scaffolder writes into each chunk based on the step's arc. Chunk authors tune from these against the per-beat tier legend in `../../teaching.md` "Chunked narration".
 
 | Arc | exaggeration | cfg_weight | temperature |
 |---|---|---|---|
@@ -109,9 +105,9 @@ From `../two-axis-model.md`:
 | `peak` | 0.80 | 0.40 | 0.95 |
 | `closing` | 0.70 | 0.50 | 0.92 |
 
-`cfg_weight ≥ 0.50` across non-peak arcs is **load-bearing for prosody** — at lower values, Chatterbox smooths over ellipses and mispronounces fillers. The peak is the documented exception (lower cfg_weight is what gives the peak its energy).
+These are **seeds**, not the final params. A peak step seeded at ex=0.80 might end up with chunks ranging ex=0.65 (the calm setup) → ex=0.95 (the reveal). Refine per chunk; don't ship at seed values.
 
-If a clip lands flat, raise exaggeration by 0.1 *and* drop cfg_weight by 0.1 (paired) — but **do not drop cfg_weight below 0.50** on non-peak arcs, or your prosody markers stop rendering. If a clip lands rushed, do the opposite.
+Knob-coupling rule applies within every chunk: bump exaggeration → drop cfg_weight (paired). If a chunk lands flat, raise ex *and* lower cfg by the same step (0.05–0.10). If it lands rushed, do the opposite.
 
 ## Worked example — Search Node
 

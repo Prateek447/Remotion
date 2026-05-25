@@ -16,7 +16,8 @@ export function useStepTransition(steps: SceneStep[]): StepTransition {
 
   let stepIndex = 0;
   for (let i = steps.length - 1; i >= 0; i--) {
-    if (frame >= steps[i].startFrame) {
+    const visualStart = steps[i].startFrame + (steps[i].visualOffset ?? 0);
+    if (frame >= visualStart) {
       stepIndex = i;
       break;
     }
@@ -24,7 +25,8 @@ export function useStepTransition(steps: SceneStep[]): StepTransition {
 
   const step = steps[stepIndex];
   const prevStep = stepIndex > 0 ? steps[stepIndex - 1] : step;
-  const localFrame = frame - step.startFrame;
+  const visualStart = step.startFrame + (step.visualOffset ?? 0);
+  const localFrame = frame - visualStart;
 
   const t = spring({
     frame: localFrame,

@@ -9,20 +9,25 @@
 #     1c. Claude writes scene.yaml
 #
 #   Stage 2 (VISUAL)
-#     2a. validate           — schema + contract check
-#     2b. scaffold           — emit .tsx + paste snippets
-#     2c. narration-preview  — TTS-readiness lint + per-step preset table
-#         (user pastes 4 snippets into Root.tsx / standalone / code-snippets / SCENES)
-#     2d. render-preview     — silent video using targetFrames timing
-#     2e. review-visual      — instructions for visual review + Claude fix loop
+#     2a. validate              — schema + contract check
+#     2b. scaffold              — emit .tsx + paste snippets
+#     2c1. narration-scaffold   — scene.yaml → <scene>.narration.yaml (skeleton)
+#     2c. narration-preview     — validate + summarize sidecar (chunk counts,
+#                                  param ranges, TTS-readiness lint per chunk)
+#         (user pastes 4 snippets into Root.tsx / standalone / code-snippets / SCENES,
+#          then refines the sidecar by hand against teaching.md "Chunked narration")
+#     2d. render-preview        — silent video using targetFrames timing
+#     2e. review-visual         — instructions for visual review + Claude fix loop
 #         (user iterates with Claude; propagation patterns updated in design-system)
 #
 #   Stage 3 (AUDIO + ASSEMBLY)
-#     3a. audio              — pipeline-native audio gen (reads scene.yaml)
-#     3b. review-audio       — instructions for audio review + Claude fix loop
-#         (user iterates with Claude; propagation patterns updated in design-system)
-#     3c. apply              — apply real timings to .tsx (LAST step of stage 3,
-#                              runs once audio is approved by the user)
+#     3a. audio                 — chunked audio gen (reads <scene>.narration.yaml,
+#                                  runs ChatterboxTTS per chunk with per-chunk params,
+#                                  splices pauseAfter silence between chunks)
+#     3b. review-audio          — instructions for audio review + Claude fix loop
+#         (user iterates by tuning chunk params in the sidecar)
+#     3c. apply                 — apply real timings to .tsx (LAST step of stage 3,
+#                                  runs once audio is approved by the user)
 #
 #   Stage 4 (FINAL RENDER)
 #     4a. render             — final render with audio
@@ -46,26 +51,29 @@ Stage 1 (AUTHOR) — conversational, not in this script.
   AskUserQuestion. See design-system/approaches.md.
 
 Stage 2 (VISUAL):
-  validate            — schema + contract check
-  scaffold            — emit .tsx + paste snippets
-  narration-preview   — TTS-readiness lint + per-step preset preview
-  render-preview      — silent video using targetFrames timing
-  review-visual       — print review/fix-loop instructions
+  validate              — schema + contract check
+  scaffold              — emit .tsx + paste snippets
+  narration-scaffold    — scene.yaml → <scene>.narration.yaml (skeleton)
+  narration-preview     — validate + summarize the chunked sidecar
+  render-preview        — silent video using targetFrames timing
+  review-visual         — print review/fix-loop instructions
 
 Stage 3 (AUDIO + ASSEMBLY):
-  audio               — pipeline-native audio gen
-  review-audio        — print review/fix-loop instructions
-  apply               — apply timings to .tsx + narration-scripts.ts
-                        (LAST step of stage 3, after audio is approved)
+  audio                 — chunked audio gen (reads sidecar, one Chatterbox call
+                          per chunk with per-chunk params)
+  review-audio          — print review/fix-loop instructions
+  apply                 — apply timings to .tsx + narration-scripts.ts
+                          (LAST step of stage 3, after audio is approved)
 
 Stage 4 (FINAL RENDER):
-  render              — final render with audio
+  render                — final render with audio
 
 Meta-stages (run multiple stages in sequence):
-  prefix              — validate + scaffold + narration-preview (default)
-  preview             — render-preview + review-visual (after paste)
-  audio-stage         — audio + review-audio (iterate before apply)
-  finalize            — apply + render
+  prefix                — validate + scaffold + narration-scaffold +
+                          narration-preview (default)
+  preview               — render-preview + review-visual (after paste)
+  audio-stage           — audio + review-audio (iterate before apply)
+  finalize              — apply + render
 
 USAGE
   exit 1
@@ -105,8 +113,15 @@ scaffold_stage() {
   fi
 }
 
+narration_scaffold_stage() {
+  step "Stage 2c.1 — Scaffold chunked narration sidecar"
+  hint "Produces pipeline/scenes/${SCENE_ID}.narration.yaml from scene.yaml."
+  hint "Skip if a sidecar already exists (scaffold refuses to overwrite without --force)."
+  python3 pipeline/stages/03-narration/scaffold.py "$SCENE_YAML" || true
+}
+
 narration_preview_stage() {
-  step "Stage 2c — Narration preview (lint + persona × arc presets)"
+  step "Stage 2c — Narration sidecar validate + summary"
   python3 pipeline/stages/03-narration/preview.py "$SCENE_YAML"
 }
 
@@ -229,6 +244,7 @@ render_stage() {
 case "$STAGE" in
   validate)              validate_stage ;;
   scaffold)              scaffold_stage ;;
+  narration-scaffold)    narration_scaffold_stage ;;
   narration-preview)     narration_preview_stage ;;
   render-preview)        render_preview_stage ;;
   review-visual)         review_visual_stage ;;
@@ -240,10 +256,11 @@ case "$STAGE" in
   prefix)
     validate_stage
     scaffold_stage
+    narration_scaffold_stage
     narration_preview_stage
     echo
     divider
-    echo "✅ Stage 2 prefix complete (validate + scaffold + narration-preview)."
+    echo "✅ Stage 2 prefix complete (validate + scaffold + narration-scaffold + narration-preview)."
     echo
     echo "NEXT: paste the printed snippets above into:"
     echo "  REQUIRED:"
@@ -276,6 +293,7 @@ case "$STAGE" in
   full)
     validate_stage
     scaffold_stage
+    narration_scaffold_stage
     narration_preview_stage
     render_preview_stage
     audio_stage

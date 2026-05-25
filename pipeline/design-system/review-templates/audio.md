@@ -23,12 +23,16 @@ For each issue, fill in the block.
 ### Issue 1: <one-line summary>
 
 - **Step(s)**: <stepIndex>
-- **Problem class**: flat | rushed | mispronounced | wrong-tone | sounds-off | persona-mismatch
+- **Chunk id(s)** (if you isolated the bad chunk via `chunks/step-N-N.M.wav`): <chunk id>
+- **Problem class**: flat | rushed | mispronounced | wrong-tone | sounds-off | persona-mismatch | needs-more-chunks
 - **Specific quote**: "<the audio segment that's wrong>"
 - **Suggested fix**: one of:
-  - `voiceOverride` with specific values (e.g., `{ exaggeration: 0.85, cfg_weight: 0.25 }`)
-  - Rewrite narration text (paste the new text)
-  - Change scene-level persona (e.g., `teacher-energetic` → `measured`)
+  - Tune the chunk's `params` (e.g., `{ exaggeration: 0.85, cfg_weight: 0.40 }`) in `<scene>.narration.yaml`
+  - Split a chunk in two (different beats need different params)
+  - Adjust `pauseAfter` on the chunk before this one
+  - Rewrite the chunk's `text` (paste the new text)
+  - Lock a take with `seed: <int>` if the take landed right but won't survive regeneration
+  - Change scene-level persona (e.g., `teacher-energetic` → `measured`) — content-style change, requires re-running scaffold + retuning
 - **Severity**: blocking | improvement | nit
 
 ### Issue 2: <one-line summary>
@@ -52,8 +56,8 @@ Format: `<observation>` → `<design-system doc>`
 Examples (illustrative):
 
 - "TTS consistently mispronounces 'Dijkstra' — needs phonetic respelling" → `teaching.md` TTS-readiness section
-- "Peak steps with 'And boom —' opener feel too aggressive at exaggeration 0.80" → `voice/personas/teacher-energetic.md` knob defaults
-- "Steps with 3+ commas in a row sound robotic regardless of persona" → `voice/two-axis-model.md` narration writing tips
+- "Peak-reveal chunks at ex=0.95 sound shouty when the previous chunk was at cfg=0.55" → `teaching.md` param tier legend; consider an intermediate chunk
+- "Methodical scenes feel rushed at the scaffolder's seed cfg=0.55" → `voice/personas/teacher-energetic.md` seed palette tuning
 
 If feedback is **scene-specific** (just this scene), don't put it here.
 
@@ -67,8 +71,8 @@ When this file is complete, ask Claude:
 
 Claude will:
 
-1. Read all issues and identify which `voiceOverride` entries or narration text need changes in `scene.yaml`.
-2. Edit `scene.yaml`.
+1. Read all issues and identify which chunk `params`, `pauseAfter`, `text`, or split decisions need changes in `<scene>.narration.yaml`.
+2. Edit the sidecar.
 3. Update referenced design-system docs with the propagation patterns (if any).
 4. Regenerate ONLY the affected step MP3s via `--step N --force`.
 5. Tell you it's ready for re-review.

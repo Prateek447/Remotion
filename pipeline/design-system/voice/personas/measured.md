@@ -64,43 +64,38 @@ Warm, instructive, no CTA pressure.
 - **Exclamations**: avoid. The voice is interesting because of content, not punctuation.
 - **Pauses (em-dashes)**: used for emphasis, not for energy. One per step at most.
 
-## Prosody vocabulary
+## Connector vocabulary (for chunk text)
 
-This persona is patient — it earns pauses, gives ideas room to breathe. The vocabulary is **real-English connectors paired with `[pause:Xs]`** at slightly longer durations than teacher-energetic. See `../../teaching.md` "Natural prosody — the connector-pause pattern" for cross-persona rules and rejection history.
+This persona is patient — it earns pauses, gives ideas room to breathe. Pauses themselves live in `pauseAfter` between chunks (and measured tends to use longer values — 0.5–0.7s standard, 0.8–1.0s at peak — than teacher-energetic). The connector vocabulary lives inside the chunk text itself.
 
-| Marker | When measured uses it |
+| Connector | When measured uses it |
 |---|---|
-| `[pause:Xs]` | **Primary tool.** Deterministic silence. Measured uses longer pauses than teacher-energetic — typical durations 0.5–0.7s standard, 0.8–1.0s at peak. Pair with a connector for max effect. |
-| `So, [pause:0.6]` | Pre-arithmetic / pre-consequence — measured's most common pattern |
-| `And [pause:0.5]` | Additive continuation, layered explanation |
-| `But [pause:0.7]` | Contrast / base-case surprise — replaces what `Hmm` used to do; measured prefers a slightly longer pause here than teacher-energetic |
-| `Now, [pause:0.6]` | Transition between phases — measured leans on `Now` for orientation more than `Okay` |
-| `Well, [pause:0.5]` | Acknowledging nuance ("Well, [pause:0.5] the right child is also null.") — measured-specific; rare in teacher-energetic |
-| `Then [pause:0.5]` | Sequence step |
+| `So,` | Pre-arithmetic / pre-consequence — measured's most common opener |
+| `And` | Additive continuation, layered explanation |
+| `But` | Contrast / base-case surprise — replaces what `Hmm` used to do |
+| `Now,` | Transition between phases — measured leans on `Now` for orientation more than `Okay` |
+| `Well,` | Acknowledging nuance ("Well, the right child is also null.") — measured-specific; rare in teacher-energetic |
+| `Then` | Sequence step |
 
-**Rejected** — do not use as fillers:
-- `Um` — read literally by Chatterbox; replace with `So, [pause:0.5]` or `[pause:0.5]`
+**Rejected** — do not use in chunk text:
+- `Um` — read literally by Chatterbox
 - `Ah` — read literally; not measured's register anyway
-- `Hmm` / `Hmmm` — initial 4/5 lab reliability **failed in real-world listening** ("sometimes works, sometimes doesn't"). For base-case surprises use `But [pause:0.7]` — the contrast word does the work reliably.
+- `Hmm` / `Hmmm` — initial 4/5 lab reliability **failed in real-world listening** ("sometimes works, sometimes doesn't"). For base-case surprises use `But` + a longer-pause-after chunk — the contrast word does the work reliably.
 
 The persona **avoids** `Okay` / `Alright` openers (too peppy — that's `teacher-energetic` territory). Prefers `So,` / `Now,` / `Well,` openers.
 
-Ellipses (`…`) appear within sentences for soft trailing thoughts. For any pause that matters to the listener, use `[pause:Xs]` — deterministic and longer-felt, which suits measured's patient register.
+## Knob values (scaffolder seed palette)
 
-## Knob values
+These are the **starting** values the scaffolder writes into each chunk based on the step's arc. Chunk authors tune from these against the per-beat tier legend in `../../teaching.md` "Chunked narration".
 
-From `../two-axis-model.md`:
+| Arc | exaggeration | cfg_weight | temperature |
+|---|---|---|---|
+| `opening` | 0.50 | 0.60 | 0.85 |
+| `methodical` | 0.35 | 0.65 | 0.80 |
+| `peak` | 0.65 | 0.50 | 0.92 |
+| `closing` | 0.55 | 0.55 | 0.88 |
 
-| Arc | exaggeration | cfg_weight | temperature | Legacy preset |
-|---|---|---|---|---|
-| `opening` | 0.50 | 0.60 | 0.85 | `natural` (tuned) |
-| `methodical` | 0.35 | 0.65 | 0.80 | `calm` (tuned) |
-| `peak` | 0.65 | 0.50 | 0.92 | `expressive` (tuned) |
-| `closing` | 0.55 | 0.55 | 0.88 | `expressive`-lite (tuned) |
-
-`cfg_weight ≥ 0.50` across all arcs is **load-bearing for prosody** — at lower values, Chatterbox smooths over ellipses and mispronounces fillers.
-
-These values are tuned from the legacy `tts-narration-writer` preset baselines: `cfg_weight` bumped +0.05–0.10 to honor written prosody markers, `temperature` bumped +0.05 for natural variation across long methodical sequences. Pre-tuning scenes still render coherently — only the prosody texture improves.
+The methodical seed (ex=0.35) is the lowest in any persona — measured's bulk steps stay quiet. Tune up where individual chunks need a small lift; keep most chunks near the seed for the patient-narrator feel. Chunk-level knob-coupling (ex↑ cfg↓ paired) still applies.
 
 ## Worked example — Search Node
 

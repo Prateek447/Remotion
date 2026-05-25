@@ -32,11 +32,12 @@ ALLOWED_ARCS = {"opening", "methodical", "peak", "closing"}
 ALLOWED_FORMATS = {"youtube", "reel", "reel-anim"}
 # Note: "pinned" deliberately excluded — would crash on tree nodes per audit
 # (TreeNodeCircle.highlightColorMap has no entry for it).
-# Pause marker syntax used in narration: [pause:0.5] inserts 500ms of silence
-# via splicing in pipeline/stages/05-audio/generate.py. Stripped before the
-# digit/bracket TTS-readiness checks below — these markers are intentional,
-# not literal text Chatterbox will read.
-PAUSE_PATTERN = re.compile(r"\[pause:(\d+(?:\.\d+)?)\]")
+#
+# Narration text in scene.yaml is **content-only** — the chunked narration
+# sidecar (`<scene>.narration.yaml`) is the authoritative source for audio.
+# The scene yaml's `narration` field is a draft that scaffold.py uses to
+# seed chunk text and that human authors keep as a readability reference.
+# Per-chunk TTS-readiness lives in `pipeline/stages/03-narration/preview.py`.
 
 ALLOWED_NODE_HIGHLIGHTS = {
     "none", "active", "found", "new", "removing", "error", "visited",
@@ -173,35 +174,23 @@ def validate(scene: dict) -> list[str]:
                 f"(readability ceiling): {caption!r}"
             )
 
-        # narration TTS-readiness (hard)
+        # narration content sanity (cheap, surfaces issues early before
+        # they get baked into chunks by scaffold.py). Detailed per-chunk
+        # TTS-readiness is preview.py's job.
         narration = step.get("narration", "")
         if isinstance(narration, str):
-            # Strip [pause:Xs] markers before digit/bracket checks — they're
-            # intentional prosody markers handled by silence-splicing in
-            # generate.py, not literal text Chatterbox reads.
-            text_no_pauses = PAUSE_PATTERN.sub("", narration)
-            if re.search(r"\b\d+\b", text_no_pauses):
+            if re.search(r"\b\d+\b", narration):
                 errors.append(
                     f"{prefix}: narration contains digits — spell as words. "
                     f"Got: {narration!r}"
                 )
-            if "[" in text_no_pauses or "]" in text_no_pauses:
+            if "[" in narration or "]" in narration:
                 errors.append(
-                    f"{prefix}: narration contains [brackets] — base Chatterbox "
-                    f"reads them as English. Got: {narration!r}"
+                    f"{prefix}: narration contains [brackets]. If this is a "
+                    f"legacy [pause:Xs] marker, remove it — pauses now live "
+                    f"in the chunked sidecar's pauseAfter, not in scene yaml "
+                    f"text. Got: {narration!r}"
                 )
-            # breath-group word count (em-dashes, ellipses, AND [pause:Xs]
-            # markers all count as breath boundaries — they each insert
-            # audible silence at the audio level).
-            bg_split_re = r"—|--|…|\.\.\.|\[pause:\d+(?:\.\d+)?\]"
-            for sentence in re.split(r"[.!?]", narration):
-                for bg in re.split(bg_split_re, sentence):
-                    word_count = len(bg.strip().split())
-                    if word_count > 12:
-                        errors.append(
-                            f"{prefix}: narration breath group has {word_count} "
-                            f"words > 12: {bg.strip()!r}"
-                        )
 
         # highlight bounds
         hl = step.get("highlight") or {}

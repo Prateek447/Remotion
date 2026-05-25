@@ -1,30 +1,43 @@
 #!/usr/bin/env python3
-"""Pipeline-native audio generator. Reads scene.yaml directly.
+"""Pipeline-native chunked-narration audio generator.
 
-Computes per-step Chatterbox knobs from `voice.persona × step.arc` per
-`pipeline/design-system/voice/two-axis-model.md`, then synthesizes MP3s.
+Reads `pipeline/scenes/<sid>.narration.yaml` (the chunked narration sidecar)
+and renders one MP3 per step by running ChatterboxTTS.generate() once per
+chunk with per-chunk (exaggeration, cfg_weight, temperature), splicing
+torch.zeros silence between chunks per each chunk's `pauseAfter`.
 
-Pipeline isolation note: this script intentionally does NOT import from
-`scripts/generate-narration-chatterbox.py`. The legacy script is the editorial
-ancestor of this pipeline but is preserved untouched. All pipeline-driven scenes
-use this script; existing scenes continue using the legacy one.
+This is the ONLY audio path. There is no AUTO-mode fallback to inline
+`[pause:Xs]` markers in scene.yaml's `narration` field — that approach was
+deprecated in favor of chunked authoring because a single Chatterbox call
+has one acoustic identity for its full duration, and the persona × arc
+preset can't crescendo within a step. The chunk boundary IS the emotion
+boundary.
+
+Required input layout:
+    pipeline/scenes/<sid>.yaml             — for sceneId + step count cross-check
+    pipeline/scenes/<sid>.narration.yaml   — the authoritative audio source
 
 Outputs:
-  - public/narration/<sceneId>/step-N.mp3        (one per step)
-  - public/narration/<sceneId>/durations.json    (consumed by apply-narration-updates.py)
+    public/narration/<sid>/step-N.mp3      — one per step, concatenated chunks
+    public/narration/<sid>/durations.json  — consumed by stage 06 apply.py
+    public/narration/<sid>/chunks/step-N-N.M.wav
+                                            — per-chunk debug WAVs
+                                              (gated on sidecar output.perChunkDebug)
 
 Usage:
     python3 pipeline/stages/05-audio/generate.py <scene.yaml>
                   [--force]              Overwrite existing MP3s
                   [--step N]             Regenerate only step N
                   [--reference WAV]      Override reference audio for voice cloning
+
+See `pipeline/design-system/teaching.md` for chunk authoring rules,
+`pipeline/scenes/count-tree-nodes.narration.yaml` for a working example.
 """
 
 import argparse
 import json
 import math
 import os
-import re
 import subprocess
 import sys
 import tempfile
@@ -36,51 +49,65 @@ except ImportError:
     print("ERROR: pyyaml required. Install with: pip install pyyaml", file=sys.stderr)
     sys.exit(2)
 
-# Source of truth: pipeline/design-system/voice/two-axis-model.md
-PRESET_MATRIX: dict[str, dict[str, dict[str, float]]] = {
-    "teacher-energetic": {
-        "opening":    {"exaggeration": 0.60, "cfg_weight": 0.55, "temperature": 0.90},
-        "methodical": {"exaggeration": 0.55, "cfg_weight": 0.60, "temperature": 0.88},
-        "peak":       {"exaggeration": 0.80, "cfg_weight": 0.40, "temperature": 0.95},
-        "closing":    {"exaggeration": 0.70, "cfg_weight": 0.50, "temperature": 0.92},
-    },
-    "measured": {
-        "opening":    {"exaggeration": 0.50, "cfg_weight": 0.60, "temperature": 0.85},
-        "methodical": {"exaggeration": 0.35, "cfg_weight": 0.65, "temperature": 0.80},
-        "peak":       {"exaggeration": 0.65, "cfg_weight": 0.50, "temperature": 0.92},
-        "closing":    {"exaggeration": 0.55, "cfg_weight": 0.55, "temperature": 0.88},
-    },
-    "casual": {
-        "opening":    {"exaggeration": 0.55, "cfg_weight": 0.45, "temperature": 0.85},
-        "methodical": {"exaggeration": 0.50, "cfg_weight": 0.50, "temperature": 0.82},
-        "peak":       {"exaggeration": 0.70, "cfg_weight": 0.35, "temperature": 0.90},
-        "closing":    {"exaggeration": 0.60, "cfg_weight": 0.45, "temperature": 0.87},
-    },
-}
-
 DEFAULT_REFERENCE_WAV = "scripts/my-voice.wav"
 FPS = 30
 
-# Pause marker syntax: [pause:0.5] inserts 500ms of digital silence at that
-# position. The generator splits text on this marker, runs Chatterbox per
-# text chunk, and splices silence tensors between chunks.
-#
-# Why splice silence at the Python level rather than relying on the model to
-# honor pause tokens: base Chatterbox reads [PAUSE] tokens literally
-# (resemble-ai/chatterbox issue #210). The community-validated pattern
-# (PR #164, psdwizzard/chatterbox-Audiobook fork) is to splice WAV silence
-# between separately-generated chunks. Deterministic, millisecond-precise,
-# model-agnostic.
-PAUSE_PATTERN = re.compile(r"\[pause:(\d+(?:\.\d+)?)\]")
+
+def find_sidecar(scene_path: Path) -> Path:
+    """Locate `<scene>.narration.yaml` next to `<scene>.yaml`.
+
+    Errors if the sidecar is missing — chunked narration is the only audio
+    path; there is no fallback to inline scene.yaml narration.
+    """
+    sidecar = scene_path.with_suffix("").with_suffix(".narration.yaml")
+    if not sidecar.exists():
+        print(
+            f"ERROR: chunked-narration sidecar not found at {sidecar}\n"
+            f"  This is the only audio path. Author a sidecar with:\n"
+            f"    python3 pipeline/stages/03-narration/scaffold.py {scene_path}\n"
+            f"  then tune chunk params per pipeline/design-system/teaching.md.",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+    return sidecar
 
 
-def resolve_preset(persona: str, step: dict) -> dict:
-    """persona × arc → (exaggeration, cfg_weight, temperature), honoring voiceOverride."""
-    arc = step["arc"]
-    base = dict(PRESET_MATRIX[persona][arc])
-    override = step.get("voiceOverride") or {}
-    base.update({k: v for k, v in override.items() if k in base})
-    return base
+def load_sidecar(sidecar_path: Path) -> tuple[dict, dict[int, dict]]:
+    """Parse a narration sidecar. Returns (top_level_dict, {stepIndex: step_dict}).
+
+    Performs minimal schema validation — full validation is stage 03's job.
+    Hard-errors only on conditions that would crash the generator.
+    """
+    data = yaml.safe_load(sidecar_path.read_text())
+    if not isinstance(data, dict) or "steps" not in data:
+        raise ValueError(f"Sidecar {sidecar_path} missing 'steps' key")
+    steps_by_idx: dict[int, dict] = {}
+    for s in data["steps"]:
+        if "stepIndex" not in s or "chunks" not in s:
+            raise ValueError(
+                f"Sidecar {sidecar_path} step missing stepIndex/chunks: {s!r}"
+            )
+        chunks = s["chunks"]
+        if not isinstance(chunks, list) or len(chunks) == 0:
+            raise ValueError(
+                f"Sidecar {sidecar_path} step {s['stepIndex']} has no chunks"
+            )
+        for c in chunks:
+            for required in ("id", "text", "params"):
+                if required not in c:
+                    raise ValueError(
+                        f"Sidecar {sidecar_path} step {s['stepIndex']} "
+                        f"chunk missing {required!r}: {c!r}"
+                    )
+            params = c["params"]
+            for required in ("exaggeration", "cfg_weight", "temperature"):
+                if required not in params:
+                    raise ValueError(
+                        f"Sidecar {sidecar_path} step {s['stepIndex']} "
+                        f"chunk {c['id']} params missing {required!r}"
+                    )
+        steps_by_idx[s["stepIndex"]] = s
+    return data, steps_by_idx
 
 
 def get_audio_duration(file_path: str) -> float:
@@ -103,79 +130,79 @@ def wav_to_mp3(wav_path: str, mp3_path: str) -> None:
     )
 
 
-def generate_speech(
+def generate_chunked_speech(
     model,
-    text: str,
+    chunks: list[dict],
     output_mp3: str,
     reference_wav: str,
-    exaggeration: float,
-    cfg_weight: float,
-    temperature: float,
+    debug_dir: Path | None = None,
+    debug_prefix: str = "",
 ) -> None:
-    """Synthesize text → MP3, honoring [pause:Xs] markers as exact silence inserts.
+    """Synthesize a list of hand-authored chunks → single MP3.
 
-    The text is split on [pause:Xs] markers (e.g. [pause:0.5] = 500ms). Each
-    non-empty text chunk is sent to Chatterbox; each marker produces silence
-    of the exact requested duration. Chunks and silences are concatenated in
-    order, then the combined WAV is converted to MP3.
+    Each chunk runs ChatterboxTTS.generate() with its own (exaggeration,
+    cfg_weight, temperature). Between chunks, `pauseAfter` seconds of
+    torch.zeros silence are spliced in. If `seed` is set on a chunk, the
+    PyTorch RNG is seeded before that chunk for reproducibility.
 
-    Text without any [pause:Xs] markers is generated in a single Chatterbox
-    call (no concatenation overhead) — backward compatible with existing
-    scenes.
+    Per-chunk debug WAVs land at `{debug_dir}/{debug_prefix}{chunk.id}.wav`
+    when `debug_dir` is provided.
+
+    Chunk schema (validated at load):
+      { id: str, text: str,
+        params: {exaggeration, cfg_weight, temperature},
+        pauseAfter: float (optional, default 0),
+        seed: int (optional — locks the random draw for this chunk) }
     """
     import torch
     import torchaudio
 
-    pieces = PAUSE_PATTERN.split(text)
-    # re.split with a capturing group returns alternating chunks:
-    #   [text0, captured_pause1, text1, captured_pause2, text2, ...]
-    # Even indices are text; odd indices are pause durations (as strings).
-
     audio_segments: list = []
-    ref_segment = None  # first generated wav — dtype/device reference for silence
+    ref_segment = None
+    has_reference = bool(reference_wav) and Path(reference_wav).exists()
 
-    for i, piece in enumerate(pieces):
-        if i % 2 == 0:
-            # Text chunk — synthesize if non-empty
-            stripped = piece.strip()
-            if not stripped:
-                continue
-            wav = model.generate(
-                text=stripped,
-                audio_prompt_path=reference_wav if reference_wav else None,
-                exaggeration=exaggeration,
-                cfg_weight=cfg_weight,
-                temperature=temperature,
-            )
-            if ref_segment is None:
-                ref_segment = wav
-            audio_segments.append(wav)
-        else:
-            # Pause marker — synthesize silence of exact duration
-            seconds = float(piece)
-            n_samples = int(seconds * model.sr)
-            if n_samples <= 0:
-                continue
-            if ref_segment is not None:
+    if debug_dir is not None:
+        debug_dir.mkdir(parents=True, exist_ok=True)
+
+    for chunk in chunks:
+        text = (chunk.get("text") or "").strip()
+        if not text:
+            continue
+
+        # Per-chunk seed lock: reproducibility for "this take is the keeper".
+        if "seed" in chunk and chunk["seed"] is not None:
+            torch.manual_seed(int(chunk["seed"]))
+
+        params = chunk["params"]
+        wav = model.generate(
+            text=text,
+            audio_prompt_path=reference_wav if has_reference else None,
+            exaggeration=params["exaggeration"],
+            cfg_weight=params["cfg_weight"],
+            temperature=params["temperature"],
+        )
+        if ref_segment is None:
+            ref_segment = wav
+        audio_segments.append(wav)
+
+        # Save this chunk alone for surgical inspection / regenerate.
+        if debug_dir is not None:
+            chunk_wav_path = debug_dir / f"{debug_prefix}{chunk['id']}.wav"
+            torchaudio.save(str(chunk_wav_path), wav.cpu(), model.sr)
+
+        # Splice the pause that follows this chunk.
+        pause_after = float(chunk.get("pauseAfter", 0) or 0)
+        if pause_after > 0:
+            n_samples = int(pause_after * model.sr)
+            if n_samples > 0:
                 silence = torch.zeros(
                     *ref_segment.shape[:-1], n_samples,
                     dtype=ref_segment.dtype, device=ref_segment.device,
                 )
-            else:
-                # No model output yet (text starts with a pause marker) — assume
-                # mono float32 on CPU. Will be moved to model's device before cat.
-                silence = torch.zeros(1, n_samples, dtype=torch.float32)
-            audio_segments.append(silence)
+                audio_segments.append(silence)
 
     if not audio_segments:
-        raise ValueError(
-            f"No audio produced from text (all chunks empty?): {text!r}"
-        )
-
-    # Ensure all segments share the same device. Silence created before any
-    # model output landed on CPU; align it with the model's device now.
-    if ref_segment is not None:
-        audio_segments = [s.to(ref_segment.device) for s in audio_segments]
+        raise ValueError("No audio produced — every chunk's text was empty.")
 
     final_wav = torch.cat(audio_segments, dim=-1).cpu()
 
@@ -198,7 +225,7 @@ def _has_cuda() -> bool:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("scene_yaml", help="Path to scene.yaml")
+    ap.add_argument("scene_yaml", help="Path to scene.yaml (sidecar discovered alongside)")
     ap.add_argument("--force", "-f", action="store_true",
                     help="Overwrite existing MP3 files")
     ap.add_argument("--step", type=int, default=None,
@@ -207,39 +234,65 @@ def main() -> None:
                     help=f"Reference WAV for voice cloning (default: {DEFAULT_REFERENCE_WAV})")
     args = ap.parse_args()
 
-    path = Path(args.scene_yaml)
-    if not path.exists():
-        print(f"Not found: {path}", file=sys.stderr)
+    scene_path = Path(args.scene_yaml)
+    if not scene_path.exists():
+        print(f"Not found: {scene_path}", file=sys.stderr)
         sys.exit(2)
 
-    scene = yaml.safe_load(path.read_text())
+    scene = yaml.safe_load(scene_path.read_text())
     sid = scene["sceneId"]
-    persona = scene["voice"]["persona"]
+    scene_step_indices = {s["stepIndex"] for s in scene["steps"]}
 
-    if persona not in PRESET_MATRIX:
-        print(f"Unknown persona: {persona!r}. Allowed: {list(PRESET_MATRIX)}",
-              file=sys.stderr)
+    sidecar_path = find_sidecar(scene_path)
+    try:
+        sidecar_top, sidecar_steps = load_sidecar(sidecar_path)
+    except ValueError as e:
+        print(f"ERROR loading sidecar: {e}", file=sys.stderr)
         sys.exit(2)
+
+    # Sanity: every scene step must have a chunked entry. Single-path means
+    # there's no AUTO fallback — if a step is missing from the sidecar we
+    # can't render it.
+    missing = scene_step_indices - set(sidecar_steps.keys())
+    if missing:
+        print(
+            f"ERROR: sidecar is missing chunked narration for step(s): "
+            f"{sorted(missing)}\n"
+            f"  Author entries for these steps in {sidecar_path}.\n"
+            f"  See pipeline/design-system/teaching.md 'Chunked narration'.",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+    extra = set(sidecar_steps.keys()) - scene_step_indices
+    if extra:
+        print(
+            f"WARNING: sidecar has chunked entries for stepIndex(es) "
+            f"not in scene yaml: {sorted(extra)} — ignored.",
+            file=sys.stderr,
+        )
 
     out_dir = Path("public") / "narration" / sid
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    all_steps = scene["steps"]
+    per_chunk_debug = bool(
+        (sidecar_top or {}).get("output", {}).get("perChunkDebug")
+    )
+    debug_dir = (out_dir / "chunks") if per_chunk_debug else None
+
     target_indices = (
         {args.step} if args.step is not None
-        else {s["stepIndex"] for s in all_steps}
+        else set(sidecar_steps.keys())
     )
 
-    # Decide whether we need the model loaded.
     needs_gen = any(
-        s["stepIndex"] in target_indices
-        and (args.force or not (out_dir / f"step-{s['stepIndex']}.mp3").exists())
-        for s in all_steps
+        idx in target_indices
+        and (args.force or not (out_dir / f"step-{idx}.mp3").exists())
+        for idx in sidecar_steps
     )
 
     model = None
     if needs_gen:
-        print(f"Loading Chatterbox model (first run downloads ~1.5 GB)...")
+        print("Loading Chatterbox model (first run downloads ~1.5 GB)...")
         from chatterbox.tts import ChatterboxTTS
         device = "cuda" if _has_cuda() else "cpu"
         print(f"Using device: {device}")
@@ -250,15 +303,17 @@ def main() -> None:
             print(f"WARNING: reference WAV not found at {args.reference} — "
                   f"generating without voice cloning.")
 
-    print(f"Scene: {sid}  persona: {persona}")
+    print(f"Scene: {sid}")
+    print(f"Sidecar: {sidecar_path}")
+    print(f"Chunked steps: {len(sidecar_steps)}  "
+          f"Total chunks: {sum(len(s['chunks']) for s in sidecar_steps.values())}")
     print("=" * 60)
 
     durations: list[dict] = []
-    for step in all_steps:
-        idx = step["stepIndex"]
+    for idx in sorted(sidecar_steps.keys()):
+        sidecar_step = sidecar_steps[idx]
         out_path = out_dir / f"step-{idx}.mp3"
 
-        # If not targeted, still measure existing file (so durations.json is complete).
         if idx not in target_indices:
             if out_path.exists():
                 d = get_audio_duration(str(out_path))
@@ -275,22 +330,25 @@ def main() -> None:
             print(f"  Step {idx} [skip — exists]")
             continue
 
-        text = step["narration"]
-        short = text[:60] + "..." if len(text) > 60 else text
-        preset = resolve_preset(persona, step)
-        arc = step["arc"]
+        chunks = sidecar_step["chunks"]
+        intent = sidecar_step.get("intent", "")
+        print(f"  Step {idx} [{len(chunks)} chunks]: {intent!r}")
+        for c in chunks:
+            p = c["params"]
+            pa = float(c.get("pauseAfter", 0) or 0)
+            short = c["text"][:48] + ("..." if len(c["text"]) > 48 else "")
+            seed_marker = f" seed={c['seed']}" if c.get("seed") is not None else ""
+            print(
+                f"      {c['id']:<5} ex={p['exaggeration']:.2f} "
+                f"cw={p['cfg_weight']:.2f} t={p['temperature']:.2f} "
+                f"+{pa:.2f}s{seed_marker}  \"{short}\""
+            )
 
-        print(
-            f"  Step {idx} [{arc:10s} ex={preset['exaggeration']} "
-            f"cw={preset['cfg_weight']} t={preset['temperature']}]: \"{short}\""
-        )
-
-        generate_speech(
-            model, text, str(out_path),
+        generate_chunked_speech(
+            model, chunks, str(out_path),
             reference_wav=args.reference,
-            exaggeration=preset["exaggeration"],
-            cfg_weight=preset["cfg_weight"],
-            temperature=preset["temperature"],
+            debug_dir=debug_dir,
+            debug_prefix=f"step-{idx}-",
         )
 
         d = get_audio_duration(str(out_path))
@@ -299,7 +357,6 @@ def main() -> None:
         })
         print(f"    -> {out_path} ({d:.2f}s, {math.ceil(d * FPS)} frames)")
 
-    # Write durations.json (sorted by step).
     durations.sort(key=lambda x: x["step"])
     (out_dir / "durations.json").write_text(json.dumps(durations, indent=2))
 

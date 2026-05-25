@@ -57,6 +57,10 @@ export interface SceneStep {
   snapshot: ListSnapshot;
   highlightLines: HighlightStep;
   startFrame: number;
+  // Frames between audio start and visual transition. Default 0.
+  // Set when the step's narration opens with a chunk reflecting on the prior
+  // visual state; the visual then transitions later, after those chunks play.
+  visualOffset?: number;
   visibleLines?: number;
   excludeFromAnim?: boolean;
 }

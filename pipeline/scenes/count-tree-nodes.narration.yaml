@@ -1,0 +1,671 @@
+# Hand-authored chunked narration — count-tree-nodes
+#
+# This sidecar replaces the auto-resolved (persona × arc → single triple) model
+# from count-tree-nodes.yaml's `narration` field. Each step is broken into
+# emotion-coherent chunks; each chunk carries its own (exaggeration, cfg_weight,
+# temperature) triple that gets passed directly to ChatterboxTTS.generate().
+#
+# WHY this exists:
+#   The persona × arc table emits ONE triple per step. But a single step often
+#   spans multiple emotional beats — calm setup → slow arithmetic → explosive
+#   reveal. One triple can't render all three convincingly; the reveal sounds
+#   flat or the setup sounds shouty. Chunking puts the param control at the
+#   beat level, where the emotion actually changes.
+#
+# HOW the audio generator should consume this:
+#   For each step:
+#     1. For each chunk in order: run ChatterboxTTS.generate(chunk.text, **chunk.params)
+#     2. Splice torch.zeros(int(chunk.pauseAfter * sr)) after each chunk's audio
+#     3. Concatenate all chunks → step-N.mp3 (final apply.py timing reads this)
+#   Optional: keep per-chunk wav at step-N-M.wav for surgical regenerate.
+#
+# REPRODUCIBILITY:
+#   Each chunk has a stable `id` (step.chunk, e.g. "24.5" = step 24 chunk 5).
+#   Once a take of a chunk lands well at its params, lock it by adding
+#   `seed: <int>` to that chunk. Future regenerates with the same seed +
+#   params + Chatterbox version produce identical audio. Re-rolling is just
+#   removing the seed.
+#
+# PARAM PHILOSOPHY (knob coupling per Chatterbox README):
+#   - Higher exaggeration → faster, more excited delivery.
+#   - Lower cfg_weight   → slower, more deliberate pacing (compensates).
+#   - Pairs to bump together: ex↑ cfg↓ for energy, ex↓ cfg↑ for calm.
+#   - Temperature 0.85-0.95: lower = more stable but flatter, higher = more
+#     varied but riskier. Calm beats lean 0.85; peak reveal goes 0.95.
+#
+# Ranges actually used in this file (read this as a legend):
+#   calm orientation         ex≈0.50, cfg≈0.62, temp≈0.85
+#   standard methodical      ex≈0.60, cfg≈0.55, temp≈0.88
+#   curious / lean-in        ex≈0.65, cfg≈0.52, temp≈0.90
+#   mini-reveal / "returns N"ex≈0.75, cfg≈0.45, temp≈0.92
+#   subtree-completed return ex≈0.80, cfg≈0.42, temp≈0.93
+#   PEAK reveal (one time)   ex≈0.95, cfg≈0.32, temp≈0.95
+#   closing CTA              ex≈0.75, cfg≈0.48, temp≈0.92
+
+schemaVersion: 0.1
+sceneId: count-tree-nodes
+sourceScene: pipeline/scenes/count-tree-nodes.yaml
+
+voice:
+  reference: scripts/clone.wav  # set to whatever reference clip the audio gen uses
+  model: chatterbox-tts          # informational
+
+# Output layout the audio generator should produce:
+#   public/narration/count-tree-nodes/step-N.mp3        (concatenated, what apply.py reads)
+#   public/narration/count-tree-nodes/chunks/step-N-M.wav  (per-chunk debug, optional)
+output:
+  baseDir: public/narration/count-tree-nodes
+  perChunkDebug: true
+
+steps:
+  # ── Step 0: opening — orient + pose the question ─────────────────────────
+  - stepIndex: 0
+    intent: "Orientation + pose the question"
+    chunks:
+      - id: "0.0"
+        intent: "invitation, slight excitement"
+        text: "Alright, watch this."
+        params: { exaggeration: 0.65, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.35
+      - id: "0.1"
+        intent: "calm orientation"
+        text: "A binary tree."
+        params: { exaggeration: 0.50, cfg_weight: 0.62, temperature: 0.85 }
+        pauseAfter: 0.25
+      - id: "0.2"
+        intent: "matter-of-fact"
+        text: "Seven nodes total."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.55
+      - id: "0.3"
+        intent: "curious lean-in — the actual question"
+        text: "So, how does code count them all?"
+        params: { exaggeration: 0.72, cfg_weight: 0.50, temperature: 0.92 }
+        pauseAfter: 0.0
+
+  # ── Step 1: name recursion as the mechanism ──────────────────────────────
+  - stepIndex: 1
+    intent: "Name the recursive idea"
+    chunks:
+      - id: "1.0"
+        intent: "confident setup"
+        text: "Right. Here's the idea."
+        params: { exaggeration: 0.62, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "1.1"
+        intent: "posing the recursive question"
+        text: "Each node asks — how big is my subtree?"
+        params: { exaggeration: 0.66, cfg_weight: 0.52, temperature: 0.90 }
+        pauseAfter: 0.5
+      - id: "1.2"
+        intent: "answer follow-through"
+        text: "And then adds one for itself."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.0
+
+  # ── Step 2: show the code, the three rules ───────────────────────────────
+  - stepIndex: 2
+    intent: "Read the formula off the code"
+    chunks:
+      - id: "2.0"
+        intent: "orient to code"
+        text: "Look at the code."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.35
+      - id: "2.1"
+        intent: "conditional setup"
+        text: "If null,"
+        params: { exaggeration: 0.55, cfg_weight: 0.58, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "2.2"
+        intent: "matter-of-fact base case"
+        text: "return zero."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.55
+      - id: "2.3"
+        intent: "pivot to the recursive branch"
+        text: "Otherwise,"
+        params: { exaggeration: 0.62, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "2.4"
+        intent: "enumerating two recursive calls"
+        text: "recurse left, recurse right,"
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.35
+      - id: "2.5"
+        intent: "summary conclusion"
+        text: "and return one plus those."
+        params: { exaggeration: 0.66, cfg_weight: 0.52, temperature: 0.90 }
+        pauseAfter: 0.0
+
+  # ── Step 3: enter the first call at the root ─────────────────────────────
+  - stepIndex: 3
+    intent: "Enter recursion at the root"
+    chunks:
+      - id: "3.0"
+        intent: "action call — let's go"
+        text: "Okay — start at the root."
+        params: { exaggeration: 0.68, cfg_weight: 0.53, temperature: 0.90 }
+        pauseAfter: 0.35
+      - id: "3.1"
+        intent: "naming the call clearly"
+        text: "Call countNodes on node one."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.0
+
+  # ── Step 4: recurse left from root to n2 ─────────────────────────────────
+  - stepIndex: 4
+    intent: "Recurse left"
+    # Chunk 4.0 ("Node one is not null.") is a reflection on step 3's root.
+    # Hold step 3's visual until chunk 4.1 begins so n2 doesn't light up early.
+    visualEnterChunk: 1
+    chunks:
+      - id: "4.0"
+        intent: "observation"
+        text: "Node one is not null."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.35
+      - id: "4.1"
+        intent: "consequence — so we descend"
+        text: "So, we recurse left."
+        params: { exaggeration: 0.68, cfg_weight: 0.50, temperature: 0.92 }
+        pauseAfter: 0.5
+      - id: "4.2"
+        intent: "naming the call"
+        text: "Call countNodes on node two."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.0
+
+  # ── Step 5: keep recursing left from n2 to n4 ────────────────────────────
+  - stepIndex: 5
+    intent: "Descend further to the leaf"
+    # Chunk 5.0 ("At node two.") reflects step 4's state. Defer the visual
+    # transition until 5.1 so n4 doesn't activate while audio mentions n2.
+    visualEnterChunk: 1
+    chunks:
+      - id: "5.0"
+        intent: "orient"
+        text: "At node two."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.25
+      - id: "5.1"
+        intent: "action"
+        text: "Recurse left again."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.35
+      - id: "5.2"
+        intent: "naming the call"
+        text: "Call countNodes on node four."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.0
+
+  # ── Step 6: n4.left null → base case ─────────────────────────────────────
+  - stepIndex: 6
+    intent: "First null base case — a small surprise"
+    chunks:
+      - id: "6.0"
+        intent: "orient"
+        text: "Node four."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.25
+      - id: "6.1"
+        intent: "action"
+        text: "Recurse left."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.45
+      - id: "6.2"
+        intent: "small surprise — base case noticed"
+        text: "But there is no left child."
+        params: { exaggeration: 0.72, cfg_weight: 0.50, temperature: 0.92 }
+        pauseAfter: 0.5
+      - id: "6.3"
+        intent: "consequence"
+        text: "So, null hits the base case."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.35
+      - id: "6.4"
+        intent: "matter-of-fact return"
+        text: "Return zero."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.0
+
+  # ── Step 7: n4.right null → base case ────────────────────────────────────
+  - stepIndex: 7
+    intent: "Second null base case — already familiar pattern"
+    chunks:
+      - id: "7.0"
+        intent: "transition + action"
+        text: "Now, recurse right from node four."
+        params: { exaggeration: 0.62, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "7.1"
+        intent: "matter-of-fact (no surprise this time)"
+        text: "Right child also null."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.35
+      - id: "7.2"
+        intent: "return — slight 'again' inflection"
+        text: "Return zero again."
+        params: { exaggeration: 0.58, cfg_weight: 0.58, temperature: 0.87 }
+        pauseAfter: 0.0
+
+  # ── Step 8: n4 combines — returns 1 ──────────────────────────────────────
+  - stepIndex: 8
+    intent: "First combine — small reveal pattern (will repeat)"
+    chunks:
+      - id: "8.0"
+        intent: "setup"
+        text: "Node four combines."
+        params: { exaggeration: 0.62, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.35
+      - id: "8.1"
+        intent: "calm arithmetic"
+        text: "So, one plus zero plus zero."
+        params: { exaggeration: 0.58, cfg_weight: 0.58, temperature: 0.88 }
+        pauseAfter: 0.45
+      - id: "8.2"
+        intent: "mini-reveal — first return-up of the trace"
+        text: "And returns one."
+        params: { exaggeration: 0.78, cfg_weight: 0.45, temperature: 0.92 }
+        pauseAfter: 0.0
+
+  # ── Step 9: pop to n2, recurse right to n5 ───────────────────────────────
+  - stepIndex: 9
+    intent: "Pop frame, enter sibling"
+    # Chunk 9.0 ("Pop back to node two.") is a stack-pop reflection on step 8.
+    # Defer the visual transition until 9.1 so n5 doesn't light up early.
+    visualEnterChunk: 1
+    chunks:
+      - id: "9.0"
+        intent: "return up — frame pop"
+        text: "Pop back to node two."
+        params: { exaggeration: 0.62, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "9.1"
+        intent: "transition to right branch"
+        text: "Now, recurse right."
+        params: { exaggeration: 0.68, cfg_weight: 0.52, temperature: 0.90 }
+        pauseAfter: 0.4
+      - id: "9.2"
+        intent: "naming the call"
+        text: "Call countNodes on node five."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.0
+
+  # ── Step 10: n5.left null → returns 0 ────────────────────────────────────
+  - stepIndex: 10
+    intent: "Null base case (familiar pattern, less surprise)"
+    chunks:
+      - id: "10.0"
+        intent: "orient"
+        text: "Node five."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.2
+      - id: "10.1"
+        intent: "action"
+        text: "Recurse left."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.45
+      - id: "10.2"
+        intent: "observation"
+        text: "No left child. Null."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.3
+      - id: "10.3"
+        intent: "return"
+        text: "Return zero."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.0
+
+  # ── Step 11: n5.right null → returns 0 ───────────────────────────────────
+  - stepIndex: 11
+    intent: "Null base case"
+    chunks:
+      - id: "11.0"
+        intent: "action"
+        text: "Recurse right from node five."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "11.1"
+        intent: "observation"
+        text: "Right child also null."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.3
+      - id: "11.2"
+        intent: "return"
+        text: "Return zero."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.0
+
+  # ── Step 12: n5 combines — returns 1 ─────────────────────────────────────
+  - stepIndex: 12
+    intent: "Leaf combine — mini-reveal again"
+    chunks:
+      - id: "12.0"
+        intent: "setup"
+        text: "Node five combines."
+        params: { exaggeration: 0.62, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.35
+      - id: "12.1"
+        intent: "calm arithmetic"
+        text: "So, one plus zero plus zero."
+        params: { exaggeration: 0.58, cfg_weight: 0.58, temperature: 0.88 }
+        pauseAfter: 0.45
+      - id: "12.2"
+        intent: "mini-reveal"
+        text: "And returns one."
+        params: { exaggeration: 0.78, cfg_weight: 0.45, temperature: 0.92 }
+        pauseAfter: 0.0
+
+  # ── Step 13: n2 combines — returns 3 ─────────────────────────────────────
+  - stepIndex: 13
+    intent: "First subtree-sized return — a bigger reveal than the leaf 1's"
+    chunks:
+      - id: "13.0"
+        intent: "returning up the stack"
+        text: "Right. Back at node two."
+        params: { exaggeration: 0.65, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "13.1"
+        intent: "enumerating two child returns"
+        text: "Left returned one. Right returned one."
+        params: { exaggeration: 0.58, cfg_weight: 0.58, temperature: 0.88 }
+        pauseAfter: 0.5
+      - id: "13.2"
+        intent: "adding self — slight lean-in"
+        text: "And plus one for itself."
+        params: { exaggeration: 0.68, cfg_weight: 0.50, temperature: 0.90 }
+        pauseAfter: 0.55
+      - id: "13.3"
+        intent: "subtree reveal — bigger than mini, less than peak"
+        text: "Returns three."
+        params: { exaggeration: 0.82, cfg_weight: 0.42, temperature: 0.93 }
+        pauseAfter: 0.0
+
+  # ── Step 14: pop to root, recurse right to n3 ────────────────────────────
+  - stepIndex: 14
+    intent: "Half done — pivot to right subtree"
+    # Chunk 14.0 ("Pop back to the root.") reflects step 13. Hold the visual
+    # until 14.1 so n3 doesn't activate while audio is back at the root.
+    visualEnterChunk: 1
+    chunks:
+      - id: "14.0"
+        intent: "return up"
+        text: "Pop back to the root."
+        params: { exaggeration: 0.65, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "14.1"
+        intent: "transition with momentum — right subtree begins"
+        text: "Now, recurse right."
+        params: { exaggeration: 0.72, cfg_weight: 0.50, temperature: 0.90 }
+        pauseAfter: 0.4
+      - id: "14.2"
+        intent: "naming the call"
+        text: "Call countNodes on node three."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.0
+
+  # ── Step 15: recurse left from n3 to n6 ──────────────────────────────────
+  - stepIndex: 15
+    intent: "Descend left from n3"
+    chunks:
+      - id: "15.0"
+        intent: "orient"
+        text: "At node three."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.25
+      - id: "15.1"
+        intent: "action"
+        text: "Recurse left."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.3
+      - id: "15.2"
+        intent: "naming the call"
+        text: "Call countNodes on node six."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.0
+
+  # ── Step 16: n6.left null → returns 0 ────────────────────────────────────
+  - stepIndex: 16
+    intent: "Null base case"
+    chunks:
+      - id: "16.0"
+        intent: "orient"
+        text: "Node six."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.2
+      - id: "16.1"
+        intent: "action"
+        text: "Recurse left."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.45
+      - id: "16.2"
+        intent: "observation"
+        text: "No left child. Null."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.3
+      - id: "16.3"
+        intent: "return"
+        text: "Return zero."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.0
+
+  # ── Step 17: n6.right null → returns 0 ───────────────────────────────────
+  - stepIndex: 17
+    intent: "Null base case"
+    chunks:
+      - id: "17.0"
+        intent: "action"
+        text: "Recurse right from node six."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "17.1"
+        intent: "observation"
+        text: "Right child also null."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.3
+      - id: "17.2"
+        intent: "return"
+        text: "Return zero."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.0
+
+  # ── Step 18: n6 combines — returns 1 ─────────────────────────────────────
+  - stepIndex: 18
+    intent: "Leaf combine — mini-reveal"
+    chunks:
+      - id: "18.0"
+        intent: "setup"
+        text: "Node six combines."
+        params: { exaggeration: 0.62, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.35
+      - id: "18.1"
+        intent: "calm arithmetic"
+        text: "So, one plus zero plus zero."
+        params: { exaggeration: 0.58, cfg_weight: 0.58, temperature: 0.88 }
+        pauseAfter: 0.45
+      - id: "18.2"
+        intent: "mini-reveal"
+        text: "And returns one."
+        params: { exaggeration: 0.78, cfg_weight: 0.45, temperature: 0.92 }
+        pauseAfter: 0.0
+
+  # ── Step 19: pop to n3, recurse right to n7 ──────────────────────────────
+  - stepIndex: 19
+    intent: "Sibling step — enter the last leaf"
+    # Chunk 19.0 ("Pop back to node three.") reflects step 18's done state.
+    # Defer the visual transition until 19.1 so n7 doesn't activate too soon.
+    visualEnterChunk: 1
+    chunks:
+      - id: "19.0"
+        intent: "return up"
+        text: "Pop back to node three."
+        params: { exaggeration: 0.62, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "19.1"
+        intent: "transition"
+        text: "Now, recurse right."
+        params: { exaggeration: 0.68, cfg_weight: 0.52, temperature: 0.90 }
+        pauseAfter: 0.4
+      - id: "19.2"
+        intent: "naming the call"
+        text: "Call countNodes on node seven."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.0
+
+  # ── Step 20: n7.left null → returns 0 ────────────────────────────────────
+  - stepIndex: 20
+    intent: "Null base case"
+    chunks:
+      - id: "20.0"
+        intent: "orient"
+        text: "Node seven."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.2
+      - id: "20.1"
+        intent: "action"
+        text: "Recurse left."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.45
+      - id: "20.2"
+        intent: "observation"
+        text: "No left child. Null."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.3
+      - id: "20.3"
+        intent: "return"
+        text: "Return zero."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.0
+
+  # ── Step 21: n7.right null → returns 0 ───────────────────────────────────
+  - stepIndex: 21
+    intent: "Null base case"
+    chunks:
+      - id: "21.0"
+        intent: "action"
+        text: "Recurse right from node seven."
+        params: { exaggeration: 0.60, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "21.1"
+        intent: "observation"
+        text: "Right child also null."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.3
+      - id: "21.2"
+        intent: "return"
+        text: "Return zero."
+        params: { exaggeration: 0.55, cfg_weight: 0.60, temperature: 0.85 }
+        pauseAfter: 0.0
+
+  # ── Step 22: n7 combines — returns 1 ─────────────────────────────────────
+  - stepIndex: 22
+    intent: "Last leaf combine — mini-reveal"
+    chunks:
+      - id: "22.0"
+        intent: "setup"
+        text: "Node seven combines."
+        params: { exaggeration: 0.62, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.35
+      - id: "22.1"
+        intent: "calm arithmetic"
+        text: "So, one plus zero plus zero."
+        params: { exaggeration: 0.58, cfg_weight: 0.58, temperature: 0.88 }
+        pauseAfter: 0.45
+      - id: "22.2"
+        intent: "mini-reveal — last leaf return-up"
+        text: "And returns one."
+        params: { exaggeration: 0.78, cfg_weight: 0.45, temperature: 0.92 }
+        pauseAfter: 0.0
+
+  # ── Step 23: n3 combines — returns 3 ─────────────────────────────────────
+  - stepIndex: 23
+    intent: "Second subtree-sized return — symmetric to n2"
+    chunks:
+      - id: "23.0"
+        intent: "returning up"
+        text: "Right. Back at node three."
+        params: { exaggeration: 0.65, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.4
+      - id: "23.1"
+        intent: "enumerating returns"
+        text: "Left gave one. Right gave one."
+        params: { exaggeration: 0.58, cfg_weight: 0.58, temperature: 0.88 }
+        pauseAfter: 0.5
+      - id: "23.2"
+        intent: "adding self"
+        text: "And plus one for itself."
+        params: { exaggeration: 0.68, cfg_weight: 0.50, temperature: 0.90 }
+        pauseAfter: 0.55
+      - id: "23.3"
+        intent: "subtree reveal — sets up the peak"
+        text: "Returns three."
+        params: { exaggeration: 0.82, cfg_weight: 0.42, temperature: 0.93 }
+        pauseAfter: 0.0
+
+  # ── Step 24: PEAK — root combines, total is 7 ────────────────────────────
+  # This is THE moment. Calm-ish recap, slow arithmetic build, big reveal.
+  # The "Seven!" chunk gets the most extreme params in the whole scene.
+  - stepIndex: 24
+    intent: "PEAK — final combine, the 'aha'"
+    # Chunks 24.0 ("Okay.") and 24.1 ("So, back at the root.") are bridge
+    # beats reflecting on step 23's completion. Defer the visual transition
+    # until 24.2 ("Left gave us three.") so the "Total: 7 nodes" reveal
+    # doesn't pre-empt the recap.
+    visualEnterChunk: 2
+    chunks:
+      - id: "24.0"
+        intent: "arriving at the moment"
+        text: "Okay."
+        params: { exaggeration: 0.68, cfg_weight: 0.55, temperature: 0.90 }
+        pauseAfter: 0.35
+      - id: "24.1"
+        intent: "setup — we're at the top of the stack"
+        text: "So, back at the root."
+        params: { exaggeration: 0.66, cfg_weight: 0.55, temperature: 0.90 }
+        pauseAfter: 0.5
+      - id: "24.2"
+        intent: "recap left subtree result"
+        text: "Left gave us three."
+        params: { exaggeration: 0.65, cfg_weight: 0.55, temperature: 0.90 }
+        pauseAfter: 0.35
+      - id: "24.3"
+        intent: "recap right subtree result"
+        text: "Right gave us three."
+        params: { exaggeration: 0.65, cfg_weight: 0.55, temperature: 0.90 }
+        pauseAfter: 0.55
+      - id: "24.4"
+        intent: "slow arithmetic — building tension toward reveal"
+        text: "So, three plus three plus one."
+        params: { exaggeration: 0.78, cfg_weight: 0.45, temperature: 0.92 }
+        pauseAfter: 0.8   # the longest pause in the scene — pre-reveal beat
+      - id: "24.5"
+        intent: "PEAK REVEAL — one word, maximum energy"
+        text: "Seven!"
+        params: { exaggeration: 0.95, cfg_weight: 0.32, temperature: 0.95 }
+        pauseAfter: 0.0
+
+  # ── Step 25: closing — complexity wrap ───────────────────────────────────
+  - stepIndex: 25
+    intent: "Wrap with complexity + sign-off"
+    chunks:
+      - id: "25.0"
+        intent: "summary statement"
+        text: "Every node visited once."
+        params: { exaggeration: 0.68, cfg_weight: 0.55, temperature: 0.88 }
+        pauseAfter: 0.45
+      - id: "25.1"
+        intent: "complexity callout — clean and confident"
+        text: "O of n time."
+        params: { exaggeration: 0.74, cfg_weight: 0.50, temperature: 0.90 }
+        pauseAfter: 0.55
+      - id: "25.2"
+        intent: "CTA setup"
+        text: "And that,"
+        params: { exaggeration: 0.72, cfg_weight: 0.50, temperature: 0.90 }
+        pauseAfter: 0.45
+      - id: "25.3"
+        intent: "closer — warm CTA"
+        text: "is recursion counting a tree."
+        params: { exaggeration: 0.76, cfg_weight: 0.48, temperature: 0.92 }
+        pauseAfter: 0.0

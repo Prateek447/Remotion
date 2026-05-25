@@ -1,132 +1,132 @@
 [
   {
     "step": 0,
-    "duration": 7.2,
-    "frames": 216
+    "duration": 7.55,
+    "frames": 227
   },
   {
     "step": 1,
-    "duration": 7.86,
-    "frames": 236
+    "duration": 7.02,
+    "frames": 211
   },
   {
     "step": 2,
-    "duration": 10.76,
-    "frames": 323
+    "duration": 11.53,
+    "frames": 346
   },
   {
     "step": 3,
-    "duration": 3.76,
-    "frames": 113
+    "duration": 3.83,
+    "frames": 115
   },
   {
     "step": 4,
-    "duration": 6.08,
-    "frames": 183
+    "duration": 6.25,
+    "frames": 188
   },
   {
     "step": 5,
-    "duration": 3.96,
-    "frames": 119
+    "duration": 5.4,
+    "frames": 162
   },
   {
     "step": 6,
-    "duration": 9.42,
-    "frames": 283
+    "duration": 9.39,
+    "frames": 282
   },
   {
     "step": 7,
-    "duration": 6.3,
-    "frames": 189
+    "duration": 6.59,
+    "frames": 198
   },
   {
     "step": 8,
-    "duration": 6.64,
-    "frames": 200
+    "duration": 5.84,
+    "frames": 176
   },
   {
     "step": 9,
-    "duration": 6.74,
-    "frames": 203
+    "duration": 6.04,
+    "frames": 182
   },
   {
     "step": 10,
-    "duration": 6.62,
-    "frames": 199
+    "duration": 5.71,
+    "frames": 172
   },
   {
     "step": 11,
-    "duration": 6.08,
-    "frames": 183
+    "duration": 5.22,
+    "frames": 157
   },
   {
     "step": 12,
-    "duration": 6.64,
-    "frames": 200
+    "duration": 6.04,
+    "frames": 182
   },
   {
     "step": 13,
-    "duration": 9.12,
-    "frames": 274
+    "duration": 9.89,
+    "frames": 297
   },
   {
     "step": 14,
-    "duration": 5.94,
-    "frames": 179
-  },
-  {
-    "step": 15,
-    "duration": 3.56,
-    "frames": 107
-  },
-  {
-    "step": 16,
-    "duration": 5.74,
-    "frames": 173
-  },
-  {
-    "step": 17,
-    "duration": 4.92,
-    "frames": 148
-  },
-  {
-    "step": 18,
-    "duration": 6.8,
-    "frames": 204
-  },
-  {
-    "step": 19,
-    "duration": 6.38,
-    "frames": 192
-  },
-  {
-    "step": 20,
-    "duration": 5.7,
-    "frames": 171
-  },
-  {
-    "step": 21,
-    "duration": 4.8,
-    "frames": 144
-  },
-  {
-    "step": 22,
     "duration": 6.76,
     "frames": 203
   },
   {
+    "step": 15,
+    "duration": 5.03,
+    "frames": 151
+  },
+  {
+    "step": 16,
+    "duration": 6.07,
+    "frames": 183
+  },
+  {
+    "step": 17,
+    "duration": 5.18,
+    "frames": 156
+  },
+  {
+    "step": 18,
+    "duration": 5.8,
+    "frames": 174
+  },
+  {
+    "step": 19,
+    "duration": 5.96,
+    "frames": 179
+  },
+  {
+    "step": 20,
+    "duration": 6.99,
+    "frames": 210
+  },
+  {
+    "step": 21,
+    "duration": 5.06,
+    "frames": 152
+  },
+  {
+    "step": 22,
+    "duration": 5.12,
+    "frames": 154
+  },
+  {
     "step": 23,
-    "duration": 8.44,
-    "frames": 254
+    "duration": 8.73,
+    "frames": 262
   },
   {
     "step": 24,
-    "duration": 9.68,
-    "frames": 291
+    "duration": 10.79,
+    "frames": 324
   },
   {
     "step": 25,
-    "duration": 7.8,
-    "frames": 234
+    "duration": 8.13,
+    "frames": 244
   }
 ]
